@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://c3n5yetcib2e6"]
+
+[ext_resource type="Script" uid="uid://ckqyu81e7cnr3" path="res://scripts/npc.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cmevfg7jbbsu5" path="res://assets/sad.png" id="2"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(32, 64)
+
+[sub_resource type="CircleShape2D" id="2"]
+radius = 80.0
+
+[node name="NPC" type="CharacterBody2D" unique_id=1466623536]
+script = ExtResource("1")
+dialogFile = "res://dialogs/npc1.json"
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1180895464]
+position = Vector2(1.0000019, 1.0000019)
+scale = Vector2(1.48, 1.4711539)
+texture = ExtResource("2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1163699180]
+shape = SubResource("1")
+
+[node name="Detection" type="Area2D" parent="." unique_id=710626307]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Detection" unique_id=1384944195]
+shape = SubResource("2")
+
+[node name="Exclamation" type="Label" parent="." unique_id=1494022972]
+offset_left = -6.0
+offset_top = -80.0
+offset_right = -6.0
+offset_bottom = -80.0
+text = "!"
+
+[node name="InteractHint" type="Label" parent="." unique_id=785326673]
+offset_left = -18.0
+offset_top = -100.0
+offset_right = -18.0
+offset_bottom = -100.0
+text = "[E]"
+
+[connection signal="body_entered" from="Detection" to="." method="_on_detection_body_entered"]
+[connection signal="body_exited" from="Detection" to="." method="_on_detection_body_exited"]

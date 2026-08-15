@@ -1,0 +1,32 @@
+{
+	"npc_portrait": "res://assets/sad.png",
+	"player_portrait": "res://assets/player.png",
+	"lines": [
+		{
+			"speaker": "Monito",
+			"text": "¡Oh, un viajero! Por fin alguien que puede ayudarme..."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Qué te pasa? Se te ve muy triste."
+		},
+		{
+			"speaker": "Monito",
+			"text": "Tengo un hongo aquí, pero no sé si es peligroso. ¡Necesito que me digas el color y luego me avises!"
+		},
+		{
+			"speaker": "Monito",
+			"text": "Si el color que ingresas es rojo, imprime peligroso. Si no, imprime seguro."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Entendido, lo resuelvo ahora..."
+		}
+	],
+	"puzzle": {
+		"prompt": "Pide el color del hongo con input(). Si el color es \"rojo\", imprime \"peligroso\". Si no, imprime \"seguro\".",
+		"variables": { "color": "rojo" },
+		"available_commands": ["input", "if", "print"],
+		"expected_output": ["peligroso"]
+	}
+}

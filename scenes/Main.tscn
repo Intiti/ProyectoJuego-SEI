@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://main"]
+
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/Player.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/NPC.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/DialogBox.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/PuzzleUI.tscn" id="4"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(1152, 32)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(32, 400)
+
+[node name="Main" type="Node2D" unique_id=1155966657]
+
+[node name="Player" parent="." unique_id=836627121 instance=ExtResource("1")]
+position = Vector2(100, 300)
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=2117673677]
+position = Vector2(576, 620)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1715802328]
+shape = SubResource("1")
+
+[node name="WallLeft" type="StaticBody2D" parent="." unique_id=164602034]
+position = Vector2(0, 400)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft" unique_id=1112310037]
+shape = SubResource("2")
+
+[node name="WallRight" type="StaticBody2D" parent="." unique_id=1734906372]
+position = Vector2(1152, 400)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=764006101]
+shape = SubResource("2")
+
+[node name="NPC" parent="." unique_id=1155810672 instance=ExtResource("2")]
+position = Vector2(500, 556)
+
+[node name="DialogBox" parent="." unique_id=1982623662 instance=ExtResource("3")]
+
+[node name="PuzzleUI" parent="." unique_id=717865678 instance=ExtResource("4")]
