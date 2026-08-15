@@ -1,7 +1,7 @@
 extends CanvasLayer
 
-const LETTER_SPEED = 0.04
-const PLAYER_NAME = "Jugador"
+const letterSpeed = 0.04
+const playerName = "Jugador"
 
 var lines: Array = []
 var currentLine: int = 0
@@ -11,8 +11,8 @@ var fullText: String = ""
 var puzzleData: Dictionary = {}
 
 var overlay: ColorRect
-var leftSprite: TextureRect
-var rightSprite: TextureRect
+var leftSprite: Sprite2D
+var rightSprite: Sprite2D
 var panel: Panel
 var speakerLabel: Label
 var dialogLabel: Label
@@ -28,29 +28,15 @@ func _ready():
 	overlay.visible = false
 	add_child(overlay)
 
-	leftSprite = TextureRect.new()
-	leftSprite.anchor_top = 1.0
-	leftSprite.anchor_bottom = 1.0
-	leftSprite.offset_left = 40.0
-	leftSprite.offset_right = 180.0
-	leftSprite.offset_top = -220.0
-	leftSprite.offset_bottom = -26.0
-	leftSprite.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	leftSprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	leftSprite = Sprite2D.new()
+	leftSprite.position = Vector2(280, 390)
+	leftSprite.scale = Vector2(2, 2)
 	leftSprite.visible = false
 	add_child(leftSprite)
 
-	rightSprite = TextureRect.new()
-	rightSprite.anchor_left = 1.0
-	rightSprite.anchor_right = 1.0
-	rightSprite.anchor_top = 1.0
-	rightSprite.anchor_bottom = 1.0
-	rightSprite.offset_left = -180.0
-	rightSprite.offset_right = -40.0
-	rightSprite.offset_top = -220.0
-	rightSprite.offset_bottom = -26.0
-	rightSprite.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	rightSprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rightSprite = Sprite2D.new()
+	rightSprite.position = Vector2(872, 390)
+	rightSprite.scale = Vector2(2, 2)
 	rightSprite.visible = false
 	add_child(rightSprite)
 
@@ -60,6 +46,9 @@ func _ready():
 	panel.anchor_right = 0.9
 	panel.anchor_bottom = 0.97
 	panel.visible = false
+	var panelStyle = StyleBoxFlat.new()
+	panelStyle.bg_color = Color(0, 0, 0, 1)
+	panel.add_theme_stylebox_override("panel", panelStyle)
 	add_child(panel)
 
 	speakerLabel = Label.new()
@@ -118,11 +107,11 @@ func open(jsonPath: String):
 	leftSprite.visible = true
 	rightSprite.visible = true
 	get_tree().get_first_node_in_group("player").set_physics_process(false)
-	_showLine()
+	showLine()
 
-func _showLine():
+func showLine():
 	var lineData = lines[currentLine]
-	var isPlayer = lineData["speaker"] == PLAYER_NAME
+	var isPlayer = lineData["speaker"] == playerName
 
 	speakerLabel.text = lineData["speaker"]
 	fullText = lineData["text"]
@@ -133,14 +122,14 @@ func _showLine():
 	rightSprite.modulate.a = 0.4 if isPlayer else 1.0
 
 	isTyping = true
-	_typeText()
+	typeText()
 
-func _typeText():
+func typeText():
 	for i in fullText.length():
 		if not isTyping:
 			break
 		dialogLabel.text = fullText.substr(0, i + 1)
-		await get_tree().create_timer(LETTER_SPEED).timeout
+		await get_tree().create_timer(letterSpeed).timeout
 	dialogLabel.text = fullText
 	isTyping = false
 	continueHint.visible = true
@@ -157,20 +146,20 @@ func _input(event):
 		if isTyping:
 			isTyping = false
 		else:
-			_nextLine()
+			nextLine()
 	else:
 		var npcs = get_tree().get_nodes_in_group("npc")
 		for npc in npcs:
 			npc.tryStartDialog()
 
-func _nextLine():
+func nextLine():
 	currentLine += 1
 	if currentLine >= lines.size():
-		_closeDialog()
+		closeDialog()
 	else:
-		_showLine()
+		showLine()
 
-func _closeDialog():
+func closeDialog():
 	isOpen = false
 	overlay.visible = false
 	panel.visible = false

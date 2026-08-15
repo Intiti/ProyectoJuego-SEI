@@ -15,6 +15,14 @@ run/main_scene="uid://main"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[display]
+
+window/stretch/mode="viewport"
+
+[gui]
+
+theme/custom_font="uid://c8hts5h6nge4e"
+
 [input]
 
 interact={

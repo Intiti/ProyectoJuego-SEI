@@ -1,24 +1,28 @@
 extends CharacterBody2D
 
-const SPEED = 200.0
-const GRAVITY = 900.0
-const JUMP_FORCE = -400.0
+const speed = 200.0
+const gravity = 900.0
+const jumpForce = -400.0
 
 func _ready():
-	# necesario para que NPC y DialogBox puedan encontrarlo
 	add_to_group("player")
+	setGlobalFontSize(25)
+
+func setGlobalFontSize(newSize: int):
+	var globalTheme = get_tree().root.theme
+	if not globalTheme:
+		globalTheme = Theme.new()
+		get_tree().root.theme = globalTheme
+	globalTheme.default_font_size = newSize
 
 func _physics_process(delta):
-	# gravedad
 	if not is_on_floor():
-		velocity.y += GRAVITY * delta
+		velocity.y += gravity * delta
 
-	# movimiento horizontal
 	var dir = Input.get_axis("ui_left", "ui_right")
-	velocity.x = dir * SPEED
+	velocity.x = dir * speed
 
-	# salto
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_FORCE
+		velocity.y = jumpForce
 
 	move_and_slide()
