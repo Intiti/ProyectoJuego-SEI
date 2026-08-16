@@ -6,14 +6,7 @@ const jumpForce = -400.0
 
 func _ready():
 	add_to_group("player")
-	setGlobalFontSize(25)
 
-func setGlobalFontSize(newSize: int):
-	var globalTheme = get_tree().root.theme
-	if not globalTheme:
-		globalTheme = Theme.new()
-		get_tree().root.theme = globalTheme
-	globalTheme.default_font_size = newSize
 
 func _physics_process(delta):
 	if not is_on_floor():

@@ -24,20 +24,23 @@ shape = SubResource("1")
 [node name="Detection" type="Area2D" parent="." unique_id=710626307]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Detection" unique_id=1384944195]
+position = Vector2(12, 1)
 shape = SubResource("2")
 
 [node name="Exclamation" type="Label" parent="." unique_id=1494022972]
-offset_left = -6.0
-offset_top = -80.0
-offset_right = -6.0
-offset_bottom = -80.0
+offset_left = -4.0
+offset_top = -167.0
+offset_right = 15.0
+offset_bottom = -76.0
+theme_override_font_sizes/font_size = 90
 text = "!"
 
 [node name="InteractHint" type="Label" parent="." unique_id=785326673]
-offset_left = -18.0
-offset_top = -100.0
-offset_right = -18.0
-offset_bottom = -100.0
+offset_left = 79.0
+offset_top = -103.0
+offset_right = 106.0
+offset_bottom = -70.0
+theme_override_font_sizes/font_size = 32
 text = "[E]"
 
 [connection signal="body_entered" from="Detection" to="." method="_on_detection_body_entered"]

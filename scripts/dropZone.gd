@@ -1,6 +1,5 @@
 extends VBoxContainer
 
-# bloques colocados en orden
 var blocks: Array = []
 var levelVars: Dictionary = {}
 
@@ -12,47 +11,65 @@ func clear():
 	for c in get_children():
 		c.queue_free()
 
-# acepta drops de bloques
 func _can_drop_data(_pos, data) -> bool:
 	return data is Dictionary and data.has("block_type")
 
 func _drop_data(_pos, data):
+	# Si viene de otro bloque ya colocado dentro del dropzone, lo movemos
+	var source = data.get("source", null)
+	if source != null and is_instance_valid(source):
+		# Buscamos el row que contiene ese bloque y lo eliminamos
+		for row in get_children():
+			if row is HBoxContainer:
+				for child in row.get_children():
+					if child == source:
+						blocks.erase(source)
+						row.queue_free()
+						break
+
 	_addBlock(data["block_type"], data["vars"])
 
 func _addBlock(type: int, vars: Dictionary):
 	var block = preload("res://scenes/CommandBlock.tscn").instantiate()
 	block.setup(type, vars, false)
-	# boton para eliminar el bloque
+
+	var row = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.add_child(block)
+
 	var btn = Button.new()
 	btn.text = "x"
-	btn.custom_minimum_size.x = 24
-	var row = HBoxContainer.new()
-	row.add_child(block)
+	btn.custom_minimum_size = Vector2(30, 30)
+	btn.add_theme_font_size_override("font_size", 14)
 	row.add_child(btn)
+
 	add_child(row)
 	blocks.append(block)
+
+	# Animacion juicy: escala desde 0 a 1
+	block.scale = Vector2(0.5, 0.5)
+	block.modulate.a = 0.0
+	var tween = block.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(block, "scale", Vector2(1.0, 1.0), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(block, "modulate:a", 1.0, 0.12)
+
 	btn.pressed.connect(func():
-		blocks.erase(block)
-		row.queue_free()
+		# Animacion juicy al eliminar
+		var t = block.create_tween()
+		t.set_parallel(true)
+		t.tween_property(block, "scale", Vector2(0.5, 0.5), 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		t.tween_property(row, "modulate:a", 0.0, 0.14)
+		t.chain().tween_callback(func():
+			blocks.erase(block)
+			row.queue_free()
+		)
 	)
 
-# ejecuta todos los bloques en orden y retorna el output
 func execute(vars: Dictionary) -> Array:
 	var output = []
-	var i = 0
-	while i < blocks.size():
-		var block = blocks[i]
+	for block in blocks:
 		var result = block.execute(vars)
 		output.append_array(result["output"])
 		vars = result["vars"]
-
-		# si es IF, el siguiente bloque solo corre si la condicion es true
-		if block.blockType == block.Type.IF:
-			i += 1
-			if i < blocks.size() and result.get("condition", false):
-				var inner = blocks[i].execute(vars)
-				output.append_array(inner["output"])
-				vars = inner["vars"]
-		else:
-			i += 1
 	return output

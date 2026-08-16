@@ -22,6 +22,7 @@ window/stretch/mode="viewport"
 [gui]
 
 theme/custom_font="uid://c8hts5h6nge4e"
+theme/default_font_size=48
 
 [input]
 

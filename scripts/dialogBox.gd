@@ -49,6 +49,12 @@ func _ready():
 	var panelStyle = StyleBoxFlat.new()
 	panelStyle.bg_color = Color(0, 0, 0, 1)
 	panel.add_theme_stylebox_override("panel", panelStyle)
+
+	var dialogTheme = Theme.new()
+	dialogTheme.default_font = load("res://assets/MotionControl-Bold.otf")
+	dialogTheme.default_font_size = 24
+	panel.theme = dialogTheme
+
 	add_child(panel)
 
 	speakerLabel = Label.new()
