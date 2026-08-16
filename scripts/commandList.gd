@@ -18,5 +18,6 @@ func _nameToType(name: String) -> int:
 	match name:
 		"input": return 0
 		"if":    return 1
-		"print": return 2
-	return 2
+		"else":  return 2
+		"print": return 3
+	return 3

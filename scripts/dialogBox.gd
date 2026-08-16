@@ -146,6 +146,11 @@ func _input(event):
 	if not event.is_action("interact"):
 		return
 
+	# Si el puzzle está abierto, ignorar completamente
+	var puzzle = get_tree().get_first_node_in_group("puzzle")
+	if puzzle and puzzle.isOpen:
+		return
+
 	get_viewport().set_input_as_handled()
 
 	if isOpen:
