@@ -1,0 +1,24 @@
+{
+	"npc_portrait": "res://assets/sad.png",
+	"player_portrait": "res://assets/player.png",
+	"lines": [
+		{
+			"speaker": "Alcalde Gatuno",
+			"text": "¡Miau! ¡Bienvenido, viajero! Soy el alcalde de este pueblo. Antes de dejarte pasar, necesito saber tu nombre."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Claro, puedo presentarme."
+		},
+		{
+			"speaker": "Alcalde Gatuno",
+			"text": "El print() ya está listo. Solo arrastra el bloque input() al área y asígnalo a tu_nombre. ¡Tu primera misión de código!"
+		}
+	],
+	"puzzle": {
+		"prompt": "El alcalde quiere conocerte. Arrastra el bloque input() para asignarlo a tu_nombre. Luego coloca print() para mostrar el nombre. ¡Prueba con 'Miau' como input!",
+		"variables": { "tu_nombre": "Miau" },
+		"available_commands": ["input", "print"],
+		"expected_output": ["Miau"]
+	}
+}

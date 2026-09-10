@@ -21,7 +21,7 @@ func _ready():
 	panel = ColorRect.new()
 	panel.anchor_right = 1.0
 	panel.anchor_bottom = 1.0
-	panel.color = Color(0.08, 0.08, 0.12, 0.95)
+	panel.color = Color(0.14, 0.11, 0.06, 0.97)  # fondo calido amarillento oscuro
 	panel.visible = false
 	add_child(panel)
 
@@ -60,8 +60,8 @@ func _ready():
 	dropWrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dropWrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var dropStyle = StyleBoxFlat.new()
-	dropStyle.bg_color = Color(0.1, 0.12, 0.18, 1.0)
-	dropStyle.border_color = Color(0.4, 0.5, 0.8, 0.8)
+	dropStyle.bg_color = Color(0.10, 0.08, 0.04, 1.0)
+	dropStyle.border_color = Color(0.7, 0.6, 0.3, 0.8)
 	dropStyle.border_width_left = 2
 	dropStyle.border_width_right = 2
 	dropStyle.border_width_top = 2
@@ -85,7 +85,7 @@ func _ready():
 	var dropTitle = Label.new()
 	dropTitle.text = "Arrastra los bloques aqui"
 	dropTitle.add_theme_font_size_override("font_size", FONT_SIZE - 2)
-	dropTitle.add_theme_color_override("font_color", Color(0.5, 0.6, 0.9))
+	dropTitle.add_theme_color_override("font_color", Color(0.8, 0.7, 0.4))
 	dropInner.add_child(dropTitle)
 
 	dropZone = VBoxContainer.new()
@@ -145,7 +145,9 @@ func open(data: Dictionary):
 
 	promptLabel.text = _colorizePrompt(levelPrompt)
 	outputLabel.text = ""
+	var prefilled = data.get("prefilled_blocks", [])
 	dropZone.clear()
+	dropZone.setup(levelVars, prefilled)
 	commandList.setup(data.get("available_commands", []), levelVars)
 	panel.visible = true
 

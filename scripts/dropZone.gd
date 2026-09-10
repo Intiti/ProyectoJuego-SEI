@@ -9,8 +9,74 @@ var _shadowPlaceholder: Control = null
 static var _activeDragZone: VBoxContainer = null
 static var _activeDragData = null
 
-func setup(vars: Dictionary):
+func setup(vars: Dictionary, prefilled: Array = []):
 	levelVars = vars
+	add_to_group("drop_zone")
+	for entry in prefilled:
+		_addPrefilledBlock(entry)
+
+func _addPrefilledBlock(entry: Dictionary):
+	var typeStr = entry.get("type", "")
+	var typeEnum = _typeStrToEnum(typeStr)
+	if typeEnum < 0:
+		return
+
+	var block = preload("res://scenes/CommandBlock.tscn").instantiate()
+	block.setup(typeEnum, levelVars, false)
+
+	# forzar la variable seleccionada si viene en el entry
+	var varName = entry.get("var", "")
+	if varName != "":
+		block.config["var"] = varName
+		# buscar el OptionButton y seleccionar el item correcto
+		_selectVarInBlock(block, varName)
+
+	block.setLocked()
+
+	var row = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.add_child(block)
+
+	# sin boton X — es un bloque fijo
+	var spacer = Control.new()
+	spacer.custom_minimum_size = Vector2(30, 0)
+	row.add_child(spacer)
+
+	add_child(row)
+	blocks.append(block)
+
+func _selectVarInBlock(block: Node, varName: String):
+	for child in block.get_children():
+		_selectVarRecursive(child, varName)
+
+func _selectVarRecursive(node: Node, varName: String):
+	if node is OptionButton:
+		for i in node.item_count:
+			if node.get_item_text(i) == varName:
+				node.select(i)
+				return
+	for child in node.get_children():
+		_selectVarRecursive(child, varName)
+
+func _typeStrToEnum(s: String) -> int:
+	# importar el enum desde CommandBlock
+	var cb = preload("res://scenes/CommandBlock.tscn").instantiate()
+	var result = -1
+	match s:
+		"input": result = cb.Type.INPUT
+		"if":    result = cb.Type.IF
+		"else":  result = cb.Type.ELSE
+		"print": result = cb.Type.PRINT
+	cb.queue_free()
+	return result
+
+func _notification(what):
+	# cuando el drag global termina (se suelta fuera o se cancela) limpiamos el ghost
+	if what == NOTIFICATION_DRAG_END:
+		if _activeDragZone != null and is_instance_valid(_activeDragZone):
+			_activeDragZone._removeShadow()
+		_activeDragZone = null
+		_activeDragData = null
 
 func clear():
 	blocks = []
@@ -40,16 +106,32 @@ func _drop_data(pos, data):
 
 	var source = data.get("source", null)
 	if source != null and is_instance_valid(source):
-		for row in get_children():
-			if row is HBoxContainer:
-				for child in row.get_children():
-					if child == source:
-						blocks.erase(source)
-						row.queue_free()
-						break
+		_removeSourceBlock(source)
 
 	var insertIdx = _getInsertIndex(pos)
 	_addBlockAt(data["block_type"], data["vars"], insertIdx)
+
+func _removeSourceBlock(source: Node):
+	# busca el row que contiene source en cualquier dropzone activo
+	var allDropZones = get_tree().get_nodes_in_group("drop_zone")
+	for dz in allDropZones:
+		if not is_instance_valid(dz):
+			continue
+		for row in dz.get_children():
+			if row is HBoxContainer:
+				for child in row.get_children():
+					if child == source:
+						dz.blocks.erase(source)
+						row.queue_free()
+						return
+	# fallback: buscar directo en este dropzone
+	for row in get_children():
+		if row is HBoxContainer:
+			for child in row.get_children():
+				if child == source:
+					blocks.erase(source)
+					row.queue_free()
+					return
 
 func _relinquishShadow():
 	# Solo quitar la sombra si somos el dropzone activo

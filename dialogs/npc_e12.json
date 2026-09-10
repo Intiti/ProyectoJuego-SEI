@@ -1,0 +1,24 @@
+{
+	"npc_portrait": "res://assets/sad.png",
+	"player_portrait": "res://assets/player.png",
+	"lines": [
+		{
+			"speaker": "Gato Bibliotecario",
+			"text": "¡Oh, un visitante! Encontré este algoritmo antiguo en los archivos, pero le falta una pieza crucial..."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Qué le falta exactamente?"
+		},
+		{
+			"speaker": "Gato Bibliotecario",
+			"text": "Tiene dos números: numero_a vale 7 y numero_b vale 5. Necesita el input() para tomar un número y el print() que lo muestre. ¡Complétalo!"
+		}
+	],
+	"puzzle": {
+		"prompt": "numero_a = 7 y numero_b = 5. Coloca input() para asignar un valor a resultado, luego print() para mostrarlo. Ingresa 12 cuando se pida el valor.",
+		"variables": { "numero_a": 7, "numero_b": 5, "resultado": "12" },
+		"available_commands": ["input", "print"],
+		"expected_output": ["12"]
+	}
+}

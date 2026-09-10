@@ -125,14 +125,13 @@ func _buildInnerZone(vbox: VBoxContainer):
 	innerVBox.add_child(innerDropZone)
 
 func _buildUI():
-	# Templates de INPUT: solo mostrar "input()"
-	if blockType == Type.INPUT and isTemplate:
-		label.text = "input()"
-		return
-
-	label.text = _typeName()
+	label.text = _typeLabel(isTemplate)
 	for c in paramContainer.get_children():
 		c.queue_free()
+
+	# template: solo el nombre, sin parametros ni selectores
+	if isTemplate:
+		return
 
 	match blockType:
 		Type.INPUT:
@@ -140,11 +139,11 @@ func _buildUI():
 		Type.IF:
 			_addVarSelector()
 			_addOpSelector()
-			_addValueInput()
+			_addIfValueSelector()
 		Type.ELSE:
-			pass  # sin parámetros
+			pass
 		Type.PRINT:
-			_addValueInput()
+			_addPrintSelector()
 
 func _buildInputRow():
 	var hbox = label.get_parent()
@@ -160,16 +159,32 @@ func _buildInputRow():
 		config["var"] = opt.get_item_text(0)
 	hbox.add_child(opt)
 
+	var edit = LineEdit.new()
+	edit.placeholder_text = "valor"
+	edit.custom_minimum_size.x = 80
+	edit.add_theme_font_size_override("font_size", FONT_SIZE - 1)
+	edit.text_changed.connect(func(t): config["input_value"] = t)
+	hbox.add_child(edit)
+
 	label.text = "= input()"
 	hbox.add_child(label)
 	hbox.add_child(paramContainer)
 
-func _typeName() -> String:
-	match blockType:
-		Type.INPUT: return "input()"
-		Type.IF:    return "if"
-		Type.ELSE:  return "else"
-		Type.PRINT: return "print"
+func _typeLabel(template: bool = false) -> String:
+	# en template: nombre compacto con parentesis
+	# en instancia: solo la palabra clave
+	if template:
+		match blockType:
+			Type.INPUT: return "input()"
+			Type.IF:    return "if ()"
+			Type.ELSE:  return "else ()"
+			Type.PRINT: return "print()"
+	else:
+		match blockType:
+			Type.INPUT: return "input()"
+			Type.IF:    return "if"
+			Type.ELSE:  return "else"
+			Type.PRINT: return "print"
 	return ""
 
 func _addVarSelector():
@@ -191,6 +206,74 @@ func _addOpSelector():
 	config["op"] = "=="
 	paramContainer.add_child(opt)
 
+func _addPrintSelector():
+	var opt = OptionButton.new()
+	opt.add_theme_font_size_override("font_size", FONT_SIZE - 1)
+	# primero las variables disponibles
+	for varName in levelVars.keys():
+		opt.add_item(varName)
+	# luego opcion texto literal
+	opt.add_item("\"texto...\"")
+	opt.item_selected.connect(func(i):
+		var selected = opt.get_item_text(i)
+		if selected == "\"texto...\"":
+			config["value"] = ""
+			_showTextInput()
+		else:
+			config["value"] = selected
+			_hideTextInput()
+	)
+	if opt.item_count > 0:
+		var first = opt.get_item_text(0)
+		config["value"] = first if first != "\"texto...\"" else ""
+	paramContainer.add_child(opt)
+
+var _textEdit: LineEdit = null
+
+func _showTextInput():
+	if _textEdit != null:
+		return
+	_textEdit = LineEdit.new()
+	_textEdit.placeholder_text = "valor"
+	_textEdit.custom_minimum_size.x = 80
+	_textEdit.add_theme_font_size_override("font_size", FONT_SIZE - 1)
+	_textEdit.text_changed.connect(func(t): config["value"] = t)
+	paramContainer.add_child(_textEdit)
+
+func _hideTextInput():
+	if _textEdit != null:
+		_textEdit.queue_free()
+		_textEdit = null
+
+func _addIfValueSelector():
+	var opt = OptionButton.new()
+	opt.add_theme_font_size_override("font_size", FONT_SIZE - 1)
+	# variables disponibles primero
+	for varName in levelVars.keys():
+		opt.add_item(varName)
+	# luego texto literal
+	opt.add_item("\"texto...\"")
+	opt.item_selected.connect(func(i):
+		var selected = opt.get_item_text(i)
+		if selected == "\"texto...\"":
+			config["value"] = ""
+			config["value_is_var"] = false
+			_showTextInput()
+		else:
+			config["value"] = selected
+			config["value_is_var"] = true
+			_hideTextInput()
+	)
+	if opt.item_count > 0:
+		var first = opt.get_item_text(0)
+		if first == "\"texto...\"":
+			config["value"] = ""
+			config["value_is_var"] = false
+		else:
+			config["value"] = first
+			config["value_is_var"] = true
+	paramContainer.add_child(opt)
+
 func _addValueInput():
 	var edit = LineEdit.new()
 	edit.placeholder_text = "valor"
@@ -203,7 +286,10 @@ func execute(vars: Dictionary) -> Dictionary:
 	var out = []
 	match blockType:
 		Type.INPUT:
-			pass
+			var varName = config.get("var", "")
+			var inputVal = config.get("input_value", "")
+			if varName != "" and inputVal != "":
+				vars[varName] = inputVal
 		Type.PRINT:
 			var val = config.get("value", "")
 			if vars.has(val):
@@ -213,16 +299,15 @@ func execute(vars: Dictionary) -> Dictionary:
 		Type.IF:
 			var varName = config.get("var", "")
 			var op = config.get("op", "==")
-			var val = config.get("value", "").trim_prefix("\"").trim_suffix("\"")
+			var rawVal = config.get("value", "")
 			var varVal = str(vars.get(varName, ""))
+			var val = str(vars.get(rawVal, rawVal.trim_prefix("\"").trim_suffix("\""))) if config.get("value_is_var", false) else rawVal.trim_prefix("\"").trim_suffix("\"")
 			var cond = (varVal == val) if op == "==" else (varVal != val)
 			if cond and innerDropZone != null:
 				var innerResult = innerDropZone.execute(vars)
 				out.append_array(innerResult)
 			return {"output": out, "vars": vars, "condition": cond}
 		Type.ELSE:
-			# La condición la evalúa dropZone según el IF anterior
-			# innerDropZone se ejecuta solo si dropZone nos pasa condition=false
 			return {"output": out, "vars": vars, "condition": false, "is_else": true}
 	return {"output": out, "vars": vars, "condition": true}
 
@@ -240,3 +325,45 @@ func _get_drag_data(_pos):
 		return {"block_type": blockType, "vars": levelVars, "source": null}
 	else:
 		return {"block_type": blockType, "vars": levelVars, "source": self}
+
+func setLocked():
+	# bloquear drag
+	set_drag_forwarding(Callable(), Callable(), Callable())
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# deshabilitar todos los controles interactivos
+	_disableChildren(self)
+
+	# estilo borde gris piedra
+	var style = StyleBoxFlat.new()
+	match blockType:
+		Type.INPUT: style.bg_color = COLOR_INPUT.darkened(0.35)
+		Type.IF:    style.bg_color = COLOR_IF.darkened(0.35)
+		Type.ELSE:  style.bg_color = COLOR_ELSE.darkened(0.35)
+		Type.PRINT: style.bg_color = COLOR_PRINT.darkened(0.35)
+	style.border_color = Color(0.55, 0.55, 0.55, 1.0)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right = 6
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	add_theme_stylebox_override("panel", style)
+
+func _disableChildren(node: Node):
+	if node is Control and node != self:
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if node is BaseButton:
+			node.disabled = true
+		if node is LineEdit:
+			node.editable = false
+		if node is OptionButton:
+			node.disabled = true
+	for child in node.get_children():
+		_disableChildren(child)
