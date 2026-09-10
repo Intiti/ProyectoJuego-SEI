@@ -12,6 +12,7 @@ var outputLabel: Label
 var runButton: Button
 
 var isOpen: bool = false
+var _currentData: Dictionary = {}
 
 const FONT_SIZE := 18
 
@@ -138,6 +139,7 @@ func open(data: Dictionary):
 	if isOpen:
 		return
 	isOpen = true
+	_currentData = data
 
 	levelPrompt = data.get("prompt", "")
 	expectedOutput = data.get("expected_output", [])
@@ -158,18 +160,56 @@ func open(data: Dictionary):
 	player.set_process_input(false)
 
 func _onRun():
-	var result = dropZone.execute(levelVars.duplicate())
-	outputLabel.text = "Output:\n" + "\n".join(result)
-	if result == expectedOutput:
-		outputLabel.text += "\n\nCorrecto!"
+	var testCases = _currentData.get("test_cases", [])
+
+	# compatibilidad con formato viejo sin test_cases
+	if testCases.is_empty():
+		var inputQueue = []
+		var result = dropZone.execute(levelVars.duplicate(), inputQueue)
+		var correct = false
+		if expectedOutput == ["any_non_empty"]:
+			correct = result.size() > 0 and result[0].strip_edges() != ""
+		else:
+			correct = result == expectedOutput
+		outputLabel.text = "Output:\n" + "\n".join(result)
+		if correct:
+			outputLabel.text += "\n\nCorrecto!"
+			outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
+			_onAllPassed()
+		else:
+			outputLabel.text += "\n\nEsperado: " + ", ".join(expectedOutput)
+			outputLabel.add_theme_color_override("font_color", Color(1.0, 0.5, 0.4))
+		return
+
+	var lines = []
+	var allPassed = true
+	for idx in testCases.size():
+		var tc = testCases[idx]
+		var inputQueue: Array = tc.get("inputs", []).duplicate()
+		var expected: Array = tc.get("expected_output", [])
+		var result = dropZone.execute(levelVars.duplicate(), inputQueue)
+		var passed = result == expected
+		if not passed:
+			allPassed = false
+		var icon = "OK" if passed else "X"
+		var line = "Caso %d: %s" % [idx + 1, icon]
+		if not passed:
+			line += "  ->  esperado \"%s\", obtuve \"%s\"" % [", ".join(expected), ", ".join(result)]
+		lines.append(line)
+
+	outputLabel.text = "\n".join(lines)
+	if allPassed:
+		outputLabel.text += "\n\nTodos correctos!"
 		outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
-		var npcs = get_tree().get_nodes_in_group("npc")
-		for npc in npcs:
-			if npc.has_method("onPuzzleSolved"):
-				npc.onPuzzleSolved()
+		_onAllPassed()
 	else:
-		outputLabel.text += "\n\nEsperado: " + ", ".join(expectedOutput)
 		outputLabel.add_theme_color_override("font_color", Color(1.0, 0.5, 0.4))
+
+func _onAllPassed():
+	var npcs = get_tree().get_nodes_in_group("npc")
+	for npc in npcs:
+		if npc.has_method("onPuzzleSolved"):
+			npc.onPuzzleSolved()
 
 func close():
 	isOpen = false

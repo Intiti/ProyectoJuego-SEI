@@ -12,13 +12,21 @@
 		},
 		{
 			"speaker": "Gato Bibliotecario",
-			"text": "Tiene dos números: numero_a vale 7 y numero_b vale 5. Necesita el input() para tomar un número y el print() que lo muestre. ¡Complétalo!"
+			"text": "Tiene dos números que entran por input. Necesitas sumarlos y mostrar el resultado. ¡Complétalo!"
 		}
 	],
 	"puzzle": {
-		"prompt": "numero_a = 7 y numero_b = 5. Coloca input() para asignar un valor a resultado, luego print() para mostrarlo. Ingresa 12 cuando se pida el valor.",
-		"variables": { "numero_a": 7, "numero_b": 5, "resultado": "12" },
+		"prompt": "numero_a y numero_b llegan por input() (ya están puestos). Crea resultado = numero_a + numero_b, luego print(resultado).",
+		"variables": { "numero_a": 0, "numero_b": 0, "resultado": 0 },
+		"prefilled_blocks": [
+			{ "type": "input", "var": "numero_a" },
+			{ "type": "input", "var": "numero_b" }
+		],
 		"available_commands": ["input", "print"],
-		"expected_output": ["12"]
+		"test_cases": [
+			{ "inputs": [7, 5],  "expected_output": ["12"] },
+			{ "inputs": [3, 2],  "expected_output": ["5"] },
+			{ "inputs": [10, 4], "expected_output": ["14"] }
+		]
 	}
 }

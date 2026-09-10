@@ -16,17 +16,21 @@
 		},
 		{
 			"speaker": "Gato Pescador A",
-			"text": "Yo pesqué 8 peces (peces_a) y mi rival 5 (peces_b). Coloca el IF que compara peces_a con 8, y el ELSE que diga quién ganó."
+			"text": "Los peces de cada uno llegan por input. ¡Compáralos con if y di quién gana!"
 		}
 	],
 	"puzzle": {
-		"prompt": "peces_a = 8, peces_b = 5. Coloca un bloque IF que compare peces_a == 8, dentro del IF pon print() con 'Gato A gana'. En el ELSE pon print() con 'Gato B gana'.",
-		"variables": { "peces_a": 8, "peces_b": 5 },
+		"prompt": "pescados_a y pescados_b llegan por input() (ya están puestos). Usa if/else para imprimir 'Gana A', 'Gana B', o 'Empate'.",
+		"variables": { "pescados_a": 0, "pescados_b": 0 },
 		"prefilled_blocks": [
-			{ "type": "input", "var": "peces_a" },
-			{ "type": "input", "var": "peces_b" }
+			{ "type": "input", "var": "pescados_a" },
+			{ "type": "input", "var": "pescados_b" }
 		],
 		"available_commands": ["if", "else", "print"],
-		"expected_output": ["Gato A gana"]
+		"test_cases": [
+			{ "inputs": [8, 5], "expected_output": ["Gana A"] },
+			{ "inputs": [3, 7], "expected_output": ["Gana B"] },
+			{ "inputs": [4, 4], "expected_output": ["Empate"] }
+		]
 	}
 }

@@ -63,10 +63,11 @@ func _typeStrToEnum(s: String) -> int:
 	var cb = preload("res://scenes/CommandBlock.tscn").instantiate()
 	var result = -1
 	match s:
-		"input": result = cb.Type.INPUT
-		"if":    result = cb.Type.IF
-		"else":  result = cb.Type.ELSE
-		"print": result = cb.Type.PRINT
+		"input":  result = cb.Type.INPUT
+		"if":     result = cb.Type.IF
+		"else":   result = cb.Type.ELSE
+		"print":  result = cb.Type.PRINT
+		"assign": result = cb.Type.ASSIGN
 	cb.queue_free()
 	return result
 
@@ -231,12 +232,12 @@ func _addBlockAt(type: int, vars: Dictionary, idx: int = -1):
 		)
 	)
 
-func execute(vars: Dictionary) -> Array:
+func execute(vars: Dictionary, inputQueue: Array = []) -> Array:
 	var output = []
 	var i = 0
 	while i < blocks.size():
 		var block = blocks[i]
-		var result = block.execute(vars)
+		var result = block.execute(vars, inputQueue)
 		output.append_array(result["output"])
 		vars = result["vars"]
 
@@ -244,7 +245,7 @@ func execute(vars: Dictionary) -> Array:
 			var nextBlock = blocks[i + 1]
 			if nextBlock.blockType == nextBlock.Type.ELSE:
 				if not result.get("condition", true):
-					output.append_array(nextBlock.execute_else(vars))
+					output.append_array(nextBlock.execute_else(vars, inputQueue))
 				i += 2
 				continue
 		i += 1

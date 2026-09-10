@@ -12,13 +12,16 @@
 		},
 		{
 			"speaker": "Alcalde Gatuno",
-			"text": "El print() ya está listo. Solo arrastra el bloque input() al área y asígnalo a tu_nombre. ¡Tu primera misión de código!"
+			"text": "Ya tengo listo el input() para capturar tu nombre. Solo coloca el print() para mostrármelo. ¡Tu primera misión de código!"
 		}
 	],
 	"puzzle": {
-		"prompt": "El alcalde quiere conocerte. Arrastra el bloque input() para asignarlo a tu_nombre. Luego coloca print() para mostrar el nombre. ¡Prueba con 'Miau' como input!",
-		"variables": { "tu_nombre": "Miau" },
-		"available_commands": ["input", "print"],
-		"expected_output": ["Miau"]
+		"prompt": "El alcalde quiere conocerte. El input() ya está puesto — escribe tu nombre en el campo. Solo agrega print() para mostrarlo.",
+		"variables": { "tu_nombre": "" },
+		"prefilled_blocks": [
+			{ "type": "assign", "var": "tu_nombre" }
+		],
+		"available_commands": ["print"],
+		"expected_output": ["any_non_empty"]
 	}
 }
