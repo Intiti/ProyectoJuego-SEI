@@ -9,7 +9,7 @@ var promptLabel: RichTextLabel
 var dropZone: VBoxContainer
 var commandList: VBoxContainer
 var outputLabel: Label
-var runButton: Button
+var feedbackLabel: Label
 
 var isOpen: bool = false
 var _currentData: Dictionary = {}
@@ -22,7 +22,7 @@ func _ready():
 	panel = ColorRect.new()
 	panel.anchor_right = 1.0
 	panel.anchor_bottom = 1.0
-	panel.color = Color(0.14, 0.11, 0.06, 0.97)  # fondo calido amarillento oscuro
+	panel.color = Color(0.14, 0.11, 0.06, 0.97)
 	panel.visible = false
 	add_child(panel)
 
@@ -56,44 +56,49 @@ func _ready():
 	hbox.add_theme_constant_override("separation", 16)
 	vbox.add_child(hbox)
 
-	# Drop Zone con rectangulo visible
-	var dropWrapper = PanelContainer.new()
-	dropWrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	dropWrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var dropStyle = StyleBoxFlat.new()
-	dropStyle.bg_color = Color(0.10, 0.08, 0.04, 1.0)
-	dropStyle.border_color = Color(0.7, 0.6, 0.3, 0.8)
-	dropStyle.border_width_left = 2
-	dropStyle.border_width_right = 2
-	dropStyle.border_width_top = 2
-	dropStyle.border_width_bottom = 2
-	dropStyle.corner_radius_top_left = 6
-	dropStyle.corner_radius_top_right = 6
-	dropStyle.corner_radius_bottom_left = 6
-	dropStyle.corner_radius_bottom_right = 6
-	dropStyle.content_margin_left = 12
-	dropStyle.content_margin_right = 12
-	dropStyle.content_margin_top = 12
-	dropStyle.content_margin_bottom = 12
-	dropWrapper.add_theme_stylebox_override("panel", dropStyle)
-	hbox.add_child(dropWrapper)
+	var consoleWrapper = PanelContainer.new()
+	consoleWrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	consoleWrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var consoleStyle = StyleBoxFlat.new()
+	consoleStyle.bg_color = Color(0.07, 0.07, 0.10, 1.0)
+	consoleStyle.border_color = Color(0.4, 0.7, 0.4, 0.8)
+	consoleStyle.border_width_left = 2
+	consoleStyle.border_width_right = 2
+	consoleStyle.border_width_top = 2
+	consoleStyle.border_width_bottom = 2
+	consoleStyle.corner_radius_top_left = 6
+	consoleStyle.corner_radius_top_right = 6
+	consoleStyle.corner_radius_bottom_left = 6
+	consoleStyle.corner_radius_bottom_right = 6
+	consoleStyle.content_margin_left = 12
+	consoleStyle.content_margin_right = 12
+	consoleStyle.content_margin_top = 12
+	consoleStyle.content_margin_bottom = 12
+	consoleWrapper.add_theme_stylebox_override("panel", consoleStyle)
+	hbox.add_child(consoleWrapper)
 
-	var dropInner = VBoxContainer.new()
-	dropInner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	dropInner.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	dropWrapper.add_child(dropInner)
+	var consoleInner = VBoxContainer.new()
+	consoleInner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	consoleInner.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	consoleWrapper.add_child(consoleInner)
 
-	var dropTitle = Label.new()
-	dropTitle.text = "Arrastra los bloques aqui"
-	dropTitle.add_theme_font_size_override("font_size", FONT_SIZE - 2)
-	dropTitle.add_theme_color_override("font_color", Color(0.8, 0.7, 0.4))
-	dropInner.add_child(dropTitle)
+	var consoleTitle = Label.new()
+	consoleTitle.text = "Consola"
+	consoleTitle.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	consoleTitle.add_theme_color_override("font_color", Color(0.5, 0.9, 0.5))
+	consoleInner.add_child(consoleTitle)
+
+	var scrollContainer = ScrollContainer.new()
+	scrollContainer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scrollContainer.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	consoleInner.add_child(scrollContainer)
 
 	dropZone = VBoxContainer.new()
 	dropZone.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dropZone.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	dropZone.set_script(load("res://scripts/dropZone.gd"))
-	dropInner.add_child(dropZone)
+	dropZone.add_theme_constant_override("separation", 4)
+	scrollContainer.add_child(dropZone)
 
 	var sep = VSeparator.new()
 	hbox.add_child(sep)
@@ -109,17 +114,23 @@ func _ready():
 	cmdTitle.add_theme_color_override("font_color", Color(0.5, 0.9, 0.6))
 	cmdWrapper.add_child(cmdTitle)
 
+	var cmdHint = Label.new()
+	cmdHint.text = "Haz click para agregar"
+	cmdHint.add_theme_font_size_override("font_size", FONT_SIZE - 4)
+	cmdHint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	cmdWrapper.add_child(cmdHint)
+
 	commandList = VBoxContainer.new()
 	commandList.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	commandList.set_script(load("res://scripts/commandList.gd"))
 	cmdWrapper.add_child(commandList)
 
-	runButton = Button.new()
-	runButton.text = "Ejecutar"
-	runButton.custom_minimum_size = Vector2(0, 48)
-	runButton.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	runButton.pressed.connect(_onRun)
-	vbox.add_child(runButton)
+	feedbackLabel = Label.new()
+	feedbackLabel.custom_minimum_size = Vector2(0, 36)
+	feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	feedbackLabel.add_theme_font_size_override("font_size", FONT_SIZE - 1)
+	feedbackLabel.visible = false
+	cmdWrapper.add_child(feedbackLabel)
 
 	outputLabel = Label.new()
 	outputLabel.custom_minimum_size = Vector2(0, 60)
@@ -147,42 +158,46 @@ func open(data: Dictionary):
 
 	promptLabel.text = _colorizePrompt(levelPrompt)
 	outputLabel.text = ""
+	feedbackLabel.visible = false
+
 	var prefilled = data.get("prefilled_blocks", [])
 	dropZone.clear()
 	dropZone.setup(levelVars, prefilled)
+
 	commandList.setup(data.get("available_commands", []), levelVars)
+	commandList.blockClicked.connect(_onBlockClicked)
+
 	panel.visible = true
 
-	# Bloquear jugador completamente
 	var player = get_tree().get_first_node_in_group("player")
 	player.set_physics_process(false)
 	player.set_process_unhandled_input(false)
 	player.set_process_input(false)
 
-func _onRun():
+func _onBlockClicked(blockType: int, vars: Dictionary):
+	dropZone.addBlock(blockType, vars)
+	_evaluateCurrent()
+
+func _evaluateCurrent():
 	var testCases = _currentData.get("test_cases", [])
 
-	# compatibilidad con formato viejo sin test_cases
 	if testCases.is_empty():
 		var inputQueue = []
 		var result = dropZone.execute(levelVars.duplicate(), inputQueue)
+		outputLabel.text = "Output: " + ", ".join(result)
+
 		var correct = false
 		if expectedOutput == ["any_non_empty"]:
 			correct = result.size() > 0 and result[0].strip_edges() != ""
 		else:
 			correct = result == expectedOutput
-		outputLabel.text = "Output:\n" + "\n".join(result)
+
 		if correct:
-			outputLabel.text += "\n\nCorrecto!"
-			outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
-			_onAllPassed()
-		else:
-			outputLabel.text += "\n\nEsperado: " + ", ".join(expectedOutput)
-			outputLabel.add_theme_color_override("font_color", Color(1.0, 0.5, 0.4))
+			_onSuccess()
 		return
 
-	var lines = []
 	var allPassed = true
+	var lines = []
 	for idx in testCases.size():
 		var tc = testCases[idx]
 		var inputQueue: Array = tc.get("inputs", []).duplicate()
@@ -191,31 +206,46 @@ func _onRun():
 		var passed = result == expected
 		if not passed:
 			allPassed = false
-		var icon = "OK" if passed else "X"
-		var line = "Caso %d: %s" % [idx + 1, icon]
-		if not passed:
-			line += "  ->  esperado \"%s\", obtuve \"%s\"" % [", ".join(expected), ", ".join(result)]
-		lines.append(line)
+		var icon = "OK" if passed else "..."
+		lines.append("Caso %d: %s" % [idx + 1, icon])
 
 	outputLabel.text = "\n".join(lines)
-	if allPassed:
-		outputLabel.text += "\n\nTodos correctos!"
-		outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
-		_onAllPassed()
-	else:
-		outputLabel.add_theme_color_override("font_color", Color(1.0, 0.5, 0.4))
 
-func _onAllPassed():
+	if allPassed:
+		_onSuccess()
+
+func _showError(message: String):
+	feedbackLabel.text = "⚠ " + message
+	feedbackLabel.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
+	feedbackLabel.visible = true
+	var tween = feedbackLabel.create_tween()
+	tween.tween_property(feedbackLabel, "modulate:a", 1.0, 0.0)
+	tween.tween_interval(2.0)
+	tween.tween_property(feedbackLabel, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(func(): feedbackLabel.visible = false)
+	dropZone.removeLastBlock()
+
+func _onSuccess():
+	outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
+	outputLabel.text += "\n\n¡Correcto!"
+	_disableCommandList()
 	var npcs = get_tree().get_nodes_in_group("npc")
 	for npc in npcs:
 		if npc.has_method("onPuzzleSolved"):
 			npc.onPuzzleSolved()
 
+func _disableCommandList():
+	for child in commandList.get_children():
+		if child is PanelContainer:
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			child.modulate.a = 0.4
+
 func close():
 	isOpen = false
 	panel.visible = false
+	if commandList.blockClicked.is_connected(_onBlockClicked):
+		commandList.blockClicked.disconnect(_onBlockClicked)
 
-	# Desbloquear jugador
 	var player = get_tree().get_first_node_in_group("player")
 	player.set_physics_process(true)
 	player.set_process_unhandled_input(true)
