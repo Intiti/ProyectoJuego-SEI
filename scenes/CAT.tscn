@@ -3,6 +3,42 @@
 [ext_resource type="Script" uid="uid://ckqyu81e7cnr3" path="res://scripts/npc.gd" id="1_5td56"]
 [ext_resource type="Texture2D" uid="uid://ckm6lcm7wcadm" path="res://assets/FreeAnimalPack/FreeAnimalPack/JumpCattt.png" id="2_5td56"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_5td56"]
+atlas = ExtResource("2_5td56")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cqklm"]
+atlas = ExtResource("2_5td56")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dn7cu"]
+atlas = ExtResource("2_5td56")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_no6e6"]
+atlas = ExtResource("2_5td56")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xusj2"]
+atlas = ExtResource("2_5td56")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_07t3f"]
+atlas = ExtResource("2_5td56")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x11g2"]
+atlas = ExtResource("2_5td56")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r6dfl"]
+atlas = ExtResource("2_5td56")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5n1fu"]
+atlas = ExtResource("2_5td56")
+region = Rect2(256, 0, 32, 32)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_2g3d0"]
 atlas = ExtResource("2_5td56")
 region = Rect2(0, 0, 32, 32)
@@ -11,9 +47,41 @@ region = Rect2(0, 0, 32, 32)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_5td56")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cqklm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dn7cu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_no6e6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xusj2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_07t3f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x11g2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r6dfl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5n1fu")
+}],
+"loop": false,
+"name": &"RUN",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_2g3d0")
 }],
-"loop": true,
+"loop": false,
 "name": &"default",
 "speed": 12.0
 }]
@@ -29,8 +97,8 @@ script = ExtResource("1_5td56")
 dialogFile = "res://dialogs/npc1.json"
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=2102206592]
-position = Vector2(1.0000019, -35.999996)
-scale = Vector2(4.95875, 4.3605766)
+position = Vector2(2, -15)
+scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_gmbj5")
 autoplay = "default"
 

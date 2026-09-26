@@ -31,10 +31,10 @@ func _ready():
 	add_child(overlay)
 
 	leftPortrait = TextureRect.new()
-	leftPortrait.position = Vector2(160, 280)
-	leftPortrait.size = Vector2(128, 128)
-	leftPortrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	leftPortrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	leftPortrait.position = Vector2(60, 60)
+	leftPortrait.size = Vector2(512, 512)
+	leftPortrait.expand_mode = 3
+	leftPortrait.stretch_mode = 4
 	leftPortrait.visible = false
 	add_child(leftPortrait)
 
@@ -234,11 +234,14 @@ func closeDialog():
 	panel.visible = false
 	leftPortrait.visible = false
 	rightPortrait.visible = false
-	get_tree().get_first_node_in_group("player").set_physics_process(true)
 	if isCinematic:
+		# En modo cinemático, NO liberamos al jugador aquí.
+		# La escena que escucha cinematicDialogFinished se encarga de eso
+		# una vez que termine su animación post-diálogo.
 		isCinematic = false
 		emit_signal("cinematicDialogFinished")
 		return
+	get_tree().get_first_node_in_group("player").set_physics_process(true)
 	if not puzzleData.is_empty():
 		var puzzle = get_tree().get_first_node_in_group("puzzle")
 		if puzzle:

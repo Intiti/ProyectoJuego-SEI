@@ -1,12 +1,13 @@
 extends CharacterBody2D
 
-const speed = 200.0
+const speed = 300.0
 const gravity = 900.0
 const jumpForce = -400.0
 
+@onready var sprite = $Sprite2D
+
 func _ready():
 	add_to_group("player")
-
 
 func _physics_process(delta):
 	if not is_on_floor():
@@ -19,3 +20,13 @@ func _physics_process(delta):
 		velocity.y = jumpForce
 
 	move_and_slide()
+	_updateAnimation(dir)
+
+func _updateAnimation(dir: float):
+	if not is_on_floor():
+		sprite.play("jump")
+	elif dir != 0:
+		sprite.play("run")
+		sprite.flip_h = dir < 0
+	else:
+		sprite.play("default")

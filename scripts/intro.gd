@@ -1,8 +1,8 @@
 extends Node2D
 
 var introDialogLines = [
-	{"speaker": "Jugador", "text": "¡PANKO!!"},
-	{"speaker": "Jugador", "text": "¡PANKOO!!"},
+	{"speaker": "Jugador", "text": "¡PANKO!  ¡¿PANKO DÓNDE ESTÁS?!"},
+	{"speaker": "Jugador", "text": "¿Dónde se metió este gato ahora? ¡PANKOO!"},
 ]
 
 @onready var fadeRect = $FadeLayer/FadeRect
