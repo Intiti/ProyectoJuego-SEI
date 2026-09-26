@@ -30,6 +30,10 @@
 		},
 		{
 			"speaker": "Jugador",
+			"text": "(Parece que me pegué bien fuerte al caer a ese pozo y ahora veo a las personas con forma de gatos... Pero debo pretender estar bien, quizá si ayudo a estos tipos, me ayudarán a recuperar a Panko)"
+		},
+		{
+			"speaker": "Jugador",
 			"text": "Está bien... ¿qué debo hacer?"
 		},
 		{
@@ -105,11 +109,11 @@
 		},
 		{
 			"speaker": "Alcalde Boris",
-			"text": "¡Por supuesto! Aquí en el mundo de los gatos, todo se basa en miaugoritmos. Ahora ve y ayuda a los demás habitantes. Yo me encargaré de poner el aviso de tu amigo Panko."
+			"text": "¡Por supuesto! Aquí en el mundo de los gatos, todo se basa en miaugoritmos. Ahora ve y ayuda a los demás habitantes. Yo me encargaré de poner el aviso de búsqueda de tu amigo Panko."
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Miaugoritmos... creo que me estoy volviendo loco. Pero loco o no, debo recuperar a Panko... incluso si debo ayudar a estos... gatos parlanchines."
+			"text": "(Miaugoritmos... creo que me estoy volviendo loco. Pero loco o no, debo recuperar a Panko... incluso si debo ayudar a estos... gatos parlanchines.)"
 		}
 	],
 	"npc_scene": "res://scenes/NPC.tscn",

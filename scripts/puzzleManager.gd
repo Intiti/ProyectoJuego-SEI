@@ -441,7 +441,8 @@ func _onSuccess():
 		_closeKeepPlayerFrozen()
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 		if dialogBox:
-			dialogBox.openDirect(outroLines, playerScene, npcScene, true)
+			var savedNpcTexture: Texture2D = dialogBox._npcPortraitTexture
+			dialogBox.openDirect(outroLines, playerScene, npcScene, true, savedNpcTexture)
 	else:
 		close()
 

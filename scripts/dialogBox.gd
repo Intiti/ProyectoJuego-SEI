@@ -146,7 +146,7 @@ func open(jsonPath: String):
 	get_tree().get_first_node_in_group("player").set_physics_process(false)
 	showLine()
 
-func openDirect(dialogLines: Array, playerScene: String = "", npcScene: String = "", restorePlayer: bool = false):
+func openDirect(dialogLines: Array, playerScene: String = "", npcScene: String = "", restorePlayer: bool = false, npcTexture: Texture2D = null):
 	if isOpen:
 		return
 	_activeNpc = null
@@ -159,13 +159,15 @@ func openDirect(dialogLines: Array, playerScene: String = "", npcScene: String =
 
 	if playerScene != "":
 		leftPortrait.texture = _getFirstFrameFromScene(playerScene)
-	if npcScene != "":
+	if npcTexture != null:
+		rightPortrait.texture = npcTexture
+	elif npcScene != "":
 		rightPortrait.texture = _getFirstFrameFromScene(npcScene)
 
 	overlay.visible = true
 	panel.visible = true
-	leftPortrait.visible = playerScene != "" or npcScene != ""
-	rightPortrait.visible = playerScene != "" or npcScene != ""
+	leftPortrait.visible = playerScene != "" or npcScene != "" or npcTexture != null
+	rightPortrait.visible = playerScene != "" or npcScene != "" or npcTexture != null
 	get_tree().get_first_node_in_group("player").set_physics_process(false)
 	showLine()
 
@@ -223,6 +225,13 @@ func showLine():
 	fullText = lineData["text"].replace("{nombre}", GameData.playerName)
 	continueHint.visible = false
 	dialogLabel.text = ""
+
+	# Pensamientos: líneas que empiezan y terminan con paréntesis → color azul claro
+	var isThought = fullText.begins_with("(") and fullText.ends_with(")")
+	if isThought:
+		dialogLabel.modulate = Color(0.55, 0.78, 1.0)
+	else:
+		dialogLabel.modulate = Color(1.0, 1.0, 1.0)
 
 	leftPortrait.modulate.a = 1.0 if isPlayer else 0.4
 	rightPortrait.modulate.a = 0.4 if isPlayer else 1.0

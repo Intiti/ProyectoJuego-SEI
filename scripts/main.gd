@@ -1,12 +1,21 @@
 extends Node2D
 
-var tutorialLabel: Node = null
 var tutorialLayer: CanvasLayer = null
+var tutorialLabel: Node = null
+
+var _exploreTutorialLayer: CanvasLayer = null
+var _exploreTutorialLabel: Node = null
+var _exploreTutorialShown: bool = false
+
+# Trigger de salida: Area2D creado por código en el borde derecho
+var _exitArea: Area2D = null
+var _exitBlocked: bool = true  # se desbloquea cuando alcaldePuzzleSolved
 
 func _ready():
 	_applyGlobalTheme()
 	_showTutorialHint()
 	_watchDialogBox()
+	_buildExitTrigger()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/MotionControl-Bold.otf")
@@ -14,6 +23,8 @@ func _applyGlobalTheme() -> void:
 	theme.default_font = font
 	theme.default_font_size = 20
 	get_tree().root.theme = theme
+
+# ─── Tutorial inicial "pulsa E" ───────────────────────────────────────────────
 
 func _showTutorialHint() -> void:
 	tutorialLayer = CanvasLayer.new()
@@ -58,6 +69,14 @@ func _watchDialogBox() -> void:
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 		if dialogBox and dialogBox.isOpen:
 			_hideTutorial()
+			# Esperar a que cierre el diálogo final (outro del alcalde)
+			while dialogBox.isOpen:
+				await get_tree().process_frame
+			# Si el puzzle del alcalde ya está resuelto y no mostramos el tutorial de explorar aún
+			if GameData.alcaldePuzzleSolved and not _exploreTutorialShown:
+				_exploreTutorialShown = true
+				_exitBlocked = false
+				_showExploreTutorial()
 			return
 		await get_tree().process_frame
 
@@ -68,3 +87,80 @@ func _hideTutorial() -> void:
 	if is_instance_valid(tutorialLayer):
 		tutorialLayer.queue_free()
 		tutorialLayer = null
+
+# ─── Tutorial "Explora Villa Miaulemana" ──────────────────────────────────────
+
+func _showExploreTutorial() -> void:
+	_exploreTutorialLayer = CanvasLayer.new()
+	_exploreTutorialLayer.layer = 5
+	add_child(_exploreTutorialLayer)
+
+	var lbl = RichTextLabel.new()
+	lbl.bbcode_enabled = true
+	lbl.text = "Ahora puedes explorar Villa Miaulemana libremente  [color=yellow]→[/color]"
+	lbl.add_theme_font_size_override("normal_font_size", 28)
+	lbl.add_theme_color_override("default_color", Color(1, 1, 1, 1))
+	lbl.add_theme_constant_override("shadow_offset_x", 2)
+	lbl.add_theme_constant_override("shadow_offset_y", 2)
+	lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
+	lbl.fit_content = true
+	lbl.scroll_active = false
+	lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	lbl.anchor_left   = 0.5
+	lbl.anchor_right  = 0.5
+	lbl.anchor_top    = 1.0
+	lbl.anchor_bottom = 1.0
+	lbl.offset_left   = -480.0
+	lbl.offset_right  = 480.0
+	lbl.offset_top    = -80.0
+	lbl.offset_bottom = -20.0
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	_exploreTutorialLayer.add_child(lbl)
+	_exploreTutorialLabel = lbl
+	_blinkLabel(_exploreTutorialLabel)
+
+# ─── Trigger de salida hacia Villa1 ──────────────────────────────────────────
+
+func _buildExitTrigger() -> void:
+	_exitArea = Area2D.new()
+	var shape = CollisionShape2D.new()
+	var rect = RectangleShape2D.new()
+	rect.size = Vector2(32, 400)
+	shape.shape = rect
+	_exitArea.add_child(shape)
+	# Borde derecho de la escena (igual que WallRight pero un poco antes)
+	_exitArea.position = Vector2(1136, 400)
+	add_child(_exitArea)
+	_exitArea.body_entered.connect(_on_exit_body_entered)
+
+func _on_exit_body_entered(body: Node) -> void:
+	if not body.is_in_group("player"):
+		return
+	if _exitBlocked:
+		return
+	# Esconder tutorial de explorar si sigue visible
+	if is_instance_valid(_exploreTutorialLabel):
+		_exploreTutorialLabel.queue_free()
+	if is_instance_valid(_exploreTutorialLayer):
+		_exploreTutorialLayer.queue_free()
+	_goToVilla1()
+
+func _goToVilla1() -> void:
+	# Congelar jugador y hacer fade out antes de cambiar escena
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		player.set_physics_process(false)
+
+	var fadeLayer = CanvasLayer.new()
+	fadeLayer.layer = 10
+	add_child(fadeLayer)
+	var fadeRect = ColorRect.new()
+	fadeRect.anchor_right = 1.0
+	fadeRect.anchor_bottom = 1.0
+	fadeRect.color = Color(0, 0, 0, 0)
+	fadeLayer.add_child(fadeRect)
+
+	var tween = create_tween()
+	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 0.8)
+	tween.tween_callback(func(): get_tree().change_scene_to_file("res://scenes/Villa1.tscn"))

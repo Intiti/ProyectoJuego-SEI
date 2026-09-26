@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export var dialogFile: String = ""
 @export var needsHelp: bool = true
 @export var npcSprite: Texture2D
+@export var solvedFlag: String = ""  # nombre de la propiedad en GameData a poner true al resolver
 
 var playerNearby: bool = false
 
@@ -64,6 +65,8 @@ func onPuzzleSolved():
 	if is_instance_valid(_exclamLabel):
 		_exclamLabel.queue_free()
 		_exclamLabel = null
+	if solvedFlag != "" and GameData.get(solvedFlag) != null:
+		GameData.set(solvedFlag, true)
 
 func tryStartDialog():
 	if not playerNearby or not needsHelp:
