@@ -26,8 +26,10 @@ var completeOnSteps: bool = false
 # Nodos de slot en dropZone, uno por cada step (en orden)
 # Cada entrada: { "type": "fixed"|"empty"|"filled", "node": Node, "arrow": Label|null }
 var _slots: Array = []
+var _celebrating: bool = false
 
 const FONT_SIZE := 18
+const COMPLETION_DURATION := 3.5
 
 func _ready():
 	add_to_group("puzzle")
@@ -203,37 +205,39 @@ func _buildAllSlots():
 		var step = _steps[i]
 		var indent = step.get("indent", 0)
 
-		# Contenedor de fila: flecha + bloque
+		# Cada fila termina con la flecha. Al quedar al lado derecho,
+		# nunca empuja ni desplaza horizontalmente el bloque.
 		var row = HBoxContainer.new()
-		row.add_theme_constant_override("separation", 4)
+		row.add_theme_constant_override("separation", 6)
 		dropZone.add_child(row)
 
-		# Flecha (inicialmente invisible)
-		var arrow = Label.new()
-		arrow.text = "▶"
-		arrow.add_theme_font_size_override("font_size", FONT_SIZE)
-		arrow.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-		arrow.custom_minimum_size = Vector2(20, 0)
-		arrow.visible = false
-		row.add_child(arrow)
-
-		# Indentación
+		# Indentación primero, luego el bloque.
 		if indent > 0:
 			var spacer = Control.new()
 			spacer.custom_minimum_size = Vector2(indent * 20, 0)
 			row.add_child(spacer)
 
+		var arrow = Label.new()
+		arrow.text = "◀"
+		arrow.add_theme_font_size_override("font_size", FONT_SIZE)
+		arrow.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+		arrow.custom_minimum_size = Vector2(26, 44)
+		arrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		arrow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		arrow.visible = false
+		arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 		if step.get("fixed", false):
-			# Bloque fijo completo
 			var block = preload("res://scenes/CommandBlock.tscn").instantiate()
 			block.setupPlaced(_nameToType(step.get("type", "print")), step.get("text", ""), step.get("config", {}), indent)
 			block.setLocked()
 			row.add_child(block)
+			row.add_child(arrow)
 			_slots.append({"kind": "fixed", "row": row, "block": block, "arrow": arrow, "step_idx": i})
 		else:
-			# Slot vacío bordeado
 			var emptySlot = _makeEmptySlot(step)
 			row.add_child(emptySlot)
+			row.add_child(arrow)
 			_slots.append({"kind": "empty", "row": row, "slot_node": emptySlot, "arrow": arrow, "step_idx": i})
 
 # Crea un bloque vacío con borde punteado que indica "aquí va algo"
@@ -269,27 +273,29 @@ func _makeEmptySlot(step: Dictionary) -> PanelContainer:
 	return pc
 
 # Busca el primer slot vacío a partir de _currentStep y apunta la flecha ahí
-func _loadCurrentStep():
-	# Apagar todas las flechas
+func _loadCurrentStep(animate_arrow: bool = true):
+	var previousArrow: Label = null
 	for slot in _slots:
-		slot["arrow"].visible = false
+		var arrow: Label = slot["arrow"]
+		if arrow.visible:
+			previousArrow = arrow
+		arrow.visible = false
+		arrow.modulate.a = 1.0
+		arrow.position.y = 0.0
+		arrow.scale = Vector2.ONE
 
-	# Buscar el primer slot "empty" desde _currentStep en adelante
 	while _currentStep < _steps.size():
 		if not _steps[_currentStep].get("fixed", false):
 			break
 		_currentStep += 1
 
 	if _currentStep >= _steps.size():
-		# Algunos niveles solo necesitan completar correctamente las líneas.
-		# No ejecutamos ni mostramos output: la quest se completa directamente.
 		if completeOnSteps:
 			_onSuccess()
 		else:
 			_evaluateFull()
 		return
 
-	# Contar cuántos pasos de elección quedan
 	var totalChoices = 0
 	var choiceNum = 0
 	for i in _steps.size():
@@ -298,16 +304,34 @@ func _loadCurrentStep():
 			if i < _currentStep:
 				choiceNum += 1
 	choiceNum += 1
-
 	stepLabel.text = "Elección %d de %d" % [choiceNum, totalChoices]
 
-	# Encender flecha del slot actual
+	var currentArrow: Label = null
 	for slot in _slots:
 		if slot["step_idx"] == _currentStep:
-			slot["arrow"].visible = true
+			currentArrow = slot["arrow"]
 			break
 
-	# Cargar alternativas mezcladas
+	if currentArrow != null:
+		currentArrow.visible = true
+		if animate_arrow and previousArrow != null and previousArrow != currentArrow:
+			# La flecha "viaja" hacia el siguiente bloque con una entrada
+			# vertical/lateral breve, sin alterar el ancho del bloque.
+			currentArrow.position = Vector2(14, -10)
+			currentArrow.scale = Vector2(0.65, 0.65)
+			currentArrow.modulate.a = 0.0
+			var oldTween = previousArrow.create_tween()
+			oldTween.tween_property(previousArrow, "modulate:a", 0.0, 0.12)
+			var arrowTween = currentArrow.create_tween()
+			arrowTween.set_parallel(true)
+			arrowTween.tween_property(currentArrow, "position", Vector2(0, 0), 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			arrowTween.tween_property(currentArrow, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			arrowTween.tween_property(currentArrow, "modulate:a", 1.0, 0.18)
+		else:
+			currentArrow.position = Vector2(0, 0)
+			currentArrow.scale = Vector2.ONE
+			currentArrow.modulate.a = 1.0
+
 	var step = _steps[_currentStep]
 	var alternatives = step.get("alternatives", []).duplicate()
 	alternatives.shuffle()
@@ -423,28 +447,133 @@ func _showError(message: String):
 	tween.tween_callback(func(): feedbackLabel.visible = false)
 
 func _onSuccess():
+	if _celebrating:
+		return
+	_celebrating = true
+
 	if showOutput:
 		outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 		outputLabel.text += "\n\n¡Correcto!"
 	_disableCommandList()
+
 	var npc = _activeNpc
 	_activeNpc = null
-	# Marcar al NPC resuelto YA, antes del await, para que no pueda
-	# reactivarse si el jugador pulsa E durante el segundo de espera
 	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
 		npc.onPuzzleSolved()
+
+	# Primero mostramos la celebración completa durante 3.5 segundos.
+	await _playCompletionCelebration()
+
+	_celebrating = false
 	var outroLines: Array = _currentData.get("outro_lines", [])
 	var playerScene: String = _currentData.get("player_scene", "")
 	var npcScene: String = _currentData.get("npc_scene", "")
-	await get_tree().create_timer(1.0).timeout
+
 	if outroLines.size() > 0:
 		_closeKeepPlayerFrozen()
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 		if dialogBox:
 			var savedNpcTexture: Texture2D = dialogBox._npcPortraitTexture
 			dialogBox.openDirect(outroLines, playerScene, npcScene, true, savedNpcTexture)
+		else:
+			close()
 	else:
 		close()
+
+# Celebración final: bloques de la consola en arcoíris + texto flotante.
+# El texto sube desde abajo, queda fijo en pantalla y sus letras hacen
+# una pequeña "serpiente" mientras el tono del arcoíris cambia.
+func _playCompletionCelebration() -> void:
+	# Mantener todo visible y bloquear nuevas selecciones.
+	panel.move_to_front()
+	commandList.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var rainbowBlocks: Array = []
+	for slot in _slots:
+		if slot.has("block") and is_instance_valid(slot["block"]):
+			rainbowBlocks.append(slot["block"])
+
+	# Crear el texto como letras individuales para poder hacer el efecto serpiente.
+	var celebration = Control.new()
+	celebration.name = "CompletionCelebration"
+	celebration.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	celebration.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(celebration)
+
+	var textContainer = HBoxContainer.new()
+	textContainer.position = Vector2(0, panel.size.y + 30.0)
+	textContainer.size = Vector2(panel.size.x, 90)
+	textContainer.alignment = BoxContainer.ALIGNMENT_CENTER
+	textContainer.add_theme_constant_override("separation", 0)
+	celebration.add_child(textContainer)
+
+	var message = "MIAUGORITMO COMPLETADO"
+	var letters: Array = []
+	for i in message.length():
+		var letterSlot = Control.new()
+		letterSlot.custom_minimum_size = Vector2(24, 90)
+		textContainer.add_child(letterSlot)
+
+		var letter = Label.new()
+		letter.text = message.substr(i, 1)
+		letter.position = Vector2(0, 0)
+		letter.size = Vector2(24, 90)
+		letter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		letter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		letter.add_theme_font_size_override("font_size", FONT_SIZE + 12)
+		letter.add_theme_color_override("font_color", Color.WHITE)
+		letter.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 1.0))
+		letter.add_theme_constant_override("outline_size", 5)
+		letter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		letterSlot.add_child(letter)
+		letters.append(letter)
+
+	# Entrada: el mensaje aparece desde abajo y se detiene en una posición fija.
+	var targetY = panel.size.y * 0.78
+	var enterTween = textContainer.create_tween()
+	enterTween.tween_property(textContainer, "position:y", targetY, 0.65).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	var startTime = Time.get_ticks_msec()
+	while is_instance_valid(celebration) and Time.get_ticks_msec() - startTime < int(COMPLETION_DURATION * 1000.0):
+		var elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
+		var hueBase = fmod(elapsed * 0.22, 1.0)
+
+		# Arcoíris cambiante en todos los bloques.
+		for i in rainbowBlocks.size():
+			var block = rainbowBlocks[i]
+			if not is_instance_valid(block):
+				continue
+			var hue = fmod(hueBase + float(i) / max(1.0, float(rainbowBlocks.size())) * 0.75, 1.0)
+			var color = Color.from_hsv(hue, 0.78, 0.92)
+			var style = StyleBoxFlat.new()
+			style.bg_color = color
+			style.border_color = Color.from_hsv(fmod(hue + 0.12, 1.0), 0.45, 1.0)
+			style.border_width_left = 2
+			style.border_width_right = 2
+			style.border_width_top = 2
+			style.border_width_bottom = 2
+			style.corner_radius_top_left = 6
+			style.corner_radius_top_right = 6
+			style.corner_radius_bottom_left = 6
+			style.corner_radius_bottom_right = 6
+			style.content_margin_left = 10
+			style.content_margin_right = 10
+			style.content_margin_top = 6
+			style.content_margin_bottom = 6
+			block.add_theme_stylebox_override("panel", style)
+
+		# Serpiente fija: cada letra oscila verticalmente con desfase.
+		for i in letters.size():
+			var letter: Label = letters[i]
+			var wave = sin(elapsed * 7.0 - float(i) * 0.55) * 8.0
+			letter.position.y = wave
+			var letterHue = fmod(hueBase + float(i) / max(1.0, float(letters.size())) * 0.85, 1.0)
+			letter.add_theme_color_override("font_color", Color.from_hsv(letterHue, 0.72, 1.0))
+
+		await get_tree().process_frame
+
+	if is_instance_valid(celebration):
+		celebration.queue_free()
 
 func _disableCommandList():
 	for child in commandList.get_children():
