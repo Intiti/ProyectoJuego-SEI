@@ -386,22 +386,6 @@ shape = SubResource("2")
 
 [node name="DialogBox" parent="." unique_id=332413322 instance=ExtResource("dialogbox_ext")]
 
-[node name="TutorialLayer" type="CanvasLayer" parent="." unique_id=315053544]
-layer = 5
-
-[node name="TutorialLabel" type="Label" parent="TutorialLayer" unique_id=369436538]
-visible = false
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.55
-anchor_right = 0.5
-anchor_bottom = 0.55
-offset_left = -200.0
-offset_right = 200.0
-theme_override_font_sizes/font_size = 28
-text = "Usa <- y -> para moverte"
-horizontal_alignment = 1
-
 [node name="FadeLayer" type="CanvasLayer" parent="." unique_id=784191537]
 layer = 10
 
@@ -413,6 +397,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
+
+[node name="SkyBackground" type="ColorRect" parent="." unique_id=111111001]
+z_index = -10
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0.903816, 0.73786443, 0.36997935, 1)
 
 [node name="BG" type="TileMap" parent="." unique_id=1459996018]
 z_index = -3

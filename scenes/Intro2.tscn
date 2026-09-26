@@ -383,6 +383,7 @@ shape = SubResource("2")
 
 [node name="FadeLayer" type="CanvasLayer" parent="." unique_id=1688197282]
 layer = 10
+visible = false
 
 [node name="FadeRect" type="ColorRect" parent="FadeLayer" unique_id=347070458]
 anchors_preset = 15
@@ -392,6 +393,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
+
+[node name="SkyBackground" type="ColorRect" parent="." unique_id=111111002]
+z_index = -10
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0.94703466, 0.7102884, 0.43004024, 1)
 
 [node name="BG" type="TileMap" parent="." unique_id=188028813]
 z_index = -3

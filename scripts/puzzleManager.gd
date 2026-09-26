@@ -14,6 +14,7 @@ var stepLabel: Label
 
 var isOpen: bool = false
 var _currentData: Dictionary = {}
+var _activeNpc: Node = null  # NPC que abrió este puzzle
 
 var _steps: Array = []
 var _currentStep: int = 0  # índice dentro de _steps (incluye fixed)
@@ -159,11 +160,12 @@ func _colorizePrompt(text: String) -> String:
 	result = result.replace("Si el", "[color=#f0d060]Si[/color] el")
 	return result
 
-func open(data: Dictionary):
+func open(data: Dictionary, npc: Node = null):
 	if isOpen:
 		return
 	isOpen = true
 	_currentData = data
+	_activeNpc = npc
 
 	levelPrompt = data.get("prompt", "")
 	expectedOutput = data.get("expected_output", [])
@@ -425,16 +427,38 @@ func _onSuccess():
 		outputLabel.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
 		outputLabel.text += "\n\n¡Correcto!"
 	_disableCommandList()
-	var npcs = get_tree().get_nodes_in_group("npc")
-	for npc in npcs:
-		if npc.has_method("onPuzzleSolved"):
-			npc.onPuzzleSolved()
+	var npc = _activeNpc
+	_activeNpc = null
+	var outroLines: Array = _currentData.get("outro_lines", [])
+	var playerScene: String = _currentData.get("player_scene", "")
+	var npcScene: String = _currentData.get("npc_scene", "")
+	await get_tree().create_timer(1.0).timeout
+	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
+		npc.onPuzzleSolved()
+	# Si hay diálogo de cierre, ocultar el puzzle SIN reactivar al jugador
+	# para que openDirect no encuentre al jugador ya libre y el guard isOpen no bloquee
+	if outroLines.size() > 0:
+		_closeKeepPlayerFrozen()
+		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
+		if dialogBox:
+			dialogBox.openDirect(outroLines, playerScene, npcScene, true)
+	else:
+		close()
 
 func _disableCommandList():
 	for child in commandList.get_children():
 		if child is PanelContainer:
 			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			child.modulate.a = 0.4
+
+# Cierra el panel del puzzle pero NO reactiva al jugador.
+# Usar cuando se va a abrir un diálogo de outro inmediatamente después;
+# el diálogo se encargará de devolver el control al jugador al cerrarse.
+func _closeKeepPlayerFrozen():
+	isOpen = false
+	panel.visible = false
+	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
+		commandList.alternativeChosen.disconnect(_onAlternativeChosen)
 
 func close():
 	isOpen = false

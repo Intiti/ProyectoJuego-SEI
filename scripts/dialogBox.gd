@@ -9,6 +9,11 @@ var isOpen: bool = false
 var fullText: String = ""
 var puzzleData: Dictionary = {}
 var isCinematic: bool = false
+var _activeNpc: Node = null
+var _npcPortraitTexture: Texture2D = null
+# Cuando es true, closeDialog reactiva al jugador aunque isCinematic sea true.
+# Se usa para diálogos de outro del puzzle donde el jugador llegó congelado.
+var _restorePlayerOnClose: bool = false
 
 signal cinematicDialogFinished
 
@@ -93,6 +98,15 @@ func _ready():
 	continueHint.visible = false
 	panel.add_child(continueHint)
 
+# Llamado desde npc.gd — guarda referencia al NPC activo
+func openWithNpc(jsonPath: String, npc: Node):
+	_activeNpc = npc
+	if npc.get("npcSprite") != null and npc.npcSprite:
+		_npcPortraitTexture = npc.npcSprite
+	else:
+		_npcPortraitTexture = null
+	open(jsonPath)
+
 func open(jsonPath: String):
 	if isOpen:
 		return
@@ -110,7 +124,9 @@ func open(jsonPath: String):
 	isCinematic = false
 	puzzleData = parsed.get("puzzle", {})
 
-	if parsed.has("npc_scene"):
+	if _npcPortraitTexture:
+		rightPortrait.texture = _npcPortraitTexture
+	elif parsed.has("npc_scene"):
 		rightPortrait.texture = _getFirstFrameFromScene(parsed["npc_scene"])
 	if parsed.has("player_scene"):
 		leftPortrait.texture = _getFirstFrameFromScene(parsed["player_scene"])
@@ -122,13 +138,15 @@ func open(jsonPath: String):
 	get_tree().get_first_node_in_group("player").set_physics_process(false)
 	showLine()
 
-func openDirect(dialogLines: Array, playerScene: String = "", npcScene: String = ""):
+func openDirect(dialogLines: Array, playerScene: String = "", npcScene: String = "", restorePlayer: bool = false):
 	if isOpen:
 		return
+	_activeNpc = null
 	lines = dialogLines
 	currentLine = 0
 	isOpen = true
 	isCinematic = true
+	_restorePlayerOnClose = restorePlayer
 	puzzleData = {}
 
 	if playerScene != "":
@@ -159,6 +177,12 @@ func _getFirstFrameFromScene(scenePath: String) -> Texture2D:
 		if frames.has_animation(animName) and frames.get_frame_count(animName) > 0:
 			texture = frames.get_frame_texture(animName, 0)
 
+	# Fallback: buscar Sprite2D normal
+	if not texture:
+		var sprite = _findSprite2D(instance)
+		if sprite:
+			texture = sprite.texture
+
 	instance.queue_free()
 	return texture
 
@@ -171,6 +195,15 @@ func _findAnimatedSprite(node: Node) -> AnimatedSprite2D:
 			return result
 	return null
 
+func _findSprite2D(node: Node) -> Sprite2D:
+	if node is Sprite2D:
+		return node
+	for child in node.get_children():
+		var result = _findSprite2D(child)
+		if result:
+			return result
+	return null
+
 func showLine():
 	var lineData = lines[currentLine]
 	var isPlayer = lineData["speaker"] == "Jugador"
@@ -179,7 +212,7 @@ func showLine():
 		displaySpeaker = GameData.playerName
 
 	speakerLabel.text = displaySpeaker
-	fullText = lineData["text"]
+	fullText = lineData["text"].replace("{nombre}", GameData.playerName)
 	continueHint.visible = false
 	dialogLabel.text = ""
 
@@ -200,9 +233,13 @@ func typeText():
 	continueHint.visible = true
 
 func _input(event):
+	if not isOpen:
+		return
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	if not event.is_action("interact"):
+	var isInteract = event.keycode == KEY_E or event.physical_keycode == KEY_E \
+		or event.is_action("interact")
+	if not isInteract:
 		return
 
 	var puzzle = get_tree().get_first_node_in_group("puzzle")
@@ -211,15 +248,10 @@ func _input(event):
 
 	get_viewport().set_input_as_handled()
 
-	if isOpen:
-		if isTyping:
-			isTyping = false
-		else:
-			nextLine()
+	if isTyping:
+		isTyping = false
 	else:
-		var npcs = get_tree().get_nodes_in_group("npc")
-		for npc in npcs:
-			npc.tryStartDialog()
+		nextLine()
 
 func nextLine():
 	currentLine += 1
@@ -235,14 +267,21 @@ func closeDialog():
 	leftPortrait.visible = false
 	rightPortrait.visible = false
 	if isCinematic:
-		# En modo cinemático, NO liberamos al jugador aquí.
-		# La escena que escucha cinematicDialogFinished se encarga de eso
-		# una vez que termine su animación post-diálogo.
 		isCinematic = false
+		var shouldRestore = _restorePlayerOnClose
+		_restorePlayerOnClose = false
+		if shouldRestore:
+			var player = get_tree().get_first_node_in_group("player")
+			if player:
+				player.set_physics_process(true)
+				player.set_process_unhandled_input(true)
+				player.set_process_input(true)
 		emit_signal("cinematicDialogFinished")
 		return
 	get_tree().get_first_node_in_group("player").set_physics_process(true)
 	if not puzzleData.is_empty():
 		var puzzle = get_tree().get_first_node_in_group("puzzle")
 		if puzzle:
-			puzzle.open(puzzleData)
+			# Pasar referencia del NPC activo al puzzle para notificación individual
+			puzzle.open(puzzleData, _activeNpc)
+		_activeNpc = null

@@ -1,34 +1,54 @@
 {
 	"lines": [
 		{
-			"speaker": "Alcalde Gatuno",
-			"text": "¡Miau! ¡Bienvenido, viajero! Soy el alcalde de este pueblo. Antes de dejarte pasar, necesito saber tu nombre."
+			"speaker": "Alcalde Boris",
+			"text": "¡Saludos, desconocido! Miau... me llamo Boris y soy el alcalde de esta ciudad. ¿En qué puedo ayudarte?"
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Claro, puedo presentarme."
+			"text": "¿Eh? ¿Estoy soñando? ¿Ese gato me acaba de hablar?"
 		},
 		{
-			"speaker": "Alcalde Gatuno",
-			"text": "Ya tengo listo el nombre fijo. Solo coloca el print() para mostrármelo. ¡Tu primera misión de código!"
+			"speaker": "Alcalde Boris",
+			"text": "¡Nada de sueños, querido amigo! Bienvenido a la Villa Miaulemana. Pareces preocupado... ¿qué te trae por aquí?"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Estoy buscando a mi gato Panko. ¿Lo han visto? Es un gato pardo y pequeñín..."
+		},
+		{
+			"speaker": "Alcalde Boris",
+			"text": "Mmm... Panko... No creo que le hayamos visto por aquí. Pero estaremos encantados de ayudarte... si tú nos ayudas a nosotros."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Ayudarlos? ¿Qué necesitan?"
+		},
+		{
+			"speaker": "Alcalde Boris",
+			"text": "Verás, hemos tenido problemas desarrollando nuestros miaugoritmos. Tú tienes pinta de ser alguien inteligente. ¡Si nos ayudas, te lo pagaremos con creces!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Está bien... ¿qué debo hacer?"
+		},
+		{
+			"speaker": "Alcalde Boris",
+			"text": "Empecemos con algo simple. Necesito pedirle el nombre a alguien y luego mostrarlo. ¡Tu primera misión de código!"
 		}
 	],
 	"puzzle": {
-		"prompt": "El alcalde quiere conocerte. El nombre ya está asignado. Solo agrega print() para mostrarlo.",
+		"prompt": "El alcalde quiere conocer tu nombre. Pídelo con input() y luego muéstralo con print().",
 		"variables": {
-			"nombre": "Ricardo"
+			"nombre": ""
 		},
-		"expected_output": [
-			"Ricardo"
-		],
 		"steps": [
 			{
 				"fixed": true,
-				"type": "assign",
-				"text": "nombre = \"Ricardo\"",
+				"type": "input",
+				"text": "nombre = input()",
 				"config": {
-					"var": "nombre",
-					"assign_value": "Ricardo"
+					"var": "nombre"
 				}
 			},
 			{
@@ -70,8 +90,28 @@
 					}
 				]
 			}
-		]
+		],
+		"show_output": false,
+		"complete_on_steps": true
 	},
+	"outro_lines": [
+		{
+			"speaker": "Alcalde Boris",
+			"text": "¿Con que te llamas {nombre}, eh? ¡Excelente trabajo!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Wow... ¿eso lo supiste gracias al miaugoritmo?"
+		},
+		{
+			"speaker": "Alcalde Boris",
+			"text": "¡Por supuesto! Aquí en el mundo de los gatos, todo se basa en miaugoritmos. Ahora ve y ayuda a los demás habitantes. Yo me encargaré de poner el aviso de tu amigo Panko."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Miaugoritmos... creo que me estoy volviendo loco. Pero loco o no, debo recuperar a Panko... incluso si debo ayudar a estos... gatos parlanchines."
+		}
+	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"
 }
