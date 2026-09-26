@@ -5,8 +5,6 @@
 [ext_resource type="Script" uid="uid://d368aqyj6voxv" path="res://scripts/background.gd" id="3"]
 [ext_resource type="PackedScene" uid="uid://dqgdwchjfc0p7" path="res://scenes/DialogBox.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/PuzzleUI.tscn" id="5"]
-[ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/NPC.tscn" id="6_obl85"]
-[ext_resource type="Texture2D" uid="uid://cwn8xd1jpcgti" path="res://assets/NPCs/gato_granjero.png" id="7_y53av"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)
@@ -46,12 +44,3 @@ shape = SubResource("2")
 [node name="DialogBox" parent="." unique_id=832459565 instance=ExtResource("4")]
 
 [node name="PuzzleUI" parent="." unique_id=1111084419 instance=ExtResource("5")]
-
-[node name="NPC_E12" parent="." unique_id=1466623536 instance=ExtResource("6_obl85")]
-position = Vector2(667, 564)
-dialogFile = "res://dialogs/npc_e12.json"
-npcSprite = ExtResource("7_y53av")
-
-[node name="NPC_E13" parent="." unique_id=2123435532 instance=ExtResource("6_obl85")]
-position = Vector2(886, 566)
-dialogFile = "res://dialogs/npc_e13.json"

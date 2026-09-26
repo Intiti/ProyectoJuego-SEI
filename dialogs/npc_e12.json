@@ -1,52 +1,36 @@
 {
 	"lines": [
 		{
-			"speaker": "Facundo",
-			"text": "¡Miau! Justo llegas a tiempo. Estoy llevando la contabilidad de las semillas recolectadas en la aldea."
+			"speaker": "Bibliotecaria",
+			"text": "¡Hola! Necesito sumar dos números que me lleguen por input. ¿Puedes ayudarme?"
 		},
 		{
 			"speaker": "Jugador",
-			"text": "¿Y qué necesitas que haga?"
-		},
-		{
-			"speaker": "Facundo",
-			"text": "Tengo anotadas las semillas que reunimos durante la mañana y las de la tarde, pero necesito saber cuántos kilos juntamos en total."
-		},
-		{
-			"speaker": "Jugador",
-			"text": "Entonces solo tengo que sumar las dos cantidades."
-		},
-		{
-			"speaker": "Facundo",
-			"text": "¡Exactamente! Las dos cantidades llegarán mediante input(). Usa variables para guardarlas, súmalas y muestra el total para que pueda registrarlo."
-		},
-		{
-			"speaker": "Jugador",
-			"text": "Déjamelo a mí. Voy a ordenar esas cuentas."
+			"text": "Claro, lo resuelvo."
 		}
 	],
 	"puzzle": {
-		"prompt": "El Gato Facundo necesita calcular cuántos kilos de semillas se recolectaron en total. Recibe la cantidad de la mañana y de la tarde mediante input(), súmalas y muestra el resultado con print().",
+		"prompt": "La bibliotecaria lleva la cuenta de libros prestados y devueltos. Los dos valores llegan por input() — ya están puestos. Calcula la suma y muéstrala con print().",
 		"variables": {
-			"grano_manana": 0,
-			"grano_tarde": 0,
-			"total": 0
+			"numero_A": 0,
+			"numero_B": 0,
+			"resultado": 0
 		},
 		"steps": [
 			{
 				"fixed": true,
 				"type": "input",
-				"text": "grano_manana = int(input())",
+				"text": "numero_A = input()",
 				"config": {
-					"var": "grano_manana"
+					"var": "numero_A"
 				}
 			},
 			{
 				"fixed": true,
 				"type": "input",
-				"text": "grano_tarde = int(input())",
+				"text": "numero_B = input()",
 				"config": {
-					"var": "grano_tarde"
+					"var": "numero_B"
 				}
 			},
 			{
@@ -55,44 +39,44 @@
 				"alternatives": [
 					{
 						"type": "expr",
-						"text": "total = grano_manana + grano_tarde",
+						"text": "resultado = numero_A + numero_B",
 						"correct": true,
 						"config": {
-							"var": "total",
-							"expr_a": "grano_manana",
+							"var": "resultado",
+							"expr_a": "numero_A",
 							"expr_op": "+",
-							"expr_b": "grano_tarde"
+							"expr_b": "numero_B"
 						}
 					},
 					{
 						"type": "expr",
-						"text": "total = grano_manana - grano_tarde",
+						"text": "resultado = numero_A - numero_B",
 						"correct": false,
 						"config": {
-							"var": "total",
-							"expr_a": "grano_manana",
+							"var": "resultado",
+							"expr_a": "numero_A",
 							"expr_op": "-",
-							"expr_b": "grano_tarde"
-						}
-					},
-					{
-						"type": "expr",
-						"text": "total = grano_manana * grano_tarde",
-						"correct": false,
-						"config": {
-							"var": "total",
-							"expr_a": "grano_manana",
-							"expr_op": "*",
-							"expr_b": "grano_tarde"
+							"expr_b": "numero_B"
 						}
 					},
 					{
 						"type": "assign",
-						"text": "total = 0",
+						"text": "resultado = 0",
 						"correct": false,
 						"config": {
-							"var": "total",
+							"var": "resultado",
 							"assign_value": "0"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "resultado = numero_A * numero_B",
+						"correct": false,
+						"config": {
+							"var": "resultado",
+							"expr_a": "numero_A",
+							"expr_op": "*",
+							"expr_b": "numero_B"
 						}
 					}
 				]
@@ -103,34 +87,34 @@
 				"alternatives": [
 					{
 						"type": "print",
-						"text": "print(\"Total de semillas recolectadas:\", total, \"kg\")",
+						"text": "print(resultado)",
 						"correct": true,
 						"config": {
-							"value": "total"
+							"value": "resultado"
 						}
 					},
 					{
 						"type": "print",
-						"text": "print(\"Total de semillas recolectadas:\", grano_tarde, \"kg\")",
+						"text": "print(numero_A)",
 						"correct": false,
 						"config": {
-							"value": "grano_tarde"
+							"value": "numero_A"
 						}
 					},
 					{
 						"type": "print",
-						"text": "print(grano_manana)",
+						"text": "print(numero_B)",
 						"correct": false,
 						"config": {
-							"value": "grano_manana"
+							"value": "numero_B"
 						}
 					},
 					{
 						"type": "print",
-						"text": "print(\"Total de semillas recolectadas:\", grano_manana, \"kg\")",
+						"text": "print(\"resultado\")",
 						"correct": false,
 						"config": {
-							"value": "grano_manana"
+							"value": "\"resultado\""
 						}
 					}
 				]
@@ -139,24 +123,6 @@
 		"show_output": false,
 		"complete_on_steps": true
 	},
-	"outro_lines": [
-		{
-			"speaker": "Facundo",
-			"text": "¡Miau, perfecto! Ahora tengo el total de semillas que recolectamos durante el día."
-		},
-		{
-			"speaker": "Jugador",
-			"text": "Parece que las cuentas están en orden."
-		},
-		{
-			"speaker": "Facundo",
-			"text": "Gracias por ayudarme. En esta aldea hasta las semillas necesitan sus propios miaugoritmos para no perderse."
-		},
-		{
-			"speaker": "Jugador",
-			"text": "Bueno, mientras sigamos avanzando hacia la pista de Panko, puedo echar una pata."
-		}
-	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"
 }

@@ -1,93 +1,176 @@
 {
 	"lines": [
 		{
-			"speaker": "Gato Competidor 1",
-			"text": "¡Ey, tú! Sí, tú, el que anda por aquí. ¿Puedes echarnos una pata con algo antes de la competencia de pesca? ¡Faltan solo 3 días!"
+			"speaker": "Gato Pescador A",
+			"text": "¡Yo atrapé más peces hoy! ¡Soy el mejor pescador del pueblo!"
+		},
+		{
+			"speaker": "Gato Pescador B",
+			"text": "¡Para nada! ¡Mis peces son más! ¡Necesitamos que alguien lo resuelva con código!"
 		},
 		{
 			"speaker": "Jugador",
-			"text": "¿Una competencia de pesca? ¿Qué necesitan?"
+			"text": "Cálmense, puedo escribir una condición para determinarlo."
 		},
 		{
-			"speaker": "Gato Competidor 2",
-			"text": "En tres días será la gran competencia de pesca de la aldea. Hemos estado practicando y queremos comparar nuestros puntajes para saber quién tiene más posibilidades de quedarse con el primer lugar."
-		},
-		{
-			"speaker": "Gato Competidor 1",
-			"text": "Exacto. Ya tenemos los puntajes de una prueba anterior, pero queremos dejar preparado el miaugoritmo que determine cuál de los dos obtiene el puntaje más alto."
-		},
-		{
-			"speaker": "Jugador",
-			"text": "Entonces podemos comparar ambos puntajes y dejar listo el veredicto para cuando llegue la competencia."
-		},
-		{
-			"speaker": "Gato Competidor 2",
-			"text": "¡Eso mismo! Solo necesitamos que el código compare los dos puntajes correctamente."
+			"speaker": "Gato Pescador A",
+			"text": "Los peces de cada uno llegan por input. ¡Compáralos con if y di quién gana!"
 		}
 	],
 	"puzzle": {
-		"prompt": "Faltan 3 días para la competencia de pesca de la aldea y dos gatos quieren comparar sus puntajes de práctica. Recibe ambos puntajes mediante input(). Si el puntaje del Gato 1 es mayor, imprime '¡Gato 1 gana la competencia de pesca!'; de lo contrario, imprime '¡Gato 2 gana la competencia de pesca!'.",
+		"prompt": "pescados_A y pescados_B llegan por input(). Usa if/else para imprimir 'Gana A', 'Gana B' o 'Empate' según corresponda.",
 		"variables": {
-			"puntaje_gato1": 0,
-			"puntaje_gato2": 0
+			"pescados_A": 0,
+			"pescados_B": 0
 		},
 		"steps": [
-			{
-				"fixed": true,
-				"type": "input",
-				"text": "puntaje_gato1 = int(input())",
-				"config": {
-					"var": "puntaje_gato1"
-				}
-			},
 			{
 				"fixed": false,
 				"type": "input",
 				"alternatives": [
 					{
 						"type": "input",
-						"text": "puntaje_gato2 = int(input())",
+						"text": "pescados_A = input()",
 						"correct": true,
 						"config": {
-							"var": "puntaje_gato2"
+							"var": "pescados_A"
 						}
 					},
 					{
 						"type": "input",
-						"text": "puntaje_gato2 = input()",
+						"text": "pescados_B = input()",
 						"correct": false,
 						"config": {
-							"var": "puntaje_gato2"
+							"var": "pescados_B"
 						}
 					},
 					{
-						"type": "input",
-						"text": "puntaje_gato1 = int(input())",
+						"type": "assign",
+						"text": "pescados_A = 0",
 						"correct": false,
 						"config": {
-							"var": "puntaje_gato1"
+							"var": "pescados_A",
+							"assign_value": "0"
 						}
 					},
 					{
-						"type": "input",
-						"text": "puntaje_gato2 = int(puntaje_gato1)",
+						"type": "print",
+						"text": "print(pescados_A)",
 						"correct": false,
 						"config": {
-							"var": "puntaje_gato2"
+							"value": "pescados_A"
 						}
 					}
 				]
 			},
 			{
 				"fixed": true,
-				"type": "if",
-				"text": "if puntaje_gato1 > puntaje_gato2:",
+				"type": "input",
+				"text": "pescados_B = input()",
 				"config": {
-					"var": "puntaje_gato1",
-					"op": ">",
-					"value": "puntaje_gato2",
-					"value_is_var": true
+					"var": "pescados_B"
 				}
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "if pescados_A > pescados_B",
+						"correct": true,
+						"config": {
+							"var": "pescados_A",
+							"op": ">",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "if",
+						"text": "if pescados_A < pescados_B",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"op": "<",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "if",
+						"text": "if pescados_A == pescados_B",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"op": "==",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "print",
+						"text": "print(pescados_A)",
+						"correct": false,
+						"config": {
+							"value": "pescados_A"
+						}
+					}
+				]
+			},
+			{
+				"fixed": true,
+				"type": "print",
+				"indent": 1,
+				"text": "  print(\"Gana A\")",
+				"config": {
+					"value": "\"Gana A\""
+				}
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "else if pescados_B > pescados_A",
+						"correct": true,
+						"config": {
+							"var": "pescados_B",
+							"op": ">",
+							"value": "pescados_A",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "else",
+						"text": "else",
+						"correct": false,
+						"config": {}
+					},
+					{
+						"type": "if",
+						"text": "else if pescados_A == pescados_B",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"op": "==",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "if",
+						"text": "else if pescados_B < pescados_A",
+						"correct": false,
+						"config": {
+							"var": "pescados_B",
+							"op": "<",
+							"value": "pescados_A",
+							"value_is_var": true
+						}
+					}
+				]
 			},
 			{
 				"fixed": false,
@@ -96,26 +179,18 @@
 				"alternatives": [
 					{
 						"type": "print",
-						"text": "  print(\"¡Gato 1 gana la competencia de pesca!\")",
+						"text": "  print(\"Gana B\")",
 						"correct": true,
 						"config": {
-							"value": "\"¡Gato 1 gana la competencia de pesca!\""
+							"value": "\"Gana B\""
 						}
 					},
 					{
 						"type": "print",
-						"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
+						"text": "  print(\"Gana A\")",
 						"correct": false,
 						"config": {
-							"value": "\"¡Gato 2 gana la competencia de pesca!\""
-						}
-					},
-					{
-						"type": "print",
-						"text": "  print(puntaje_gato1)",
-						"correct": false,
-						"config": {
-							"value": "puntaje_gato1"
+							"value": "\"Gana A\""
 						}
 					},
 					{
@@ -125,13 +200,21 @@
 						"config": {
 							"value": "\"Empate\""
 						}
+					},
+					{
+						"type": "print",
+						"text": "  print(pescados_B)",
+						"correct": false,
+						"config": {
+							"value": "pescados_B"
+						}
 					}
 				]
 			},
 			{
 				"fixed": true,
 				"type": "else",
-				"text": "else:",
+				"text": "else",
 				"config": {}
 			},
 			{
@@ -141,34 +224,34 @@
 				"alternatives": [
 					{
 						"type": "print",
-						"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
-						"correct": true,
-						"config": {
-							"value": "\"¡Gato 2 gana la competencia de pesca!\""
-						}
-					},
-					{
-						"type": "print",
-						"text": "  print(\"¡Gato 1 gana la competencia de pesca!\")",
-						"correct": false,
-						"config": {
-							"value": "\"¡Gato 1 gana la competencia de pesca!\""
-						}
-					},
-					{
-						"type": "print",
 						"text": "  print(\"Empate\")",
-						"correct": false,
+						"correct": true,
 						"config": {
 							"value": "\"Empate\""
 						}
 					},
 					{
 						"type": "print",
-						"text": "  print(puntaje_gato2)",
+						"text": "  print(\"Gana A\")",
 						"correct": false,
 						"config": {
-							"value": "puntaje_gato2"
+							"value": "\"Gana A\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Gana B\")",
+						"correct": false,
+						"config": {
+							"value": "\"Gana B\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(pescados_A)",
+						"correct": false,
+						"config": {
+							"value": "pescados_A"
 						}
 					}
 				]
@@ -177,28 +260,6 @@
 		"show_output": false,
 		"complete_on_steps": true
 	},
-	"outro_lines": [
-		{
-			"speaker": "Gato Competidor 1",
-			"text": "¡Miau! Perfecto. Ahora tenemos listo el veredicto para la competencia de pesca."
-		},
-		{
-			"speaker": "Gato Competidor 2",
-			"text": "Y todavía faltan 3 días. Ahora podemos seguir practicando sin preocuparnos de hacer las cuentas a última hora."
-		},
-		{
-			"speaker": "Gato Competidor 1",
-			"text": "Cuando llegue el día de la competencia, sabremos rápidamente cuál de los dos tiene el puntaje más alto. ¡Gracias por la ayuda!"
-		},
-		{
-			"speaker": "Jugador",
-			"text": "De nada. Ahora solo queda esperar la competencia y ver qué pasa."
-		},
-		{
-			"speaker": "Gato Competidor 2",
-			"text": "¡Nos vemos en tres días! Y no te olvides de venir a la competencia de pesca."
-		}
-	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"
 }
