@@ -123,6 +123,14 @@ func open(jsonPath: String):
 	isOpen = true
 	isCinematic = false
 	puzzleData = parsed.get("puzzle", {})
+	# Propagar al puzzleData los campos de raíz que puzzleManager necesita
+	if not puzzleData.is_empty():
+		if parsed.has("outro_lines"):
+			puzzleData["outro_lines"] = parsed["outro_lines"]
+		if parsed.has("npc_scene"):
+			puzzleData["npc_scene"] = parsed["npc_scene"]
+		if parsed.has("player_scene"):
+			puzzleData["player_scene"] = parsed["player_scene"]
 
 	if _npcPortraitTexture:
 		rightPortrait.texture = _npcPortraitTexture
@@ -268,6 +276,8 @@ func closeDialog():
 	rightPortrait.visible = false
 	if isCinematic:
 		isCinematic = false
+		puzzleData = {}
+		_activeNpc = null
 		var shouldRestore = _restorePlayerOnClose
 		_restorePlayerOnClose = false
 		if shouldRestore:
@@ -281,7 +291,9 @@ func closeDialog():
 	get_tree().get_first_node_in_group("player").set_physics_process(true)
 	if not puzzleData.is_empty():
 		var puzzle = get_tree().get_first_node_in_group("puzzle")
-		if puzzle:
-			# Pasar referencia del NPC activo al puzzle para notificación individual
-			puzzle.open(puzzleData, _activeNpc)
+		var dataToOpen = puzzleData
+		var npcRef = _activeNpc
+		puzzleData = {}
 		_activeNpc = null
+		if puzzle:
+			puzzle.open(dataToOpen, npcRef)

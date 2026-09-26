@@ -72,7 +72,9 @@ func tryStartDialog():
 		push_error("NPC '" + name + "' no tiene dialogFile asignado.")
 		return
 	var dialogBox = get_tree().get_first_node_in_group("dialog_box")
-	if dialogBox:
-		# Pasar referencia de este NPC al dialogBox para que el puzzleManager
-		# sepa a quién notificar al resolver
-		dialogBox.openWithNpc(dialogFile, self)
+	if not dialogBox or dialogBox.isOpen:
+		return
+	var puzzle = get_tree().get_first_node_in_group("puzzle")
+	if puzzle and puzzle.isOpen:
+		return
+	dialogBox.openWithNpc(dialogFile, self)

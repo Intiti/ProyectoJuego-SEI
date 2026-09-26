@@ -429,14 +429,14 @@ func _onSuccess():
 	_disableCommandList()
 	var npc = _activeNpc
 	_activeNpc = null
+	# Marcar al NPC resuelto YA, antes del await, para que no pueda
+	# reactivarse si el jugador pulsa E durante el segundo de espera
+	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
+		npc.onPuzzleSolved()
 	var outroLines: Array = _currentData.get("outro_lines", [])
 	var playerScene: String = _currentData.get("player_scene", "")
 	var npcScene: String = _currentData.get("npc_scene", "")
 	await get_tree().create_timer(1.0).timeout
-	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
-		npc.onPuzzleSolved()
-	# Si hay diálogo de cierre, ocultar el puzzle SIN reactivar al jugador
-	# para que openDirect no encuentre al jugador ya libre y el guard isOpen no bloquee
 	if outroLines.size() > 0:
 		_closeKeepPlayerFrozen()
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
