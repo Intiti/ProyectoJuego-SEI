@@ -39,7 +39,6 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 4
 text = "MIAUGORITMOS"
-label_settings = null
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 52
 
@@ -54,4 +53,41 @@ custom_minimum_size = Vector2(200, 55)
 text = "JUGAR"
 theme_override_font_sizes/font_size = 28
 
+[node name="NamePanel" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+visible = false
+
+[node name="NameLabel" type="Label" parent="VBoxContainer/NamePanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "¿Cómo te llamas? (3-10 caracteres)"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="NameInput" type="LineEdit" parent="VBoxContainer/NamePanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(200, 40)
+max_length = 10
+placeholder_text = "Tu nombre..."
+alignment = 1
+
+[node name="ErrorLabel" type="Label" parent="VBoxContainer/NamePanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = ""
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+visible = false
+
+[node name="ConfirmButton" type="Button" parent="VBoxContainer/NamePanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(200, 50)
+text = "CONFIRMAR"
+theme_override_font_sizes/font_size = 24
+
 [connection signal="pressed" from="VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/NamePanel/ConfirmButton" to="." method="_on_confirm_button_pressed"]

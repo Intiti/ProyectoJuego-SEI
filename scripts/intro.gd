@@ -1,26 +1,19 @@
 extends Node2D
 
-const letterSpeed = 0.04
-
-var dialogLines = [
+var introDialogLines = [
 	{"speaker": "Jugador", "text": "¡PANKO!!"},
 	{"speaker": "Jugador", "text": "¡PANKOO!!"},
 ]
 
-var currentLine = 0
-var isTyping = false
-var fullText = ""
-
-@onready var fadeRect = $FadeRect
-@onready var panel = $DialogLayer/Panel
-@onready var speakerLabel = $DialogLayer/Panel/SpeakerLabel
-@onready var dialogLabel = $DialogLayer/Panel/DialogLabel
-@onready var continueHint = $DialogLayer/Panel/ContinueHint
+@onready var fadeRect = $FadeLayer/FadeRect
+@onready var tutorialLabel = $TutorialLayer/TutorialLabel
+@onready var dialogBox = $DialogBox
 
 func _ready():
 	_applyGlobalTheme()
-	panel.visible = false
 	fadeRect.color = Color(0, 0, 0, 1)
+	_blockPlayer()
+	dialogBox.cinematicDialogFinished.connect(_onIntroDialogFinished)
 	_fadeIn()
 
 func _applyGlobalTheme() -> void:
@@ -30,57 +23,26 @@ func _applyGlobalTheme() -> void:
 	globalTheme.default_font_size = 20
 	get_tree().root.theme = globalTheme
 
+func _blockPlayer():
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		player.set_physics_process(false)
+
 func _fadeIn():
 	var tween = create_tween()
 	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 0), 2.0)
 	tween.tween_callback(_startDialog)
 
 func _startDialog():
-	panel.visible = true
-	_showLine()
+	dialogBox.openDirect(introDialogLines, "res://scenes/Player.tscn")
 
-func _showLine():
-	var lineData = dialogLines[currentLine]
-	speakerLabel.text = lineData["speaker"]
-	fullText = lineData["text"]
-	continueHint.visible = false
-	dialogLabel.text = ""
-	isTyping = true
-	_typeText()
+func _onIntroDialogFinished():
+	tutorialLabel.visible = true
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		player.set_physics_process(true)
 
-func _typeText():
-	for i in fullText.length():
-		if not isTyping:
-			break
-		dialogLabel.text = fullText.substr(0, i + 1)
-		await get_tree().create_timer(letterSpeed).timeout
-	dialogLabel.text = fullText
-	isTyping = false
-	continueHint.visible = true
-
-func _input(event):
-	if not (event is InputEventKey and event.pressed and not event.echo):
+func _on_exit_trigger_body_entered(body):
+	if not body.is_in_group("player"):
 		return
-	if not event.is_action("interact"):
-		return
-	get_viewport().set_input_as_handled()
-	if isTyping:
-		isTyping = false
-	else:
-		_nextLine()
-
-func _nextLine():
-	currentLine += 1
-	if currentLine >= dialogLines.size():
-		_endCinematic()
-	else:
-		_showLine()
-
-func _endCinematic():
-	panel.visible = false
-	var tween = create_tween()
-	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 1.0)
-	tween.tween_callback(_goToMain)
-
-func _goToMain():
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	get_tree().call_deferred("change_scene_to_file", "res://scenes/Intro2.tscn")

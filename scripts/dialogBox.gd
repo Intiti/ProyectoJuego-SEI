@@ -1,7 +1,6 @@
 extends CanvasLayer
 
 const letterSpeed = 0.04
-const playerName = "Jugador"
 
 var lines: Array = []
 var currentLine: int = 0
@@ -9,6 +8,9 @@ var isTyping: bool = false
 var isOpen: bool = false
 var fullText: String = ""
 var puzzleData: Dictionary = {}
+var isCinematic: bool = false
+
+signal cinematicDialogFinished
 
 var overlay: ColorRect
 var leftPortrait: TextureRect
@@ -105,9 +107,9 @@ func open(jsonPath: String):
 	lines = parsed["lines"]
 	currentLine = 0
 	isOpen = true
+	isCinematic = false
 	puzzleData = parsed.get("puzzle", {})
 
-	# Cargar retratos desde escenas (primer frame de AnimatedSprite2D)
 	if parsed.has("npc_scene"):
 		rightPortrait.texture = _getFirstFrameFromScene(parsed["npc_scene"])
 	if parsed.has("player_scene"):
@@ -120,7 +122,27 @@ func open(jsonPath: String):
 	get_tree().get_first_node_in_group("player").set_physics_process(false)
 	showLine()
 
-# Instancia la escena, busca el AnimatedSprite2D y extrae el AtlasTexture del frame 0
+func openDirect(dialogLines: Array, playerScene: String = "", npcScene: String = ""):
+	if isOpen:
+		return
+	lines = dialogLines
+	currentLine = 0
+	isOpen = true
+	isCinematic = true
+	puzzleData = {}
+
+	if playerScene != "":
+		leftPortrait.texture = _getFirstFrameFromScene(playerScene)
+	if npcScene != "":
+		rightPortrait.texture = _getFirstFrameFromScene(npcScene)
+
+	overlay.visible = true
+	panel.visible = true
+	leftPortrait.visible = playerScene != "" or npcScene != ""
+	rightPortrait.visible = playerScene != "" or npcScene != ""
+	get_tree().get_first_node_in_group("player").set_physics_process(false)
+	showLine()
+
 func _getFirstFrameFromScene(scenePath: String) -> Texture2D:
 	var packed = load(scenePath)
 	if not packed:
@@ -128,8 +150,6 @@ func _getFirstFrameFromScene(scenePath: String) -> Texture2D:
 		return null
 
 	var instance = packed.instantiate()
-
-	# Buscar AnimatedSprite2D en la escena (puede ser hijo directo o anidado)
 	var animSprite = _findAnimatedSprite(instance)
 
 	var texture: Texture2D = null
@@ -153,9 +173,12 @@ func _findAnimatedSprite(node: Node) -> AnimatedSprite2D:
 
 func showLine():
 	var lineData = lines[currentLine]
-	var isPlayer = lineData["speaker"] == playerName
+	var isPlayer = lineData["speaker"] == "Jugador"
+	var displaySpeaker = lineData["speaker"]
+	if isPlayer:
+		displaySpeaker = GameData.playerName
 
-	speakerLabel.text = lineData["speaker"]
+	speakerLabel.text = displaySpeaker
 	fullText = lineData["text"]
 	continueHint.visible = false
 	dialogLabel.text = ""
@@ -212,6 +235,10 @@ func closeDialog():
 	leftPortrait.visible = false
 	rightPortrait.visible = false
 	get_tree().get_first_node_in_group("player").set_physics_process(true)
+	if isCinematic:
+		isCinematic = false
+		emit_signal("cinematicDialogFinished")
+		return
 	if not puzzleData.is_empty():
 		var puzzle = get_tree().get_first_node_in_group("puzzle")
 		if puzzle:
