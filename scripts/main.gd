@@ -6,16 +6,20 @@ var tutorialLabel: Node = null
 var _exploreTutorialLayer: CanvasLayer = null
 var _exploreTutorialLabel: Node = null
 var _exploreTutorialShown: bool = false
-
-# Trigger de salida: Area2D creado por código en el borde derecho
-var _exitArea: Area2D = null
-var _exitBlocked: bool = true  # se desbloquea cuando alcaldePuzzleSolved
+var _exitBlocked: bool = true
 
 func _ready():
 	_applyGlobalTheme()
 	_showTutorialHint()
-	_watchDialogBox()
 	_buildExitTrigger()
+	call_deferred("_setup")
+
+func _setup() -> void:
+	var dialogBox = get_tree().get_first_node_in_group("dialog_box")
+	if dialogBox:
+		dialogBox.cinematicDialogFinished.connect(_onCinematicDialogFinished)
+	# Escuchar input para ocultar tutorial al abrir cualquier diálogo
+	_watchFirstDialog()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/MotionControl-Bold.otf")
@@ -57,28 +61,21 @@ func _showTutorialHint() -> void:
 	tutorialLabel = richLabel
 	_blinkLabel(tutorialLabel)
 
+# Espera a que abra el primer diálogo y oculta el tutorial
+func _watchFirstDialog() -> void:
+	while is_instance_valid(self):
+		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
+		if dialogBox and dialogBox.isOpen:
+			_hideTutorial()
+			return
+		await get_tree().process_frame
+
 func _blinkLabel(label: Node) -> void:
 	while is_instance_valid(label):
 		var t = create_tween()
 		t.tween_property(label, "modulate:a", 0.2, 0.6)
 		t.tween_property(label, "modulate:a", 1.0, 0.6)
 		await t.finished
-
-func _watchDialogBox() -> void:
-	while is_instance_valid(self):
-		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
-		if dialogBox and dialogBox.isOpen:
-			_hideTutorial()
-			# Esperar a que cierre el diálogo final (outro del alcalde)
-			while dialogBox.isOpen:
-				await get_tree().process_frame
-			# Si el puzzle del alcalde ya está resuelto y no mostramos el tutorial de explorar aún
-			if GameData.alcaldePuzzleSolved and not _exploreTutorialShown:
-				_exploreTutorialShown = true
-				_exitBlocked = false
-				_showExploreTutorial()
-			return
-		await get_tree().process_frame
 
 func _hideTutorial() -> void:
 	if is_instance_valid(tutorialLabel):
@@ -87,6 +84,16 @@ func _hideTutorial() -> void:
 	if is_instance_valid(tutorialLayer):
 		tutorialLayer.queue_free()
 		tutorialLayer = null
+
+# ─── Señal del dialogBox: se llama al cerrar cualquier outro (isCinematic) ────
+
+func _onCinematicDialogFinished() -> void:
+	# El outro del alcalde cerró — chequear si el NPC_E11 ya no necesita ayuda
+	var npc = get_node_or_null("NPC_E11")
+	if npc and not npc.needsHelp and not _exploreTutorialShown:
+		_exploreTutorialShown = true
+		_exitBlocked = false
+		_showExploreTutorial()
 
 # ─── Tutorial "Explora Villa Miaulemana" ──────────────────────────────────────
 
@@ -123,31 +130,24 @@ func _showExploreTutorial() -> void:
 # ─── Trigger de salida hacia Villa1 ──────────────────────────────────────────
 
 func _buildExitTrigger() -> void:
-	_exitArea = Area2D.new()
+	var exitArea = Area2D.new()
 	var shape = CollisionShape2D.new()
 	var rect = RectangleShape2D.new()
 	rect.size = Vector2(32, 400)
 	shape.shape = rect
-	_exitArea.add_child(shape)
-	# Borde derecho de la escena (igual que WallRight pero un poco antes)
-	_exitArea.position = Vector2(1136, 400)
-	add_child(_exitArea)
-	_exitArea.body_entered.connect(_on_exit_body_entered)
+	exitArea.add_child(shape)
+	exitArea.position = Vector2(1136, 400)
+	add_child(exitArea)
+	exitArea.body_entered.connect(_on_exit_body_entered)
 
 func _on_exit_body_entered(body: Node) -> void:
 	if not body.is_in_group("player"):
 		return
 	if _exitBlocked:
 		return
-	# Esconder tutorial de explorar si sigue visible
-	if is_instance_valid(_exploreTutorialLabel):
-		_exploreTutorialLabel.queue_free()
-	if is_instance_valid(_exploreTutorialLayer):
-		_exploreTutorialLayer.queue_free()
 	_goToVilla1()
 
 func _goToVilla1() -> void:
-	# Congelar jugador y hacer fade out antes de cambiar escena
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		player.set_physics_process(false)

@@ -1,0 +1,265 @@
+{
+	"lines": [
+		{
+			"speaker": "Gato Pescador A",
+			"text": "¡Yo atrapé más peces hoy! ¡Soy el mejor pescador del pueblo!"
+		},
+		{
+			"speaker": "Gato Pescador B",
+			"text": "¡Para nada! ¡Mis peces son más! ¡Necesitamos que alguien lo resuelva con código!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Cálmense, puedo escribir una condición para determinarlo."
+		},
+		{
+			"speaker": "Gato Pescador A",
+			"text": "Los peces de cada uno llegan por input. ¡Compáralos con if y di quién gana!"
+		}
+	],
+	"puzzle": {
+		"prompt": "pescados_A y pescados_B llegan por input(). Usa if/else para imprimir 'Gana A', 'Gana B' o 'Empate' según corresponda.",
+		"variables": {
+			"pescados_A": 0,
+			"pescados_B": 0
+		},
+		"steps": [
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "pescados_A = input()",
+						"correct": true,
+						"config": {
+							"var": "pescados_A"
+						}
+					},
+					{
+						"type": "input",
+						"text": "pescados_B = input()",
+						"correct": false,
+						"config": {
+							"var": "pescados_B"
+						}
+					},
+					{
+						"type": "assign",
+						"text": "pescados_A = 0",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"assign_value": "0"
+						}
+					},
+					{
+						"type": "print",
+						"text": "print(pescados_A)",
+						"correct": false,
+						"config": {
+							"value": "pescados_A"
+						}
+					}
+				]
+			},
+			{
+				"fixed": true,
+				"type": "input",
+				"text": "pescados_B = input()",
+				"config": {
+					"var": "pescados_B"
+				}
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "if pescados_A > pescados_B",
+						"correct": true,
+						"config": {
+							"var": "pescados_A",
+							"op": ">",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "if",
+						"text": "if pescados_A < pescados_B",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"op": "<",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "if",
+						"text": "if pescados_A == pescados_B",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"op": "==",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "print",
+						"text": "print(pescados_A)",
+						"correct": false,
+						"config": {
+							"value": "pescados_A"
+						}
+					}
+				]
+			},
+			{
+				"fixed": true,
+				"type": "print",
+				"indent": 1,
+				"text": "  print(\"Gana A\")",
+				"config": {
+					"value": "\"Gana A\""
+				}
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "else if pescados_B > pescados_A",
+						"correct": true,
+						"config": {
+							"var": "pescados_B",
+							"op": ">",
+							"value": "pescados_A",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "else",
+						"text": "else",
+						"correct": false,
+						"config": {}
+					},
+					{
+						"type": "if",
+						"text": "else if pescados_A == pescados_B",
+						"correct": false,
+						"config": {
+							"var": "pescados_A",
+							"op": "==",
+							"value": "pescados_B",
+							"value_is_var": true
+						}
+					},
+					{
+						"type": "if",
+						"text": "else if pescados_B < pescados_A",
+						"correct": false,
+						"config": {
+							"var": "pescados_B",
+							"op": "<",
+							"value": "pescados_A",
+							"value_is_var": true
+						}
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Gana B\")",
+						"correct": true,
+						"config": {
+							"value": "\"Gana B\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Gana A\")",
+						"correct": false,
+						"config": {
+							"value": "\"Gana A\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Empate\")",
+						"correct": false,
+						"config": {
+							"value": "\"Empate\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(pescados_B)",
+						"correct": false,
+						"config": {
+							"value": "pescados_B"
+						}
+					}
+				]
+			},
+			{
+				"fixed": true,
+				"type": "else",
+				"text": "else",
+				"config": {}
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Empate\")",
+						"correct": true,
+						"config": {
+							"value": "\"Empate\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Gana A\")",
+						"correct": false,
+						"config": {
+							"value": "\"Gana A\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Gana B\")",
+						"correct": false,
+						"config": {
+							"value": "\"Gana B\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(pescados_A)",
+						"correct": false,
+						"config": {
+							"value": "pescados_A"
+						}
+					}
+				]
+			}
+		],
+		"show_output": false,
+		"complete_on_steps": true
+	},
+	"npc_scene": "res://scenes/NPC.tscn",
+	"player_scene": "res://scenes/Player.tscn"
+}
