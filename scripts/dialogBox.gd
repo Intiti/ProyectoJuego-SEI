@@ -11,8 +11,8 @@ var fullText: String = ""
 var puzzleData: Dictionary = {}
 
 var overlay: ColorRect
-var leftSprite: Sprite2D
-var rightSprite: Sprite2D
+var leftPortrait: TextureRect
+var rightPortrait: TextureRect
 var panel: Panel
 var speakerLabel: Label
 var dialogLabel: Label
@@ -28,17 +28,21 @@ func _ready():
 	overlay.visible = false
 	add_child(overlay)
 
-	leftSprite = Sprite2D.new()
-	leftSprite.position = Vector2(280, 390)
-	leftSprite.scale = Vector2(2, 2)
-	leftSprite.visible = false
-	add_child(leftSprite)
+	leftPortrait = TextureRect.new()
+	leftPortrait.position = Vector2(160, 280)
+	leftPortrait.size = Vector2(128, 128)
+	leftPortrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	leftPortrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	leftPortrait.visible = false
+	add_child(leftPortrait)
 
-	rightSprite = Sprite2D.new()
-	rightSprite.position = Vector2(872, 390)
-	rightSprite.scale = Vector2(2, 2)
-	rightSprite.visible = false
-	add_child(rightSprite)
+	rightPortrait = TextureRect.new()
+	rightPortrait.position = Vector2(864, 280)
+	rightPortrait.size = Vector2(128, 128)
+	rightPortrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rightPortrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rightPortrait.visible = false
+	add_child(rightPortrait)
 
 	panel = Panel.new()
 	panel.anchor_left = 0.1
@@ -103,17 +107,49 @@ func open(jsonPath: String):
 	isOpen = true
 	puzzleData = parsed.get("puzzle", {})
 
-	if parsed.has("npc_portrait"):
-		rightSprite.texture = load(parsed["npc_portrait"])
-	if parsed.has("player_portrait"):
-		leftSprite.texture = load(parsed["player_portrait"])
+	# Cargar retratos desde escenas (primer frame de AnimatedSprite2D)
+	if parsed.has("npc_scene"):
+		rightPortrait.texture = _getFirstFrameFromScene(parsed["npc_scene"])
+	if parsed.has("player_scene"):
+		leftPortrait.texture = _getFirstFrameFromScene(parsed["player_scene"])
 
 	overlay.visible = true
 	panel.visible = true
-	leftSprite.visible = true
-	rightSprite.visible = true
+	leftPortrait.visible = true
+	rightPortrait.visible = true
 	get_tree().get_first_node_in_group("player").set_physics_process(false)
 	showLine()
+
+# Instancia la escena, busca el AnimatedSprite2D y extrae el AtlasTexture del frame 0
+func _getFirstFrameFromScene(scenePath: String) -> Texture2D:
+	var packed = load(scenePath)
+	if not packed:
+		push_error("No se pudo cargar la escena: " + scenePath)
+		return null
+
+	var instance = packed.instantiate()
+
+	# Buscar AnimatedSprite2D en la escena (puede ser hijo directo o anidado)
+	var animSprite = _findAnimatedSprite(instance)
+
+	var texture: Texture2D = null
+	if animSprite and animSprite.sprite_frames:
+		var frames = animSprite.sprite_frames
+		var animName = animSprite.animation if animSprite.animation != "" else "default"
+		if frames.has_animation(animName) and frames.get_frame_count(animName) > 0:
+			texture = frames.get_frame_texture(animName, 0)
+
+	instance.queue_free()
+	return texture
+
+func _findAnimatedSprite(node: Node) -> AnimatedSprite2D:
+	if node is AnimatedSprite2D:
+		return node
+	for child in node.get_children():
+		var result = _findAnimatedSprite(child)
+		if result:
+			return result
+	return null
 
 func showLine():
 	var lineData = lines[currentLine]
@@ -124,8 +160,8 @@ func showLine():
 	continueHint.visible = false
 	dialogLabel.text = ""
 
-	leftSprite.modulate.a = 1.0 if isPlayer else 0.4
-	rightSprite.modulate.a = 0.4 if isPlayer else 1.0
+	leftPortrait.modulate.a = 1.0 if isPlayer else 0.4
+	rightPortrait.modulate.a = 0.4 if isPlayer else 1.0
 
 	isTyping = true
 	typeText()
@@ -146,7 +182,6 @@ func _input(event):
 	if not event.is_action("interact"):
 		return
 
-	# Si el puzzle está abierto, ignorar completamente
 	var puzzle = get_tree().get_first_node_in_group("puzzle")
 	if puzzle and puzzle.isOpen:
 		return
@@ -174,8 +209,8 @@ func closeDialog():
 	isOpen = false
 	overlay.visible = false
 	panel.visible = false
-	leftSprite.visible = false
-	rightSprite.visible = false
+	leftPortrait.visible = false
+	rightPortrait.visible = false
 	get_tree().get_first_node_in_group("player").set_physics_process(true)
 	if not puzzleData.is_empty():
 		var puzzle = get_tree().get_first_node_in_group("puzzle")

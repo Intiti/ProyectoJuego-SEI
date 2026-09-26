@@ -1,6 +1,4 @@
 {
-	"npc_portrait": "res://assets/sad.png",
-	"player_portrait": "res://assets/player.png",
 	"lines": [
 		{
 			"speaker": "Alcalde Gatuno",
@@ -12,16 +10,68 @@
 		},
 		{
 			"speaker": "Alcalde Gatuno",
-			"text": "Ya tengo listo el input() para capturar tu nombre. Solo coloca el print() para mostrármelo. ¡Tu primera misión de código!"
+			"text": "Ya tengo listo el nombre fijo. Solo coloca el print() para mostrármelo. ¡Tu primera misión de código!"
 		}
 	],
 	"puzzle": {
-		"prompt": "El alcalde quiere conocerte. El input() ya está puesto — escribe tu nombre en el campo. Solo agrega print() para mostrarlo.",
-		"variables": { "tu_nombre": "" },
-		"prefilled_blocks": [
-			{ "type": "assign", "var": "tu_nombre" }
+		"prompt": "El alcalde quiere conocerte. El nombre ya está asignado. Solo agrega print() para mostrarlo.",
+		"variables": {
+			"nombre": "Ricardo"
+		},
+		"expected_output": [
+			"Ricardo"
 		],
-		"available_commands": ["print"],
-		"expected_output": ["any_non_empty"]
-	}
+		"steps": [
+			{
+				"fixed": true,
+				"type": "assign",
+				"text": "nombre = \"Ricardo\"",
+				"config": {
+					"var": "nombre",
+					"assign_value": "Ricardo"
+				}
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "print(nombre)",
+						"correct": true,
+						"config": {
+							"value": "nombre"
+						}
+					},
+					{
+						"type": "print",
+						"text": "print(\"Hola\")",
+						"correct": false,
+						"config": {
+							"value": "\"Hola\""
+						}
+					},
+					{
+						"type": "input",
+						"text": "nombre = input()",
+						"correct": false,
+						"config": {
+							"var": "nombre"
+						}
+					},
+					{
+						"type": "assign",
+						"text": "nombre = \"\"",
+						"correct": false,
+						"config": {
+							"var": "nombre",
+							"assign_value": ""
+						}
+					}
+				]
+			}
+		]
+	},
+	"npc_scene": "res://scenes/NPC.tscn",
+	"player_scene": "res://scenes/Player.tscn"
 }

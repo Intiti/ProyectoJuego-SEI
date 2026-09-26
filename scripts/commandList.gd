@@ -1,15 +1,27 @@
 extends VBoxContainer
 
-signal blockClicked(blockType: int, vars: Dictionary)
+# Emite el bloque de alternativa seleccionado (puede ser correcto o incorrecto)
+signal alternativeChosen(block)
 
-func setup(commands: Array, vars: Dictionary):
+# Llena el panel con las alternativas del paso actual
+# alternatives: Array de Dictionaries con claves:
+#   "type": String (input/if/else/print/assign/expr)
+#   "text": String (texto visible en el bloque)
+#   "correct": bool
+#   "config": Dictionary (datos de ejecución, solo para el correcto)
+func setup(alternatives: Array):
 	for c in get_children():
 		c.queue_free()
 
-	for cmd in commands:
-		var type = _nameToType(cmd)
+	for alt in alternatives:
+		var type = _nameToType(alt.get("type", "print"))
 		var block = preload("res://scenes/CommandBlock.tscn").instantiate()
-		block.setup(type, vars, true)
+		block.setupAlternative(
+			type,
+			alt.get("text", ""),
+			alt.get("correct", false),
+			alt.get("config", {})
+		)
 		block.clicked.connect(_onBlockClicked)
 		add_child(block)
 
@@ -18,7 +30,7 @@ func setup(commands: Array, vars: Dictionary):
 		add_child(spacer)
 
 func _onBlockClicked(block):
-	blockClicked.emit(block.blockType, block.levelVars)
+	alternativeChosen.emit(block)
 
 func _nameToType(name: String) -> int:
 	match name:

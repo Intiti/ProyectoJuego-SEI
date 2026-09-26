@@ -4,12 +4,14 @@ enum Type { INPUT, IF, ELSE, PRINT, ASSIGN, EXPR }
 
 var blockType: Type
 var config: Dictionary = {}
-var levelVars: Dictionary = {}
 var isTemplate: bool = false
 var indentLevel: int = 0
 
+# Para bloques de alternativa: texto fijo visible y si es correcto
+var displayText: String = ""
+var isCorrect: bool = false
+
 var label: Label
-var paramContainer: HBoxContainer
 
 const FONT_SIZE := 17
 const COLOR_INPUT  := Color(0.20, 0.45, 0.85, 1.0)
@@ -21,18 +23,31 @@ const COLOR_EXPR   := Color(0.20, 0.55, 0.60, 1.0)
 
 signal clicked(block)
 
-func setup(type: Type, vars: Dictionary, template: bool = false, indent: int = 0):
+# Setup para bloques de alternativa (panel de opciones)
+func setupAlternative(type: Type, text: String, correct: bool, cfg: Dictionary = {}):
 	blockType = type
-	levelVars = vars
-	isTemplate = template
+	displayText = text
+	isCorrect = correct
+	config = cfg.duplicate()
+	isTemplate = true
+	indentLevel = 0
+	custom_minimum_size = Vector2(220, 44)
+	_buildNodes()
+	_applyStyle()
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	gui_input.connect(_onGuiInput)
+
+# Setup para bloques ya colocados en la zona (solo color + texto fijo, sin controles)
+func setupPlaced(type: Type, text: String, cfg: Dictionary = {}, indent: int = 0):
+	blockType = type
+	displayText = text
+	isCorrect = false
+	config = cfg.duplicate()
+	isTemplate = false
 	indentLevel = indent
 	custom_minimum_size = Vector2(220, 44)
 	_buildNodes()
-	_buildUI()
 	_applyStyle()
-	if isTemplate:
-		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		gui_input.connect(_onGuiInput)
 
 func _onGuiInput(event: InputEvent):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -67,254 +82,23 @@ func _buildNodes():
 
 	label = Label.new()
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_font_size_override("font_size", FONT_SIZE)
 	label.add_theme_color_override("font_color", Color(1, 1, 1))
+	label.text = displayText
 	hbox.add_child(label)
-
-	paramContainer = HBoxContainer.new()
-	paramContainer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	paramContainer.add_theme_constant_override("separation", 6)
-	hbox.add_child(paramContainer)
-
-func _buildUI():
-	label.text = _typeLabel(isTemplate)
-	for c in paramContainer.get_children():
-		c.queue_free()
-
-	if isTemplate:
-		return
-
-	match blockType:
-		Type.INPUT:
-			_buildInputRow()
-		Type.IF:
-			_addVarSelector()
-			_addOpSelector()
-			_addIfValueSelector()
-		Type.ELSE:
-			pass
-		Type.PRINT:
-			_addPrintSelector()
-		Type.ASSIGN:
-			_buildAssignRow()
-		Type.EXPR:
-			_buildExprRow()
-
-func _buildExprRow():
-	var hbox = label.get_parent()
-	hbox.remove_child(label)
-	label.queue_free()
-
-	var optDest = OptionButton.new()
-	optDest.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		optDest.add_item(varName)
-	optDest.item_selected.connect(func(i): config["var"] = optDest.get_item_text(i))
-	if optDest.item_count > 0:
-		config["var"] = optDest.get_item_text(0)
-	hbox.add_child(optDest)
-
-	var eqLabel = Label.new()
-	eqLabel.text = "="
-	eqLabel.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	eqLabel.add_theme_color_override("font_color", Color(1, 1, 1))
-	hbox.add_child(eqLabel)
-
-	var optA = OptionButton.new()
-	optA.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		optA.add_item(varName)
-	optA.item_selected.connect(func(i): config["expr_a"] = optA.get_item_text(i))
-	if optA.item_count > 0:
-		config["expr_a"] = optA.get_item_text(0)
-	hbox.add_child(optA)
-
-	var optOp = OptionButton.new()
-	optOp.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for op in ["+", "-", "*", "/"]:
-		optOp.add_item(op)
-	optOp.item_selected.connect(func(i): config["expr_op"] = optOp.get_item_text(i))
-	config["expr_op"] = "+"
-	hbox.add_child(optOp)
-
-	var optB = OptionButton.new()
-	optB.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		optB.add_item(varName)
-	optB.item_selected.connect(func(i): config["expr_b"] = optB.get_item_text(i))
-	if optB.item_count > 0:
-		config["expr_b"] = optB.get_item_text(0)
-	hbox.add_child(optB)
-
-	hbox.add_child(paramContainer)
-
-func _buildAssignRow():
-	var hbox = label.get_parent()
-	hbox.remove_child(label)
-	hbox.remove_child(paramContainer)
-
-	var optVar = OptionButton.new()
-	optVar.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		optVar.add_item(varName)
-	optVar.item_selected.connect(func(i): config["var"] = optVar.get_item_text(i))
-	if optVar.item_count > 0:
-		config["var"] = optVar.get_item_text(0)
-	hbox.add_child(optVar)
-
-	var eqLabel = Label.new()
-	eqLabel.text = "="
-	eqLabel.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	eqLabel.add_theme_color_override("font_color", Color(1, 1, 1))
-	hbox.add_child(eqLabel)
-
-	var edit = LineEdit.new()
-	edit.name = "AssignEdit"
-	edit.placeholder_text = "valor"
-	edit.custom_minimum_size.x = 100
-	edit.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	edit.text_changed.connect(func(t): config["assign_value"] = t)
-	hbox.add_child(edit)
-
-	hbox.add_child(paramContainer)
-
-func _buildInputRow():
-	var hbox = label.get_parent()
-	hbox.remove_child(label)
-	hbox.remove_child(paramContainer)
-
-	var optDest = OptionButton.new()
-	optDest.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		optDest.add_item(varName)
-	optDest.item_selected.connect(func(i): config["var"] = optDest.get_item_text(i))
-	if optDest.item_count > 0:
-		config["var"] = optDest.get_item_text(0)
-	hbox.add_child(optDest)
-
-	var eqLabel = Label.new()
-	eqLabel.text = "= input()"
-	eqLabel.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	eqLabel.add_theme_color_override("font_color", Color(1, 1, 1))
-	hbox.add_child(eqLabel)
-
-	hbox.add_child(paramContainer)
-
-func _typeLabel(template: bool = false) -> String:
-	if template:
-		match blockType:
-			Type.INPUT:  return "input()"
-			Type.IF:     return "if ()"
-			Type.ELSE:   return "else ()"
-			Type.PRINT:  return "print()"
-			Type.ASSIGN: return "var ="
-			Type.EXPR:   return "var = a + b"
-	else:
-		match blockType:
-			Type.INPUT:  return "input()"
-			Type.IF:     return "if"
-			Type.ELSE:   return "else"
-			Type.PRINT:  return "print"
-			Type.ASSIGN: return ""
-			Type.EXPR:   return ""
-	return ""
-
-func _addVarSelector():
-	var opt = OptionButton.new()
-	opt.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		opt.add_item(varName)
-	opt.item_selected.connect(func(i): config["var"] = opt.get_item_text(i))
-	if opt.item_count > 0:
-		config["var"] = opt.get_item_text(0)
-	paramContainer.add_child(opt)
-
-func _addOpSelector():
-	var opt = OptionButton.new()
-	opt.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for op in ["==", "!=", "<", ">", "<=", ">="]:
-		opt.add_item(op)
-	opt.item_selected.connect(func(i): config["op"] = opt.get_item_text(i))
-	config["op"] = "=="
-	paramContainer.add_child(opt)
-
-func _addPrintSelector():
-	var opt = OptionButton.new()
-	opt.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		opt.add_item(varName)
-	opt.add_item("\"texto...\"")
-	opt.item_selected.connect(func(i):
-		var selected = opt.get_item_text(i)
-		if selected == "\"texto...\"":
-			config["value"] = ""
-			_showTextInput()
-		else:
-			config["value"] = selected
-			_hideTextInput()
-	)
-	if opt.item_count > 0:
-		var first = opt.get_item_text(0)
-		config["value"] = first if first != "\"texto...\"" else ""
-	paramContainer.add_child(opt)
-
-var _textEdit: LineEdit = null
-
-func _showTextInput():
-	if _textEdit != null:
-		return
-	_textEdit = LineEdit.new()
-	_textEdit.placeholder_text = "valor"
-	_textEdit.custom_minimum_size.x = 80
-	_textEdit.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	_textEdit.text_changed.connect(func(t): config["value"] = t)
-	paramContainer.add_child(_textEdit)
-
-func _hideTextInput():
-	if _textEdit != null:
-		_textEdit.queue_free()
-		_textEdit = null
-
-func _addIfValueSelector():
-	var opt = OptionButton.new()
-	opt.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	for varName in levelVars.keys():
-		opt.add_item(varName)
-	opt.add_item("\"texto...\"")
-	opt.item_selected.connect(func(i):
-		var selected = opt.get_item_text(i)
-		if selected == "\"texto...\"":
-			config["value"] = ""
-			config["value_is_var"] = false
-			_showTextInput()
-		else:
-			config["value"] = selected
-			config["value_is_var"] = true
-			_hideTextInput()
-	)
-	if opt.item_count > 0:
-		var first = opt.get_item_text(0)
-		if first == "\"texto...\"":
-			config["value"] = ""
-			config["value_is_var"] = false
-		else:
-			config["value"] = first
-			config["value_is_var"] = true
-	paramContainer.add_child(opt)
 
 func execute(vars: Dictionary, inputQueue: Array = []) -> Dictionary:
 	var out = []
 	match blockType:
 		Type.INPUT:
 			var varName = config.get("var", "")
-			if varName == "":
-				pass
-			elif inputQueue.size() > 0:
-				vars[varName] = inputQueue.pop_front()
-			else:
-				var inputVal = config.get("input_value", "")
-				if inputVal != "":
-					vars[varName] = inputVal
+			var val = config.get("value", "")
+			if varName != "":
+				if inputQueue.size() > 0:
+					vars[varName] = inputQueue.pop_front()
+				elif val != "":
+					vars[varName] = val
 		Type.EXPR:
 			var varName = config.get("var", "")
 			if varName != "":
@@ -347,7 +131,8 @@ func execute(vars: Dictionary, inputQueue: Array = []) -> Dictionary:
 			var op = config.get("op", "==")
 			var rawVal = config.get("value", "")
 			var leftRaw = vars.get(varName, "")
-			var rightRaw = vars.get(rawVal, rawVal.trim_prefix("\"").trim_suffix("\"")) if config.get("value_is_var", false) else rawVal.trim_prefix("\"").trim_suffix("\"")
+			var valueIsVar = config.get("value_is_var", false)
+			var rightRaw = vars.get(rawVal, rawVal) if valueIsVar else rawVal.trim_prefix("\"").trim_suffix("\"")
 			var cond = _compare(leftRaw, op, rightRaw)
 			return {"output": out, "vars": vars, "condition": cond}
 		Type.ELSE:
@@ -372,7 +157,6 @@ func _compare(left, op: String, right) -> bool:
 
 func setLocked():
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_disableChildren(self)
 
 	var style = StyleBoxFlat.new()
 	match blockType:
@@ -396,18 +180,3 @@ func setLocked():
 	style.content_margin_top = 6
 	style.content_margin_bottom = 6
 	add_theme_stylebox_override("panel", style)
-
-func _disableChildren(node: Node):
-	if node is Control and node != self:
-		if node is LineEdit and node.name == "AssignEdit":
-			node.mouse_filter = Control.MOUSE_FILTER_STOP
-			return
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		if node is BaseButton:
-			node.disabled = true
-		if node is LineEdit:
-			node.editable = false
-		if node is OptionButton:
-			node.disabled = true
-	for child in node.get_children():
-		_disableChildren(child)

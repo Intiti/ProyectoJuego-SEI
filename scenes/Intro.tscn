@@ -1,0 +1,87 @@
+[gd_scene format=3 uid="uid://intro"]
+
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/Player.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/intro.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://dq0vp8ovlfov5" path="res://assets/png/08_mid_forest.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://752mplv57ihk" path="res://assets/png/11_front_trees1.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://d1ci8qgqxftea" path="res://assets/png/06_back_mountains.png" id="5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1152, 32)
+
+[node name="Intro" type="Node2D"]
+script = ExtResource("2")
+
+[node name="BGMountains" type="Sprite2D" parent="."]
+z_index = -5
+position = Vector2(576, 320)
+texture = ExtResource("5")
+centered = true
+
+[node name="BGForest" type="Sprite2D" parent="."]
+z_index = -4
+position = Vector2(576, 400)
+texture = ExtResource("3")
+centered = true
+
+[node name="BGTrees" type="Sprite2D" parent="."]
+z_index = -3
+position = Vector2(576, 420)
+texture = ExtResource("4")
+centered = true
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(576, 620)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Player" parent="." instance=ExtResource("1")]
+position = Vector2(200, 548)
+
+[node name="FadeRect" type="ColorRect" parent="."]
+z_index = 100
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="DialogLayer" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Panel" parent="DialogLayer"]
+anchor_left = 0.1
+anchor_top = 0.75
+anchor_right = 0.9
+anchor_bottom = 0.97
+visible = false
+
+[node name="SpeakerLabel" type="Label" parent="DialogLayer/Panel"]
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 30.0
+
+[node name="DialogLabel" type="Label" parent="DialogLayer/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 34.0
+offset_right = -12.0
+offset_bottom = -28.0
+autowrap_mode = 3
+
+[node name="ContinueHint" type="Label" parent="DialogLayer/Panel"]
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+offset_right = -10.0
+offset_bottom = -4.0
+text = "\u25bc E"
+horizontal_alignment = 2
+visible = false
