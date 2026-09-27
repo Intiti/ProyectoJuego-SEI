@@ -10,7 +10,7 @@
 		},
 		{
 			"speaker": "Don Plateado",
-			"text": "Hmmm... abro un ojo. ¿Acaso puedes determinar si ya cumplí mis diez años? Si es así, imprime Verdadero. Si no, imprime Falso."
+			"text": "Hmmm...? ¿Acaso puedes determinar si ya cumplí mis diez años? Si es así, imprime Verdadero. Si no, imprime Falso."
 		},
 		{
 			"speaker": "Jugador",
@@ -22,7 +22,7 @@
 		}
 	],
 	"puzzle": {
-		"prompt": "Don Plateado descansa en la banca de la plaza. Recibe su edad con int(input()). Si la edad es mayor o igual a 10, imprime 'Verdadero'. Si no, imprime 'Falso'.",
+		"prompt": "Don Plateado descansa en la banca de la plaza. Recibe su edad. Si la edad es mayor o igual a 10, imprime 'Verdadero'. Si no, imprime 'Falso'.",
 		"variables": {
 			"edad": 0
 		},
@@ -83,7 +83,8 @@
 							"value_is_var": false
 						}
 					}
-				]
+				],
+				"hint": "Don Plateado quiere saber si YA cumplio 10 años, incluyendo exactamente 10. ¿Qué operador de comparacion cubre esta condición?"
 			},
 			{
 				"fixed": false,
@@ -122,7 +123,8 @@
 							"value": "True"
 						}
 					}
-				]
+				],
+				"hint": "Estamos dentro del if, o sea la condicion se cumplio. Don Plateado si llego a los 10 años. ¿Que debe imprimirse en ese caso?"
 			},
 			{
 				"fixed": true,
@@ -167,7 +169,8 @@
 							"value": "False"
 						}
 					}
-				]
+				],
+				"hint": "El else ocurre cuando la edad NO llega a 10. La condicion no se cumplio, asi que la respuesta es la contraria."
 			}
 		],
 		"show_output": false,
@@ -180,7 +183,7 @@
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Gracias... creo. ¿Le puedo preguntar algo, Don Plateado?"
+			"text": "Gracias, supongo. ¿Le puedo preguntar algo, Don Plateado?"
 		},
 		{
 			"speaker": "Don Plateado",

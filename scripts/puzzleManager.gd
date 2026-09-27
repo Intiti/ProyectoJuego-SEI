@@ -11,6 +11,7 @@ var commandList: VBoxContainer
 var outputLabel: Label
 var feedbackLabel: Label
 var stepLabel: Label
+var _feedbackTween: Tween = null
 
 var isOpen: bool = false
 var _currentData: Dictionary = {}
@@ -29,7 +30,7 @@ var _slots: Array = []
 var _celebrating: bool = false
 var _arrowOverlay: Label = null  # flecha dentro de la row activa
 
-const FONT_SIZE := 18
+const FONT_SIZE := 22
 const COMPLETION_DURATION := 3.5
 
 func _ready():
@@ -133,7 +134,7 @@ func _ready():
 	cmdWrapper.add_child(cmdTitle)
 
 	stepLabel = Label.new()
-	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE - 4)
+	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE - 2)
 	stepLabel.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cmdWrapper.add_child(stepLabel)
 
@@ -359,10 +360,15 @@ func _onAlternativeChosen(block):
 				slot.erase("slot_node")
 				break
 
+		_showCorrect()
 		_currentStep += 1
 		_loadCurrentStep()
 	else:
-		_showError("Esa línea no es correcta. ¡Intenta de nuevo!")
+		var hint = _steps[_currentStep].get("hint", "")
+		if hint != "":
+			_showError("Pista: " + hint)
+		else:
+			_showError("Esa línea no es correcta. ¡Intenta de nuevo!")
 
 func _evaluateFull():
 	# Recoger todos los bloques en orden de los slots
@@ -433,15 +439,28 @@ func _runBlocks(blocks: Array, vars: Dictionary, inputQueue: Array) -> Array:
 			i += 1
 	return output
 
+func _showFeedback(message: String, color: Color, duration: float):
+	if _feedbackTween != null and _feedbackTween.is_valid():
+		_feedbackTween.kill()
+	feedbackLabel.modulate.a = 1.0
+	feedbackLabel.text = message
+	feedbackLabel.add_theme_color_override("font_color", color)
+	feedbackLabel.visible = true
+	_feedbackTween = feedbackLabel.create_tween()
+	_feedbackTween.tween_interval(duration)
+	_feedbackTween.tween_property(feedbackLabel, "modulate:a", 0.0, 0.8)
+	_feedbackTween.tween_callback(func(): feedbackLabel.visible = false)
+
 func _showError(message: String):
-	feedbackLabel.text = "⚠ " + message
+	if _feedbackTween != null and _feedbackTween.is_valid():
+		_feedbackTween.kill()
+	feedbackLabel.modulate.a = 1.0
+	feedbackLabel.text = message
 	feedbackLabel.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
 	feedbackLabel.visible = true
-	var tween = feedbackLabel.create_tween()
-	tween.tween_property(feedbackLabel, "modulate:a", 1.0, 0.0)
-	tween.tween_interval(2.0)
-	tween.tween_property(feedbackLabel, "modulate:a", 0.0, 0.5)
-	tween.tween_callback(func(): feedbackLabel.visible = false)
+
+func _showCorrect():
+	_showFeedback("Correcto!", Color(0.4, 1.0, 0.5), 1.2)
 
 func _onSuccess():
 	if _celebrating:

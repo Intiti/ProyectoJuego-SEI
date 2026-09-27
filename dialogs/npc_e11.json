@@ -58,6 +58,7 @@
 			{
 				"fixed": false,
 				"type": "print",
+				"hint": "Ya guardaste el nombre en una variable. ¿Qué debería ir dentro del print() para mostrar lo que el usuario escribió?",
 				"alternatives": [
 					{
 						"type": "print",

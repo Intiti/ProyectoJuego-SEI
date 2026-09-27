@@ -26,7 +26,7 @@
 		}
 	],
 	"puzzle": {
-		"prompt": "Faltan 3 días para la competencia de pesca de la aldea y dos gatos quieren comparar sus puntajes de práctica. Recibe ambos puntajes mediante input(). Si el puntaje del Gato 1 es mayor, imprime '¡Gato 1 gana la competencia de pesca!'; de lo contrario, imprime '¡Gato 2 gana la competencia de pesca!'.",
+		"prompt": "Faltan 3 días para la competencia de pesca de la aldea y dos gatos quieren comparar sus puntajes de práctica. Recibe ambos puntajes. Si el puntaje del Gato 1 es mayor, imprime '¡Gato 1 gana la competencia de pesca!'; de lo contrario, imprime '¡Gato 2 gana la competencia de pesca!'.",
 		"variables": {
 			"puntaje_gato1": 0,
 			"puntaje_gato2": 0
@@ -43,6 +43,7 @@
 			{
 				"fixed": false,
 				"type": "input",
+				"hint": "Necesitas recibir el puntaje del Gato 2 como número entero. Fíjate cómo se hizo con el Gato 1 en la línea de arriba.",
 				"alternatives": [
 					{
 						"type": "input",
@@ -93,6 +94,7 @@
 				"fixed": false,
 				"type": "print",
 				"indent": 1,
+				"hint": "Entramos aquí solo cuando puntaje_gato1 es mayor. ¿Cuál gato debería ganar en ese caso?",
 				"alternatives": [
 					{
 						"type": "print",
@@ -138,6 +140,7 @@
 				"fixed": false,
 				"type": "print",
 				"indent": 1,
+				"hint": "El else se ejecuta cuando el Gato 1 NO tiene el puntaje mayor. Si no ganó el Gato 1, ¿quién ganó?",
 				"alternatives": [
 					{
 						"type": "print",
@@ -189,7 +192,7 @@
 		{
 			"speaker": "Jugador",
 			"text": "(Menudo espíritu deportivo...)"
-		},
+		}
 	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"

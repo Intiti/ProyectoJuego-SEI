@@ -6,7 +6,7 @@
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Una gata con delantal y gorro de chef... Claro, ¿qué necesitas saber?"
+			"text": "Claro, ¿qué necesita saber?"
 		},
 		{
 			"speaker": "Miette",
@@ -22,7 +22,7 @@
 		}
 	],
 	"puzzle": {
-		"prompt": "La gata Miette necesita calcular ingredientes para su fiesta. Recibe la cantidad de pasteles con int(input()) y calcula: harina = pasteles × 6, huevos = pasteles × 4, azúcar = pasteles × 2. Luego imprime cada resultado.",
+		"prompt": "La gata Miette necesita calcular ingredientes para su fiesta. Recibe la cantidad de pasteles y calcula: harina = pasteles × 6, huevos = pasteles × 4, azúcar = pasteles × 2. Luego imprime cada resultado.",
 		"variables": {
 			"pasteles": 0,
 			"harina": 0,
@@ -84,7 +84,8 @@
 							"assign_value": "6"
 						}
 					}
-				]
+				],
+				"hint": "Cada pastel necesita 6 tazas de harina. ¿Qué operación usas para saber el total cuando tienes varios pasteles?"
 			},
 			{
 				"fixed": true,
@@ -144,7 +145,8 @@
 							"value": "harina"
 						}
 					}
-				]
+				],
+				"hint": "Ya calculaste la harina. ¿Cuál es el nombre de la variable que guarda ese resultado?"
 			},
 			{
 				"fixed": false,
@@ -182,7 +184,8 @@
 							"value": "pasteles"
 						}
 					}
-				]
+				],
+				"hint": "Atento al nombre del ingrediente que se pide en este print. ¿Cuál variable contiene la cantidad de huevos?"
 			},
 			{
 				"fixed": false,
@@ -220,7 +223,8 @@
 							"value": "huevos"
 						}
 					}
-				]
+				],
+				"hint": "Ya tienes azucar calculada. Asegurate de mostrar esa variable, no otra del mismo tipo."
 			}
 		],
 		"show_output": false,
@@ -233,12 +237,8 @@
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Me alegra poder ayudarte, Miette. ¡Que salgan deliciosos los pasteles!"
+			"text": "Me alegra poder ayudarte, Miette. ¡Ojalá le salgan ricos los pasteles!"
 		},
-		{
-			"speaker": "Miette",
-			"text": "¡Claro que sí! Los miaugoritmos nunca fallan. ¡Gracias, amigo humano!"
-		}
 	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"

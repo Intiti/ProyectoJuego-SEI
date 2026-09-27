@@ -26,7 +26,7 @@
 		}
 	],
 	"puzzle": {
-		"prompt": "El Gato Facundo necesita calcular cuántos kilos de semillas se recolectaron en total. Recibe la cantidad de la mañana y de la tarde mediante input(), súmalas y muestra el resultado con print().",
+		"prompt": "El Gato Facundo necesita calcular cuántos kilos de semillas se recolectaron en total. Recibe la cantidad de la mañana y de la tarde, súmalas y muestra el resultado con print().",
 		"variables": {
 			"grano_mañana": 0,
 			"grano_tarde": 0,
@@ -52,6 +52,7 @@
 			{
 				"fixed": false,
 				"type": "expr",
+				"hint": "Quieres saber cuántas semillas hay en total entre la mañana y la tarde. ¿Qué operación matemática se usa para juntar dos cantidades?",
 				"alternatives": [
 					{
 						"type": "expr",
@@ -100,6 +101,7 @@
 			{
 				"fixed": false,
 				"type": "print",
+				"hint": "Ya calculaste el total. ¿Qué variable contiene ese resultado? Esa es la que deberías mostrar.",
 				"alternatives": [
 					{
 						"type": "print",
@@ -147,7 +149,7 @@
 		{
 			"speaker": "Jugador",
 			"text": "Me alegro de que las cuentas están en orden, ¡que le vaya bien!."
-		},
+		}
 	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"

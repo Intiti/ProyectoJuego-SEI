@@ -2,27 +2,27 @@
 	"lines": [
 		{
 			"speaker": "Rosalinda",
-			"text": "¡Miau, bienvenido al puesto de la señorita Rosalinda! Vendo las mejores manzanas de la feria del pueblo, ¿te interesa alguna?"
+			"text": "¡Miau, bienvenido al puesto de la señorita Rosalinda! Vendo las mejores manzanas del pueblo, ¿te interesa alguna?"
 		},
 		{
 			"speaker": "Jugador",
-			"text": "¿Una gata tendero con delantal? Bueno... ¿cuánto cuestan?"
+			"text": "No sabía que los gatos podían comer manzanas... ¿cuánto cuestan?"
 		},
 		{
 			"speaker": "Rosalinda",
-			"text": "El precio por manzana llega por input(), igual que la cantidad que quieres y el dinero que traes. Así el miaugoritmo decide si hay trato."
+			"text": "El precio por manzana llega por input, igual que la cantidad que quieres y el dinero que traes. Así el miaugoritmo decide si hay trato."
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Entiendo: multiplico el precio por la cantidad para saber el total, y luego comparo con el dinero disponible."
+			"text": "Entiendo: calculo el precio total, y luego comparo con el dinero disponible."
 		},
 		{
 			"speaker": "Rosalinda",
-			"text": "¡Exactito! Si el dinero alcanza, di cuánto sobra. Si no, di cuánto falta. El cliente ya espera nervioso... ¡vamos!"
+			"text": "¡Exactito! Si el dinero alcanza, di cuánto sobra. Si no, di cuánto falta. Los clientes ya esperan nerviosos... ¡vamos!"
 		}
 	],
 	"puzzle": {
-		"prompt": "La gata Rosalinda vende manzanas en la feria. Recibe el precio_manzana, la cantidad y el dinero del cliente con int(input()). Calcula el costo_total. Si el dinero alcanza, imprime el vuelto; si no, imprime cuántas monedas faltan.",
+		"prompt": "La gata Rosalinda vende manzanas. Recibe el precio_manzana, la cantidad y el dinero del cliente. Calcula el costo_total. Si el dinero alcanza, imprime el vuelto; si no, imprime cuántas monedas faltan.",
 		"variables": {
 			"precio_manzana": 0,
 			"cantidad": 0,
@@ -85,7 +85,8 @@
 							"assign_value": "0"
 						}
 					}
-				]
+				],
+				"hint": "Ya recibiste precio_manzana y cantidad. ¿Qué dato del cliente falta recibir para saber si puede pagar?"
 			},
 			{
 				"fixed": false,
@@ -133,7 +134,8 @@
 							"assign_value": "0"
 						}
 					}
-				]
+				],
+				"hint": "Si una manzana cuesta X y quieres varias, ¿qué operacion calcula el costo de todas juntas?"
 			},
 			{
 				"fixed": true,
@@ -195,7 +197,8 @@
 							"value": "vuelto"
 						}
 					}
-				]
+				],
+				"hint": "Entramos aqui porque el dinero alcanza. Ya calculamos el vuelto justo arriba. ¿Que variable lo guarda?"
 			},
 			{
 				"fixed": true,
@@ -252,7 +255,8 @@
 							"value": "monedas_faltantes"
 						}
 					}
-				]
+				],
+				"hint": "El cliente no tiene suficiente dinero. Ya calculamos cuanto le falta. ¿En qué variable quedo ese valor?"
 			}
 		],
 		"show_output": false,
@@ -261,16 +265,12 @@
 	"outro_lines": [
 		{
 			"speaker": "Rosalinda",
-			"text": "¡Miau excelente! Ahora mi puesto tiene el mejor miaugoritmo de toda la feria. ¡Ningún cliente me podrá enredar!"
+			"text": "¡Miau excelente! Ahora mi puesto tiene el mejor miaugoritmo de toda la Villa. ¡Ningún cliente me podrá engatusar!"
 		},
 		{
 			"speaker": "Jugador",
 			"text": "¡Para eso estamos! Que le vaya bien con las ventas, señorita Rosalinda."
 		},
-		{
-			"speaker": "Rosalinda",
-			"text": "¡Gracias, amigo humano! Y si algún día necesitas manzanas... ¡ya sabes dónde encontrarme!"
-		}
 	],
 	"npc_scene": "res://scenes/NPC.tscn",
 	"player_scene": "res://scenes/Player.tscn"

@@ -6,27 +6,23 @@
 		},
 		{
 			"speaker": "Jugador",
-			"text": "¿Un gato con toga y birrete? Está bien... ¿Qué le falta, profesor?"
+			"text": "Hasta los docentes de este mundo parecen tener problemas... ¿Qué le hace falta, profesor?"
 		},
 		{
 			"speaker": "Profesor Félix",
-			"text": "Falta calcular el promedio antes de saber si el alumno aprueba. Tengo dos notas, pero el miaugoritmo está incompleto."
+			"text": "Me falta calcular el promedio antes de saber si el alumno aprueba. Tengo dos notas, pero mi miaugoritmo está incompleto."
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Entonces recibo las dos notas, las sumo y divido entre dos para el promedio."
+			"text": "¿Entonces solo debo sacar el promedio?."
 		},
 		{
 			"speaker": "Profesor Félix",
-			"text": "¡Correcto! Las notas pueden tener decimales, así que usa float(input()). Si el promedio es igual o mayor a 4.0, el alumno aprueba. Si no... reprueba. ¡No hay piedad académica!"
+			"text": "¡Correcto! Las notas pueden tener decimales, así que usa un número flotante. Si el promedio es igual o mayor a 4.0, el alumno aprueba. Si no... reprueba. ¡No hay piedad académica!"
 		},
-		{
-			"speaker": "Jugador",
-			"text": "Entendido, profesor. Déjeme ordenar ese boletín."
-		}
 	],
 	"puzzle": {
-		"prompt": "El Profesor Félix necesita calcular el promedio de dos notas (con decimales). Recibe nota1 y nota2 con float(input()), suma ambas, calcula el promedio dividiéndola entre 2. Si el promedio es >= 4.0 imprime que el alumno está APROBADO; de lo contrario, que está REPROBADO.",
+		"prompt": "El Profesor Félix necesita calcular el promedio de dos notas (con decimales). Recibe nota1 y nota2, suma ambas y calcula el promedio. Si el promedio es >= 4.0 imprime que el alumno está APROBADO; de lo contrario, que está REPROBADO.",
 		"variables": {
 			"nota1": 0.0,
 			"nota2": 0.0,
@@ -71,7 +67,8 @@
 							"assign_value": "0.0"
 						}
 					}
-				]
+				],
+				"hint": "Las notas pueden tener decimales como 4.5. ¿Qué funcion de conversion usas cuando el numero puede tener coma decimal?"
 			},
 			{
 				"fixed": true,
@@ -127,7 +124,8 @@
 							"assign_value": "0"
 						}
 					}
-				]
+				],
+				"hint": "Para calcular el promedio primero necesitas la suma de ambas notas. ¿Qué operacion junta dos cantidades?"
 			},
 			{
 				"fixed": false,
@@ -175,7 +173,8 @@
 							"assign_value": "0"
 						}
 					}
-				]
+				],
+				"hint": "Piensa en cómo se obtiene el promedio. ¿Qué debemos hacer con la suma que calculamos previamente?"
 			},
 			{
 				"fixed": true,
@@ -225,7 +224,8 @@
 							"value": "suma"
 						}
 					}
-				]
+				],
+				"hint": "Entramos aqui cuando el promedio es mayor o igual a 4.0. ¿Que resultado corresponde a esa situacion?"
 			},
 			{
 				"fixed": true,
@@ -270,7 +270,8 @@
 							"value": "nota1"
 						}
 					}
-				]
+				],
+				"hint": "El else ocurre cuando el promedio NO llego a 4.0. ¿Que resultado corresponde a no alcanzar la nota minima?"
 			}
 		],
 		"show_output": false,
@@ -279,7 +280,7 @@
 	"outro_lines": [
 		{
 			"speaker": "Profesor Félix",
-			"text": "¡Excelente trabajo! El boletín ya está completo. La academia de Villa Miaulemana agradece tu ayuda."
+			"text": "¡Excelente! El boletín ya está completo. La academia de Villa Miaulemana agradece tu ayuda."
 		},
 		{
 			"speaker": "Jugador",
