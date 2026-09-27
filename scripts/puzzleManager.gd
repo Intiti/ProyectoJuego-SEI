@@ -28,6 +28,7 @@ var completeOnSteps: bool = false
 # Cada entrada: { "type": "fixed"|"empty"|"filled", "node": Node, "arrow": Label|null }
 var _slots: Array = []
 var _celebrating: bool = false
+var _tablonContinuar: bool = false
 var _arrowOverlay: Label = null  # flecha dentro de la row activa
 
 # Tracking de puntaje
@@ -60,7 +61,7 @@ func _ready():
 
 	var titleLabel = Label.new()
 	titleLabel.text = "Instruccion del nivel"
-	titleLabel.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	titleLabel.add_theme_font_size_override("font_size", FONT_SIZE + 8)
 	titleLabel.add_theme_color_override("font_color", Color(0.9, 0.85, 1.0))
 	vbox.add_child(titleLabel)
 
@@ -69,7 +70,7 @@ func _ready():
 	promptLabel.custom_minimum_size = Vector2(0, 80)
 	promptLabel.fit_content = true
 	promptLabel.scroll_active = false
-	promptLabel.add_theme_font_size_override("normal_font_size", FONT_SIZE)
+	promptLabel.add_theme_font_size_override("normal_font_size", FONT_SIZE + 4)
 	promptLabel.add_theme_color_override("default_color", Color(0.92, 0.92, 0.92))
 	vbox.add_child(promptLabel)
 
@@ -134,12 +135,12 @@ func _ready():
 
 	var cmdTitle = Label.new()
 	cmdTitle.text = "¿Cuál línea sigue?"
-	cmdTitle.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	cmdTitle.add_theme_font_size_override("font_size", FONT_SIZE + 4)
 	cmdTitle.add_theme_color_override("font_color", Color(0.5, 0.9, 0.6))
 	cmdWrapper.add_child(cmdTitle)
 
 	stepLabel = Label.new()
-	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE - 4)
+	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE + 2)
 	stepLabel.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cmdWrapper.add_child(stepLabel)
 
@@ -371,12 +372,14 @@ func _onAlternativeChosen(block):
 		_rachaActual += 1
 		if _rachaActual > _rachaMax:
 			_rachaMax = _rachaActual
+		GameData.rachaGlobal += 1
 		_showCorrect()
 		_currentStep += 1
 		_loadCurrentStep()
 	else:
 		_errores += 1
 		_rachaActual = 0
+		GameData.rachaGlobal = 0
 		var hint = _steps[_currentStep].get("hint", "")
 		if hint != "":
 			_showError("Pista: " + hint)
@@ -521,17 +524,17 @@ func _calcularPuntaje() -> int:
 			rellenables += 1
 	var base = rellenables * 20
 
-	# Penalizacion por errores
+	# Penalizacion por errores (1 error: sin penalización, 2: 25%, 3+: 50%)
 	var penalizacion = 0
-	if _errores == 1:
+	if _errores == 2:
 		penalizacion = int(base * 0.25)
-	elif _errores >= 2:
+	elif _errores >= 3:
 		penalizacion = int(base * 0.50)
 
-	# Bonificacion por racha (desde 3 correctas seguidas sin fallo)
+	# Bonificacion por racha global (desde 3 correctas seguidas sin fallo entre puzzles)
 	var bonus = 0
-	if _errores == 0 and _rachaMax >= 3:
-		bonus = _rachaMax * 5
+	if GameData.rachaGlobal >= 3:
+		bonus = GameData.rachaGlobal * 5
 
 	return max(0, base - penalizacion + bonus)
 
@@ -548,13 +551,13 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 			rellenables += 1
 	var base = rellenables * 20
 	var penalizacion = 0
-	if _errores == 1:
+	if _errores == 2:
 		penalizacion = int(base * 0.25)
-	elif _errores >= 2:
+	elif _errores >= 3:
 		penalizacion = int(base * 0.50)
 	var bonus = 0
-	if _errores == 0 and _rachaMax >= 3:
-		bonus = _rachaMax * 5
+	if GameData.rachaGlobal >= 3:
+		bonus = GameData.rachaGlobal * 5
 
 	var rainbowBlocks: Array = []
 	for slot in _slots:
@@ -645,9 +648,9 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 
 	# Penalización — solo si hubo errores
 	if penalizacion > 0:
-		var pct = "25%" if _errores == 1 else "50%"
+		var pct = "25%" if _errores == 2 else "50%"
 		var lblPen = Label.new()
-		lblPen.text = "Penalización  (%d error/es, -%s):  -%d pts" % [_errores, pct, penalizacion]
+		lblPen.text = "Penalización  (%d errores, -%s):  -%d pts" % [_errores, pct, penalizacion]
 		lblPen.add_theme_font_size_override("font_size", FONT_SIZE + 2)
 		lblPen.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
 		tablonVbox.add_child(lblPen)
@@ -655,7 +658,7 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 	# Bonus racha — solo si aplica
 	if bonus > 0:
 		var lblBonus = Label.new()
-		lblBonus.text = "Bonus racha  (racha de %d):  +%d pts" % [_rachaMax, bonus]
+		lblBonus.text = "Bonus racha  (racha de %d):  +%d pts" % [GameData.rachaGlobal, bonus]
 		lblBonus.add_theme_font_size_override("font_size", FONT_SIZE + 2)
 		lblBonus.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 		tablonVbox.add_child(lblBonus)
@@ -674,16 +677,17 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 	# Botón continuar
 	var btn = Button.new()
 	btn.text = "Continuar"
-	btn.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	btn.add_theme_font_size_override("font_size", FONT_SIZE + 6)
+	btn.custom_minimum_size = Vector2(220, 52)
 	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	var continuar_pressed = false
-	btn.pressed.connect(func(): continuar_pressed = true)
+	_tablonContinuar = false
+	btn.pressed.connect(func(): _tablonContinuar = true)
 	tablonVbox.add_child(btn)
 
 	# --- Loop de animación: arcoíris en bloques + serpiente en título, hasta Continuar ---
 	var startTime = Time.get_ticks_msec()
-	while not continuar_pressed:
+	while not _tablonContinuar:
 		var elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
 		var hueBase = fmod(elapsed * 0.22, 1.0)
 

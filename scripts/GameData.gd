@@ -18,3 +18,6 @@ func markSolved(dialogFile: String) -> void:
 
 func isSolved(dialogFile: String) -> bool:
 	return solvedDialogs.get(dialogFile, false)
+
+# Racha global entre puzzles
+var rachaGlobal: int = 0
