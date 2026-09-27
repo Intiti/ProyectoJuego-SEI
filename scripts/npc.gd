@@ -14,6 +14,12 @@ func _ready():
 	add_to_group("npc")
 	if npcSprite:
 		$Sprite2D.texture = npcSprite
+
+	# Si el puzzle de este NPC ya fue resuelto en una sesión anterior
+	# (el jugador cambió de villa y volvió), no mostrar "!"
+	if dialogFile != "" and GameData.isSolved(dialogFile):
+		needsHelp = false
+
 	if needsHelp:
 		_createExclamation()
 
@@ -65,6 +71,9 @@ func onPuzzleSolved():
 	if is_instance_valid(_exclamLabel):
 		_exclamLabel.queue_free()
 		_exclamLabel = null
+	# Persistir que este NPC fue resuelto para cuando el jugador vuelva a la escena
+	if dialogFile != "":
+		GameData.markSolved(dialogFile)
 	if solvedFlag != "" and GameData.get(solvedFlag) != null:
 		GameData.set(solvedFlag, true)
 

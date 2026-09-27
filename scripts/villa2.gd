@@ -1,7 +1,12 @@
 extends Node2D
 
+const SPAWN_LEFT_X  := 80.0
+const SPAWN_RIGHT_X := 1070.0
+const SPAWN_Y       := 570.0
+
 func _ready():
 	_applyGlobalTheme()
+	_positionPlayer()
 	_fadeIn()
 	_buildExitTrigger()
 
@@ -11,6 +16,13 @@ func _applyGlobalTheme() -> void:
 	theme.default_font = font
 	theme.default_font_size = 20
 	get_tree().root.theme = theme
+
+func _positionPlayer() -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+	var x = SPAWN_RIGHT_X if GameData.spawnSide == "right" else SPAWN_LEFT_X
+	player.position = Vector2(x, SPAWN_Y)
 
 func _fadeIn() -> void:
 	var fadeLayer = CanvasLayer.new()
@@ -51,6 +63,9 @@ func _goToVilla1() -> void:
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		player.set_physics_process(false)
+
+	# El jugador viene de la derecha (Villa2 está a la derecha de Villa1)
+	GameData.spawnSide = "right"
 
 	var fadeLayer = CanvasLayer.new()
 	fadeLayer.layer = 10

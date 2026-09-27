@@ -27,7 +27,7 @@ var completeOnSteps: bool = false
 # Cada entrada: { "type": "fixed"|"empty"|"filled", "node": Node, "arrow": Label|null }
 var _slots: Array = []
 var _celebrating: bool = false
-var _arrowOverlay: Label = null
+var _arrowOverlay: Label = null  # flecha dentro de la row activa
 
 const FONT_SIZE := 18
 const COMPLETION_DURATION := 3.5
@@ -262,22 +262,13 @@ func _makeEmptySlot(step: Dictionary) -> PanelContainer:
 
 	return pc
 
-# Busca el primer slot vacío a partir de _currentStep y apunta la flecha ahí
+# Busca el primer slot vacío a partir de _currentStep y apunta la flecha ahí.
+# La flecha se inserta directamente en la row del slot activo para que:
+#   - siempre quede junto al bloque correcto (sin cálculo de coordenadas globales)
+#   - scrollee con el contenido y nunca se superponga fuera del área visible
 func _loadCurrentStep(animate_arrow: bool = true):
-	# Crear el overlay de flecha una sola vez, hijo del panel (posición absoluta)
-	if _arrowOverlay == null:
-		_arrowOverlay = Label.new()
-		_arrowOverlay.text = "◀"
-		_arrowOverlay.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-		_arrowOverlay.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-		_arrowOverlay.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
-		_arrowOverlay.add_theme_constant_override("outline_size", 3)
-		_arrowOverlay.custom_minimum_size = Vector2(28, 44)
-		_arrowOverlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_arrowOverlay.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		_arrowOverlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_arrowOverlay.visible = false
-		panel.add_child(_arrowOverlay)
+	# Quitar la flecha del slot anterior (si existe)
+	_removeArrow()
 
 	while _currentStep < _steps.size():
 		if not _steps[_currentStep].get("fixed", false):
@@ -285,7 +276,6 @@ func _loadCurrentStep(animate_arrow: bool = true):
 		_currentStep += 1
 
 	if _currentStep >= _steps.size():
-		_arrowOverlay.visible = false
 		if completeOnSteps:
 			_onSuccess()
 		else:
@@ -302,49 +292,38 @@ func _loadCurrentStep(animate_arrow: bool = true):
 	choiceNum += 1
 	stepLabel.text = "Elección %d de %d" % [choiceNum, totalChoices]
 
-	# Encontrar el nodo del bloque/slot activo para leer su rect global
-	var targetNode: Control = null
+	# Encontrar la row del slot activo
+	var targetRow: HBoxContainer = null
 	for slot in _slots:
 		if slot["step_idx"] == _currentStep:
-			if slot["kind"] == "empty":
-				targetNode = slot["slot_node"]
-			elif slot.has("block"):
-				targetNode = slot["block"]
+			targetRow = slot["row"]
 			break
 
-	if targetNode == null:
+	if targetRow == null:
 		return
 
-	# Esperar un frame para que el layout haya calculado los rects
-	await get_tree().process_frame
+	# Crear la flecha como hija de la row — se posiciona con el layout,
+	# scrollea junto al contenido y no necesita coordenadas absolutas.
+	_arrowOverlay = Label.new()
+	_arrowOverlay.text = "◀"
+	_arrowOverlay.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	_arrowOverlay.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+	_arrowOverlay.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
+	_arrowOverlay.add_theme_constant_override("outline_size", 3)
+	_arrowOverlay.custom_minimum_size = Vector2(28, 44)
+	_arrowOverlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_arrowOverlay.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_arrowOverlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_arrowOverlay.modulate.a = 0.0  # empieza invisible para animar entrada
+	targetRow.add_child(_arrowOverlay)
 
-	if not is_instance_valid(targetNode):
-		return
-
-	var targetRect: Rect2 = targetNode.get_global_rect()
-	# Convertir de global a local del panel
-	var panelRect: Rect2 = panel.get_global_rect()
-	var localX = targetRect.position.x - panelRect.position.x + targetRect.size.x + 4.0
-	var localY = targetRect.position.y - panelRect.position.y + (targetRect.size.y - 44.0) * 0.5
-
-	var prevVisible = _arrowOverlay.visible
-	var prevPos = _arrowOverlay.position
-
-	_arrowOverlay.position = Vector2(localX, localY)
-	_arrowOverlay.modulate.a = 1.0
-	_arrowOverlay.scale = Vector2.ONE
-	_arrowOverlay.visible = true
-
-	if animate_arrow and prevVisible:
-		# Animar desde la posición anterior a la nueva
-		_arrowOverlay.position = prevPos
-		_arrowOverlay.modulate.a = 0.5
-		_arrowOverlay.scale = Vector2(0.7, 0.7)
-		var tween = _arrowOverlay.create_tween()
-		tween.set_parallel(true)
-		tween.tween_property(_arrowOverlay, "position", Vector2(localX, localY), 0.30).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# Animar entrada de la flecha
+	var tween = _arrowOverlay.create_tween()
+	tween.set_parallel(true)
+	if animate_arrow:
+		_arrowOverlay.scale = Vector2(0.5, 0.5)
 		tween.tween_property(_arrowOverlay, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tween.tween_property(_arrowOverlay, "modulate:a", 1.0, 0.20)
+	tween.tween_property(_arrowOverlay, "modulate:a", 1.0, 0.20)
 
 	var step = _steps[_currentStep]
 	var alternatives = step.get("alternatives", []).duplicate()
@@ -354,6 +333,12 @@ func _loadCurrentStep(animate_arrow: bool = true):
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
 		commandList.alternativeChosen.disconnect(_onAlternativeChosen)
 	commandList.alternativeChosen.connect(_onAlternativeChosen)
+
+# Elimina la flecha actual de su row padre
+func _removeArrow():
+	if is_instance_valid(_arrowOverlay):
+		_arrowOverlay.queue_free()
+	_arrowOverlay = null
 
 func _onAlternativeChosen(block):
 	if block.isCorrect:
@@ -598,16 +583,14 @@ func _disableCommandList():
 # el diálogo se encargará de devolver el control al jugador al cerrarse.
 func _closeKeepPlayerFrozen():
 	isOpen = false
-	if _arrowOverlay != null:
-		_arrowOverlay.visible = false
+	_removeArrow()
 	panel.visible = false
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
 		commandList.alternativeChosen.disconnect(_onAlternativeChosen)
 
 func close():
 	isOpen = false
-	if _arrowOverlay != null:
-		_arrowOverlay.visible = false
+	_removeArrow()
 	panel.visible = false
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
 		commandList.alternativeChosen.disconnect(_onAlternativeChosen)

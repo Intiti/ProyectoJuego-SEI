@@ -24,7 +24,12 @@ func _physics_process(delta):
 
 func _updateAnimation(dir: float):
 	if not is_on_floor():
-		sprite.play("jump")
+		# Si la animación de salto no está corriendo, la iniciamos.
+		# Si ya terminó, pause=true la congela en el último frame.
+		if sprite.animation != "jump":
+			sprite.play("jump")
+		elif not sprite.is_playing():
+			sprite.pause()
 	elif dir != 0:
 		sprite.play("run")
 		sprite.flip_h = dir < 0

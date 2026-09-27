@@ -1,7 +1,13 @@
 extends Node2D
 
+# X donde aparece el jugador según de dónde viene
+const SPAWN_LEFT_X  := 80.0
+const SPAWN_RIGHT_X := 1070.0
+const SPAWN_Y       := 570.0
+
 func _ready():
 	_applyGlobalTheme()
+	_positionPlayer()
 	_fadeIn()
 	_buildExitTrigger()
 
@@ -11,6 +17,13 @@ func _applyGlobalTheme() -> void:
 	theme.default_font = font
 	theme.default_font_size = 20
 	get_tree().root.theme = theme
+
+func _positionPlayer() -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+	var x = SPAWN_RIGHT_X if GameData.spawnSide == "right" else SPAWN_LEFT_X
+	player.position = Vector2(x, SPAWN_Y)
 
 func _fadeIn() -> void:
 	var fadeLayer = CanvasLayer.new()
@@ -29,7 +42,7 @@ func _fadeIn() -> void:
 		fadeLayer.queue_free()
 	)
 
-# ─── Trigger de salida hacia Villa2 (borde derecho) ──────────────────────────
+# ─── Trigger de salida hacia Villa2 (borde derecho) ───────────────────────────
 
 func _buildExitTrigger() -> void:
 	var exitArea = Area2D.new()
@@ -51,6 +64,9 @@ func _goToVilla2() -> void:
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		player.set_physics_process(false)
+
+	# El jugador viene de la izquierda (Villa1 está a la izquierda de Villa2)
+	GameData.spawnSide = "left"
 
 	var fadeLayer = CanvasLayer.new()
 	fadeLayer.layer = 10
