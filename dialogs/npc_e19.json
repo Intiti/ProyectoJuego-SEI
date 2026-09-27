@@ -30,7 +30,7 @@
 		}
 	],
 	"puzzle": {
-		"prompt": "Heisencat mide el nivel de azucar de su miel y la clasifica segun su pureza. Recibes el nivel de azucar. Si es 80 o mas: ALTA calidad. Si es 50 o mas: MEDIA calidad. Si no: RECHAZADA.",
+		"prompt": "Heisencat mide el nivel de azucar de su miel y la clasifica segun su pureza. Recibes el nivel de azucar. Si el nivel de azucar es 80 o mas: ALTA calidad. Si está entre 50 y 79: MEDIA calidad. Si no: RECHAZADA.",
 		"variables": {
 			"nivel_azucar": 0
 		},

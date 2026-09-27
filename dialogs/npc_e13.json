@@ -142,13 +142,44 @@
 				}
 			},
 			{
-				"fixed": true,
+				"fixed": false,
 				"type": "print",
 				"indent": 1,
-				"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
-				"config": {
-					"value": "\"¡Gato 2 gana la competencia de pesca!\""
-				}
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
+						"correct": true,
+						"config": {
+							"value": "\"¡Gato 2 gana la competencia de pesca!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"¡Gato 1 gana la competencia de pesca!\")",
+						"correct": false,
+						"config": {
+							"value": "\"¡Gato 1 gana la competencia de pesca!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"¡Empate!\")",
+						"correct": false,
+						"config": {
+							"value": "\"¡Empate!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(puntaje_gato2)",
+						"correct": false,
+						"config": {
+							"value": "puntaje_gato2"
+						}
+					}
+				],
+				"hint": "Estamos dentro del elif, o sea el Gato 2 tiene el puntaje mayor. ¿Que debe imprimirse en ese caso?"
 			},
 			{
 				"fixed": true,
