@@ -490,14 +490,13 @@ func _onSuccess():
 	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
 		npc.onPuzzleSolved()
 
-	await _playCompletionCelebration()
-
-	_celebrating = false
-
-	# Calcular y mostrar puntaje, luego esperar que el jugador presione continuar
 	var puntaje = _calcularPuntaje()
 	GameData.gatopuntos += puntaje
-	await _mostrarTablon(puntaje)
+
+	# Lanzar celebración y tablón simultáneamente; esperar a que el jugador presione continuar
+	await _playCompletionWithTablon(puntaje)
+
+	_celebrating = false
 
 	var outroLines: Array = _currentData.get("outro_lines", [])
 	var playerScene: String = _currentData.get("player_scene", "")
@@ -536,8 +535,13 @@ func _calcularPuntaje() -> int:
 
 	return max(0, base - penalizacion + bonus)
 
-func _mostrarTablon(puntaje: int) -> void:
-	# Calcular partes para mostrar en el tablon
+# Lanza la celebración de arcoíris + texto flotante y el tablón simultáneamente.
+# El tablón sube desde abajo junto con el texto "MIAUGORITMO COMPLETADO".
+# Retorna cuando el jugador presiona Continuar.
+func _playCompletionWithTablon(puntaje: int) -> void:
+	panel.move_to_front()
+	commandList.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 	var rellenables = 0
 	for s in _steps:
 		if not s.get("fixed", false):
@@ -552,147 +556,137 @@ func _mostrarTablon(puntaje: int) -> void:
 	if _errores == 0 and _rachaMax >= 3:
 		bonus = _rachaMax * 5
 
-	# Fondo oscuro sobre todo
-	var overlay = ColorRect.new()
-	overlay.anchor_right = 1.0
-	overlay.anchor_bottom = 1.0
-	overlay.color = Color(0.0, 0.0, 0.0, 0.88)
-	add_child(overlay)
-
-	var vbox = VBoxContainer.new()
-	vbox.anchor_left   = 0.25
-	vbox.anchor_right  = 0.75
-	vbox.anchor_top    = 0.20
-	vbox.anchor_bottom = 0.85
-	vbox.add_theme_constant_override("separation", 18)
-	overlay.add_child(vbox)
-
-	# Titulo
-	var titulo = Label.new()
-	titulo.text = "Resultado del Puzzle"
-	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	titulo.add_theme_font_size_override("font_size", FONT_SIZE + 6)
-	titulo.add_theme_color_override("font_color", Color(0.9, 0.85, 1.0))
-	vbox.add_child(titulo)
-
-	var sep1 = HSeparator.new()
-	vbox.add_child(sep1)
-
-	# Puntaje base
-	var lblBase = Label.new()
-	lblBase.text = "Puntaje base  (%d bloques x 20): %d pts" % [rellenables, base]
-	lblBase.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	lblBase.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
-	vbox.add_child(lblBase)
-
-	# Penalizacion
-	var lblPen = Label.new()
-	if penalizacion == 0:
-		lblPen.text = "Penalizacion: ninguna  (sin errores)"
-		lblPen.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
-	else:
-		var pct = "25%" if _errores == 1 else "50%"
-		lblPen.text = "Penalizacion (%d error/es, -%s): -%d pts" % [_errores, pct, penalizacion]
-		lblPen.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
-	lblPen.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	vbox.add_child(lblPen)
-
-	# Bonus racha
-	var lblBonus = Label.new()
-	if bonus > 0:
-		lblBonus.text = "Bonus racha  (racha de %d): +%d pts" % [_rachaMax, bonus]
-		lblBonus.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-	else:
-		lblBonus.text = "Bonus racha: -  (racha minima de 3 sin errores)"
-		lblBonus.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	lblBonus.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	vbox.add_child(lblBonus)
-
-	var sep2 = HSeparator.new()
-	vbox.add_child(sep2)
-
-	# Total
-	var lblTotal = Label.new()
-	lblTotal.text = "Total: %d pts   (Gatopuntos acumulados: %d)" % [puntaje, GameData.gatopuntos]
-	lblTotal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lblTotal.add_theme_font_size_override("font_size", FONT_SIZE + 4)
-	lblTotal.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
-	vbox.add_child(lblTotal)
-
-	# Boton continuar
-	var btn = Button.new()
-	btn.text = "Continuar"
-	btn.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var pressed = false
-	btn.pressed.connect(func(): pressed = true)
-	vbox.add_child(btn)
-
-	# Esperar hasta que el jugador presione continuar
-	while not pressed:
-		await get_tree().process_frame
-
-	overlay.queue_free()
-
-# Celebración final: bloques de la consola en arcoíris + texto flotante.
-# El texto sube desde abajo, queda fijo en pantalla y sus letras hacen
-# una pequeña "serpiente" mientras el tono del arcoíris cambia.
-func _playCompletionCelebration() -> void:
-	# Mantener todo visible y bloquear nuevas selecciones.
-	panel.move_to_front()
-	commandList.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
 	var rainbowBlocks: Array = []
 	for slot in _slots:
 		if slot.has("block") and is_instance_valid(slot["block"]):
 			rainbowBlocks.append(slot["block"])
 
-	# Crear el texto como letras individuales para poder hacer el efecto serpiente.
+	# --- Contenedor raíz de la celebración (cubre todo el panel) ---
 	var celebration = Control.new()
 	celebration.name = "CompletionCelebration"
 	celebration.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	celebration.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	celebration.mouse_filter = Control.MOUSE_FILTER_PASS
 	panel.add_child(celebration)
 
+	# --- Tablón negro que sube desde abajo (panel vertical centrado) ---
+	var tablonW = panel.size.x * 0.58
+	var tablonH = panel.size.y * 0.55
+	var tablonX = (panel.size.x - tablonW) * 0.5
+	var tablonTargetY = panel.size.y - tablonH - (panel.size.y * 0.14)
+
+	var tablon = PanelContainer.new()
+	var tablonStyle = StyleBoxFlat.new()
+	tablonStyle.bg_color = Color(0.04, 0.04, 0.07, 0.97)
+	tablonStyle.border_color = Color(0.55, 0.30, 0.85, 1.0)
+	tablonStyle.border_width_left = 3
+	tablonStyle.border_width_right = 3
+	tablonStyle.border_width_top = 3
+	tablonStyle.border_width_bottom = 3
+	tablonStyle.corner_radius_top_left = 12
+	tablonStyle.corner_radius_top_right = 12
+	tablonStyle.corner_radius_bottom_left = 12
+	tablonStyle.corner_radius_bottom_right = 12
+	tablonStyle.content_margin_left = 24
+	tablonStyle.content_margin_right = 24
+	tablonStyle.content_margin_top = 20
+	tablonStyle.content_margin_bottom = 20
+	tablon.add_theme_stylebox_override("panel", tablonStyle)
+	tablon.position = Vector2(tablonX, panel.size.y)
+	tablon.size = Vector2(tablonW, tablonH)
+	tablon.mouse_filter = Control.MOUSE_FILTER_STOP
+	celebration.add_child(tablon)
+
+	var tablonTween = tablon.create_tween()
+	tablonTween.tween_property(tablon, "position:y", tablonTargetY, 0.65).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# --- Contenido del tablón ---
+	var tablonVbox = VBoxContainer.new()
+	tablonVbox.add_theme_constant_override("separation", 14)
+	tablon.add_child(tablonVbox)
+
+	# Título animado dentro del tablón: HBoxContainer para las letras
 	var textContainer = HBoxContainer.new()
-	textContainer.position = Vector2(0, panel.size.y + 30.0)
-	textContainer.size = Vector2(panel.size.x, 90)
 	textContainer.alignment = BoxContainer.ALIGNMENT_CENTER
 	textContainer.add_theme_constant_override("separation", 0)
-	celebration.add_child(textContainer)
+	textContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	textContainer.custom_minimum_size = Vector2(0, 60)
+	tablonVbox.add_child(textContainer)
 
 	var message = "MIAUGORITMO COMPLETADO"
 	var letters: Array = []
 	for i in message.length():
 		var letterSlot = Control.new()
-		letterSlot.custom_minimum_size = Vector2(24, 90)
+		letterSlot.custom_minimum_size = Vector2(22, 60)
 		textContainer.add_child(letterSlot)
 
 		var letter = Label.new()
 		letter.text = message.substr(i, 1)
 		letter.position = Vector2(0, 0)
-		letter.size = Vector2(24, 90)
+		letter.size = Vector2(22, 60)
 		letter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		letter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		letter.add_theme_font_size_override("font_size", FONT_SIZE + 12)
+		letter.add_theme_font_size_override("font_size", FONT_SIZE + 8)
 		letter.add_theme_color_override("font_color", Color.WHITE)
 		letter.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 1.0))
-		letter.add_theme_constant_override("outline_size", 5)
+		letter.add_theme_constant_override("outline_size", 4)
 		letter.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		letterSlot.add_child(letter)
 		letters.append(letter)
 
-	# Entrada: el mensaje aparece desde abajo y se detiene en una posición fija.
-	var targetY = panel.size.y * 0.78
-	var enterTween = textContainer.create_tween()
-	enterTween.tween_property(textContainer, "position:y", targetY, 0.65).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var sep1 = HSeparator.new()
+	tablonVbox.add_child(sep1)
 
+	# Puntaje base (siempre se muestra)
+	var lblBase = Label.new()
+	lblBase.text = "Puntaje base  (%d bloques × 20):  %d pts" % [rellenables, base]
+	lblBase.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	lblBase.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	tablonVbox.add_child(lblBase)
+
+	# Penalización — solo si hubo errores
+	if penalizacion > 0:
+		var pct = "25%" if _errores == 1 else "50%"
+		var lblPen = Label.new()
+		lblPen.text = "Penalización  (%d error/es, -%s):  -%d pts" % [_errores, pct, penalizacion]
+		lblPen.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+		lblPen.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
+		tablonVbox.add_child(lblPen)
+
+	# Bonus racha — solo si aplica
+	if bonus > 0:
+		var lblBonus = Label.new()
+		lblBonus.text = "Bonus racha  (racha de %d):  +%d pts" % [_rachaMax, bonus]
+		lblBonus.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+		lblBonus.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+		tablonVbox.add_child(lblBonus)
+
+	var sep2 = HSeparator.new()
+	tablonVbox.add_child(sep2)
+
+	# Total
+	var lblTotal = Label.new()
+	lblTotal.text = "Total:  %d pts   (Gatopuntos acumulados: %d)" % [puntaje, GameData.gatopuntos]
+	lblTotal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lblTotal.add_theme_font_size_override("font_size", FONT_SIZE + 4)
+	lblTotal.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
+	tablonVbox.add_child(lblTotal)
+
+	# Botón continuar
+	var btn = Button.new()
+	btn.text = "Continuar"
+	btn.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	var continuar_pressed = false
+	btn.pressed.connect(func(): continuar_pressed = true)
+	tablonVbox.add_child(btn)
+
+	# --- Loop de animación: arcoíris en bloques + serpiente en título, hasta Continuar ---
 	var startTime = Time.get_ticks_msec()
-	while is_instance_valid(celebration) and Time.get_ticks_msec() - startTime < int(COMPLETION_DURATION * 1000.0):
+	while not continuar_pressed:
 		var elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
 		var hueBase = fmod(elapsed * 0.22, 1.0)
 
-		# Arcoíris cambiante en todos los bloques.
 		for i in rainbowBlocks.size():
 			var block = rainbowBlocks[i]
 			if not is_instance_valid(block):
@@ -716,18 +710,20 @@ func _playCompletionCelebration() -> void:
 			style.content_margin_bottom = 6
 			block.add_theme_stylebox_override("panel", style)
 
-		# Serpiente fija: cada letra oscila verticalmente con desfase.
 		for i in letters.size():
 			var letter: Label = letters[i]
-			var wave = sin(elapsed * 7.0 - float(i) * 0.55) * 8.0
+			var wave = sin(elapsed * 7.0 - float(i) * 0.55) * 6.0
 			letter.position.y = wave
 			var letterHue = fmod(hueBase + float(i) / max(1.0, float(letters.size())) * 0.85, 1.0)
 			letter.add_theme_color_override("font_color", Color.from_hsv(letterHue, 0.72, 1.0))
 
+		# El borde del tablón también cicla de color
+		tablonStyle.border_color = Color.from_hsv(fmod(hueBase * 1.5, 1.0), 0.65, 1.0)
+		tablon.add_theme_stylebox_override("panel", tablonStyle)
+
 		await get_tree().process_frame
 
-	if is_instance_valid(celebration):
-		celebration.queue_free()
+	celebration.queue_free()
 
 func _disableCommandList():
 	for child in commandList.get_children():
