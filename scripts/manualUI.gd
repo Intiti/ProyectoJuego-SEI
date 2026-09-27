@@ -7,38 +7,32 @@ const BLOCKS := [
 	{
 		"name": "input()",
 		"color": Color(0.20, 0.45, 0.85, 1.0),
-		"desc": "Lee un valor externo y lo guarda en una variable. Sirve para recibir datos del usuario o del entorno.",
-		"example": "nombre = input()\nprint(nombre)"
+		"desc": "Lee un valor del usuario y lo guarda en una variable. Por defecto el valor llega como texto (String). Para usarlo como numero hay que convertirlo:\n\n  int(input())   -> numero entero, sin decimales (ej: 5, -3, 100)\n  float(input()) -> numero con decimales (ej: 3.14, -0.5)\n\nSi no conviertes, no podras hacer operaciones matematicas con el.",
+		"example": "edad   = int(input())\nprecio = float(input())\nnombre = input()"
 	},
 	{
 		"name": "if",
 		"color": Color(0.65, 0.45, 0.08, 1.0),
-		"desc": "Ejecuta un bloque de código solo si se cumple una condición. Si la condición es falsa, ese bloque se salta.",
-		"example": "if edad >= 18:\n    print(\"adulto\")"
+		"desc": "Ejecuta un bloque solo si se cumple una condicion. Puedes encadenar condiciones extra con elif, que se revisan en orden si la anterior fue falsa. Operadores disponibles:\n\n  ==  igual a\n  !=  distinto de\n  >   mayor que\n  <   menor que\n  >=  mayor o igual\n  <=  menor o igual",
+		"example": "if nota >= 90:\n    print(\"Excelente\")"
+	},
+	{
+		"name": "elif",
+		"color": Color(0.55, 0.32, 0.05, 1.0),
+		"desc": "Agrega una condicion extra despues de un if. Solo se evalua si el if (y los elif anteriores) fueron falsos. Puedes poner tantos elif como necesites. El primero que sea verdadero se ejecuta y los demas se saltan.",
+		"example": "if color == \"rojo\":\n    print(\"Para\")\nelif color == \"amarillo\":\n    print(\"Precaucion\")\nelif color == \"verde\":\n    print(\"Sigue\")\nelse:\n    print(\"Color desconocido\")"
 	},
 	{
 		"name": "else",
 		"color": Color(0.45, 0.15, 0.65, 1.0),
-		"desc": "Se ejecuta cuando la condición del 'if' anterior fue falsa. Es el camino alternativo.",
-		"example": "if edad >= 18:\n    print(\"adulto\")\nelse:\n    print(\"menor\")"
+		"desc": "Se ejecuta cuando ninguna condicion anterior (if ni elif) fue verdadera. Es el camino por defecto. Solo puede haber un else por bloque y siempre va al final.",
+		"example": "if turno == \"dia\":\n    print(\"El sol brilla\")\nelif turno == \"tarde\":\n    print(\"Atardecer\")\nelse:\n    print(\"Es de noche\")"
 	},
 	{
 		"name": "print",
 		"color": Color(0.12, 0.52, 0.30, 1.0),
-		"desc": "Muestra un valor o texto en la consola. Es la forma de ver el resultado de tu programa.",
-		"example": "print(\"Hola\")\nprint(resultado)"
-	},
-	{
-		"name": "asignar",
-		"color": Color(0.50, 0.20, 0.20, 1.0),
-		"desc": "Guarda un valor fijo en una variable. A diferencia de input(), el valor lo escribes tú directamente.",
-		"example": "vidas = 3\nnombre = \"Miau\""
-	},
-	{
-		"name": "expr",
-		"color": Color(0.20, 0.55, 0.60, 1.0),
-		"desc": "Calcula una operacion matematica entre dos variables o numeros y guarda el resultado.",
-		"example": "total = precio + impuesto\ndif = a - b"
+		"desc": "Muestra un valor en la consola. Puedes imprimir texto entre comillas, variables, o mezclarlos con el operador +. Para mezclar un numero con texto hay que convertirlo a String primero con str().",
+		"example": "print(\"Hola\")\nprint(nombre)\nprint(\"Tu edad es: \" + edad)"
 	},
 ]
 
