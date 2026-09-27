@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dqgdwchjfc0p7" path="res://scenes/DialogBox.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/NPC.tscn" id="6_npc"]
+[ext_resource type="Texture2D" uid="uid://dxm3q8eq0c6u1" path="res://assets/ambiente/school.png" id="7_v0d3p"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)
@@ -46,18 +47,11 @@ shape = SubResource("2")
 
 [node name="PuzzleUI" parent="." unique_id=-1275682540 instance=ExtResource("5")]
 
-[node name="NPC_E15" parent="." unique_id=1029384756 instance=ExtResource("6_npc")]
-position = Vector2(220, 564)
-dialogFile = "res://dialogs/npc_e15.json"
-
-[node name="NPC_E16" parent="." unique_id=-1356491686 instance=ExtResource("6_npc")]
-position = Vector2(450, 564)
-dialogFile = "res://dialogs/npc_e16.json"
-
-[node name="NPC_E17" parent="." unique_id=-447406267 instance=ExtResource("6_npc")]
-position = Vector2(700, 564)
-dialogFile = "res://dialogs/npc_e17.json"
-
 [node name="NPC_E18" parent="." unique_id=461135642 instance=ExtResource("6_npc")]
-position = Vector2(930, 564)
+position = Vector2(677, 559)
 dialogFile = "res://dialogs/npc_e18.json"
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1750792011]
+z_index = -4
+position = Vector2(382, 474)
+texture = ExtResource("7_v0d3p")

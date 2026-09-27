@@ -373,6 +373,8 @@ func _onAlternativeChosen(block):
 		if _rachaActual > _rachaMax:
 			_rachaMax = _rachaActual
 		GameData.rachaGlobal += 1
+		if GameData.rachaGlobal >= 3:
+			_showStreakPopup(GameData.rachaGlobal)
 		_showCorrect()
 		_currentStep += 1
 		_loadCurrentStep()
@@ -477,6 +479,43 @@ func _showError(message: String):
 
 func _showCorrect():
 	_showFeedback("Correcto!", Color(0.4, 1.0, 0.5), 1.2)
+
+func _showStreakPopup(n: int) -> void:
+	# Colores ciclicos para el efecto arcoíris
+	var colors: Array[Color] = [
+		Color(1.0, 0.3, 0.3),
+		Color(1.0, 0.7, 0.1),
+		Color(0.3, 1.0, 0.4),
+		Color(0.2, 0.8, 1.0),
+		Color(0.8, 0.3, 1.0),
+	]
+
+	# Posición del jugador en pantalla
+	var player = get_tree().get_first_node_in_group("player")
+	var spawnPos: Vector2
+	if player:
+		spawnPos = get_viewport().get_canvas_transform() * player.global_position
+		spawnPos += Vector2(0, -60)
+	else:
+		spawnPos = get_viewport().get_visible_rect().get_center() + Vector2(0, -80)
+
+	var lbl = Label.new()
+	lbl.text = "RACHA x%d" % n
+	lbl.add_theme_font_size_override("font_size", 52)
+	lbl.add_theme_color_override("font_color", colors[n % colors.size()])
+	lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
+	lbl.add_theme_constant_override("shadow_offset_x", 3)
+	lbl.add_theme_constant_override("shadow_offset_y", 3)
+	lbl.position = spawnPos
+	lbl.z_index = 100
+	add_child(lbl)
+
+	# Flota hacia arriba y se desvanece
+	var tw = create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(lbl, "position:y", spawnPos.y - 100.0, 1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "modulate:a", 0.0, 1.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(func(): lbl.queue_free())
 
 func _onSuccess():
 	if _celebrating:

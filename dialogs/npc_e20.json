@@ -1,0 +1,261 @@
+{
+	"lines": [
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "¡Psst! ¡Tu, el de afuera! ¡Ven aqui!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Yo? ¿Que pasa?"
+		},
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "El profesor Félix nos dejo un programa para calcular si podemos rendir el examen final. Necesitamos al menos 70% de asistencia."
+		},
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "El problema es que el miaugoritmo esta incompleto y el profe vuelve en 5 minutos. ¡Ayúdanos por favor!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cuantas clases son en total?"
+		},
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "Son 40 clases en el semestre. Si asististe a 28, tienes exactamente 70%. Se recibe los dias que fuiste y calculamos el porcentaje. Si es 70 o mas, puedes rendir. Si no... repechaje."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Entendido. Dejenme ver ese codigo."
+		}
+	],
+	"puzzle": {
+		"prompt": "Los alumnos necesitan saber si pueden rendir el examen. Reciben los dias asistidos. El total de clases es 40. Calcula el porcentaje de asistencia. Si el porcentaje es mayor a 70%, imprime 'Puedes rendir el examen.' Si no, imprime 'Debes ir a repechaje.'",
+		"variables": {
+			"dias_asistidos": 0,
+			"porcentaje": 0
+		},
+		"steps": [
+			{
+				"fixed": true,
+				"type": "input",
+				"text": "dias_asistidos = int(input())",
+				"config": {
+					"var": "dias_asistidos"
+				}
+			},
+			{
+				"fixed": false,
+				"type": "expr",
+				"alternatives": [
+					{
+						"type": "expr",
+						"text": "porcentaje = dias_asistidos * 100 / 40",
+						"correct": true,
+						"config": {
+							"var": "porcentaje",
+							"expr_a": "dias_asistidos * 100",
+							"expr_op": "/",
+							"expr_b": "40"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "porcentaje = dias_asistidos / 40",
+						"correct": false,
+						"config": {
+							"var": "porcentaje",
+							"expr_a": "dias_asistidos",
+							"expr_op": "/",
+							"expr_b": "40"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "porcentaje = dias_asistidos * 40",
+						"correct": false,
+						"config": {
+							"var": "porcentaje",
+							"expr_a": "dias_asistidos",
+							"expr_op": "*",
+							"expr_b": "40"
+						}
+					},
+					{
+						"type": "assign",
+						"text": "porcentaje = 70",
+						"correct": false,
+						"config": {
+							"var": "porcentaje",
+							"assign_value": "70"
+						}
+					}
+				],
+				"hint": "El porcentaje se calcula multiplicando el valor por 100 y dividiendo por el total. ¿Como lo escribes con las variables que tienes?"
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "if porcentaje >= 70:",
+						"correct": true,
+						"config": {
+							"var": "porcentaje",
+							"op": ">=",
+							"value": "70",
+							"value_is_var": false
+						}
+					},
+					{
+						"type": "if",
+						"text": "if porcentaje > 70:",
+						"correct": false,
+						"config": {
+							"var": "porcentaje",
+							"op": ">",
+							"value": "70",
+							"value_is_var": false
+						}
+					},
+					{
+						"type": "if",
+						"text": "if porcentaje == 70:",
+						"correct": false,
+						"config": {
+							"var": "porcentaje",
+							"op": "==",
+							"value": "70",
+							"value_is_var": false
+						}
+					},
+					{
+						"type": "if",
+						"text": "if dias_asistidos >= 70:",
+						"correct": false,
+						"config": {
+							"var": "dias_asistidos",
+							"op": ">=",
+							"value": "70",
+							"value_is_var": false
+						}
+					}
+				],
+				"hint": "La regla dice 70% o mas alcanza para rendir. Recuerda que alguien con exactamente 70% tambien puede."
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Puedes rendir el examen.\")",
+						"correct": true,
+						"config": {
+							"value": "\"Puedes rendir el examen.\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Debes ir a repechaje.\")",
+						"correct": false,
+						"config": {
+							"value": "\"Debes ir a repechaje.\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(porcentaje)",
+						"correct": false,
+						"config": {
+							"value": "porcentaje"
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(dias_asistidos)",
+						"correct": false,
+						"config": {
+							"value": "dias_asistidos"
+						}
+					}
+				],
+				"hint": "Estamos dentro del if, o sea el porcentaje llego al minimo requerido. ¿Que le decimos al alumno en ese caso?"
+			},
+			{
+				"fixed": true,
+				"type": "else",
+				"text": "else:",
+				"config": {}
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Debes ir a repechaje.\")",
+						"correct": true,
+						"config": {
+							"value": "\"Debes ir a repechaje.\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Puedes rendir el examen.\")",
+						"correct": false,
+						"config": {
+							"value": "\"Puedes rendir el examen.\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(porcentaje)",
+						"correct": false,
+						"config": {
+							"value": "porcentaje"
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(dias_asistidos)",
+						"correct": false,
+						"config": {
+							"value": "dias_asistidos"
+						}
+					}
+				],
+				"hint": "El else ocurre cuando el porcentaje no alcanzo el 70%. ¿Que mensaje corresponde?"
+			}
+		],
+		"show_output": false,
+		"complete_on_steps": true
+	},
+	"outro_lines": [
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "¡Funciona! ¡El programa calcula bien la asistencia!"
+		},
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "Yo tengo 32 dias... eso es 80%. ¡Me salvé!"
+		},
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "Yo... tengo 26 dias. Un 65%. Toca repechaje. "
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Estudien mas y no falten seguido. Suerte en el examen."
+		},
+		{
+			"speaker": "Grupo de Estudiantes",
+			"text": "¡Gracias! Si algun dia necesitas apuntes de Cálculo, aqui estamos."
+		}
+	],
+	"npc_scene": "res://scenes/NPC.tscn",
+	"player_scene": "res://scenes/Player.tscn"
+}

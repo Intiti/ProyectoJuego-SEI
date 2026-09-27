@@ -117,10 +117,10 @@
 					},
 					{
 						"type": "print",
-						"text": "  print(True)",
+						"text": "  print(Verdadero)",
 						"correct": false,
 						"config": {
-							"value": "True"
+							"value": "Verdadero"
 						}
 					}
 				],
@@ -163,10 +163,10 @@
 					},
 					{
 						"type": "print",
-						"text": "  print(False)",
+						"text": "  print(Falso)",
 						"correct": false,
 						"config": {
-							"value": "False"
+							"value": "Falso"
 						}
 					}
 				],

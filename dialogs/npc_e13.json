@@ -132,49 +132,38 @@
 			},
 			{
 				"fixed": true,
+				"type": "elif",
+				"text": "elif puntaje_gato2 > puntaje_gato1:",
+				"config": {
+					"var": "puntaje_gato2",
+					"op": ">",
+					"value": "puntaje_gato1",
+					"value_is_var": true
+				}
+			},
+			{
+				"fixed": true,
+				"type": "print",
+				"indent": 1,
+				"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
+				"config": {
+					"value": "\"¡Gato 2 gana la competencia de pesca!\""
+				}
+			},
+			{
+				"fixed": true,
 				"type": "else",
 				"text": "else:",
 				"config": {}
 			},
 			{
-				"fixed": false,
+				"fixed": true,
 				"type": "print",
 				"indent": 1,
-				"hint": "El else se ejecuta cuando el Gato 1 NO tiene el puntaje mayor. Si no ganó el Gato 1, ¿quién ganó?",
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
-						"correct": true,
-						"config": {
-							"value": "\"¡Gato 2 gana la competencia de pesca!\""
-						}
-					},
-					{
-						"type": "print",
-						"text": "  print(\"¡Gato 1 gana la competencia de pesca!\")",
-						"correct": false,
-						"config": {
-							"value": "\"¡Gato 1 gana la competencia de pesca!\""
-						}
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Empate\")",
-						"correct": false,
-						"config": {
-							"value": "\"Empate\""
-						}
-					},
-					{
-						"type": "print",
-						"text": "  print(puntaje_gato2)",
-						"correct": false,
-						"config": {
-							"value": "puntaje_gato2"
-						}
-					}
-				]
+				"text": "  print(\"¡Empate!\")",
+				"config": {
+					"value": "\"¡Empate!\""
+				}
 			}
 		],
 		"show_output": false,
