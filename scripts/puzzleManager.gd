@@ -350,12 +350,15 @@ func _onAlternativeChosen(block):
 			if slot["step_idx"] == _currentStep and slot["kind"] == "empty":
 				var row = slot["row"]
 				# Quitar el slot vacío
+				var arrowNode = slot["arrow"]
+				var arrowIdx = arrowNode.get_index()
 				slot["slot_node"].queue_free()
-				# Crear bloque colocado
+				# Crear bloque colocado e insertarlo justo antes de la flecha
 				var placed = preload("res://scenes/CommandBlock.tscn").instantiate()
 				placed.setupPlaced(block.blockType, block.displayText, block.config, step.get("indent", 0))
 				placed.setLocked()
 				row.add_child(placed)
+				row.move_child(placed, arrowIdx)
 				# Actualizar slot
 				slot["kind"] = "filled"
 				slot["block"] = placed
