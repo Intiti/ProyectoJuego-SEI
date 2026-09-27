@@ -54,6 +54,6 @@ dialogFile = "res://dialogs/npc_e12.json"
 npcSprite = ExtResource("7_y53av")
 
 [node name="NPC_E13" parent="." unique_id=2123435532 instance=ExtResource("6_obl85")]
-position = Vector2(886, 566)
+position = Vector2(893, 545)
 dialogFile = "res://dialogs/npc_e13.json"
 npcSprite = ExtResource("8_lyhf2")

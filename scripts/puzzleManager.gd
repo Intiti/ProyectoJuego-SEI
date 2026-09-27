@@ -27,6 +27,7 @@ var completeOnSteps: bool = false
 # Cada entrada: { "type": "fixed"|"empty"|"filled", "node": Node, "arrow": Label|null }
 var _slots: Array = []
 var _celebrating: bool = false
+var _arrowOverlay: Label = null
 
 const FONT_SIZE := 18
 const COMPLETION_DURATION := 3.5
@@ -217,28 +218,17 @@ func _buildAllSlots():
 			spacer.custom_minimum_size = Vector2(indent * 20, 0)
 			row.add_child(spacer)
 
-		var arrow = Label.new()
-		arrow.text = "◀"
-		arrow.add_theme_font_size_override("font_size", FONT_SIZE)
-		arrow.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-		arrow.custom_minimum_size = Vector2(26, 44)
-		arrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		arrow.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		arrow.visible = false
-		arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		if step.get("fixed", false):
 			var block = preload("res://scenes/CommandBlock.tscn").instantiate()
 			block.setupPlaced(_nameToType(step.get("type", "print")), step.get("text", ""), step.get("config", {}), indent)
 			block.setLocked()
 			row.add_child(block)
-			row.add_child(arrow)
-			_slots.append({"kind": "fixed", "row": row, "block": block, "arrow": arrow, "step_idx": i})
+			_slots.append({"kind": "fixed", "row": row, "block": block, "step_idx": i})
 		else:
 			var emptySlot = _makeEmptySlot(step)
 			row.add_child(emptySlot)
-			row.add_child(arrow)
-			_slots.append({"kind": "empty", "row": row, "slot_node": emptySlot, "arrow": arrow, "step_idx": i})
+			_slots.append({"kind": "empty", "row": row, "slot_node": emptySlot, "step_idx": i})
 
 # Crea un bloque vacío con borde punteado que indica "aquí va algo"
 func _makeEmptySlot(step: Dictionary) -> PanelContainer:
@@ -274,15 +264,20 @@ func _makeEmptySlot(step: Dictionary) -> PanelContainer:
 
 # Busca el primer slot vacío a partir de _currentStep y apunta la flecha ahí
 func _loadCurrentStep(animate_arrow: bool = true):
-	var previousArrow: Label = null
-	for slot in _slots:
-		var arrow: Label = slot["arrow"]
-		if arrow.visible:
-			previousArrow = arrow
-		arrow.visible = false
-		arrow.modulate.a = 1.0
-		arrow.position.y = 0.0
-		arrow.scale = Vector2.ONE
+	# Crear el overlay de flecha una sola vez, hijo del panel (posición absoluta)
+	if _arrowOverlay == null:
+		_arrowOverlay = Label.new()
+		_arrowOverlay.text = "◀"
+		_arrowOverlay.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+		_arrowOverlay.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+		_arrowOverlay.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
+		_arrowOverlay.add_theme_constant_override("outline_size", 3)
+		_arrowOverlay.custom_minimum_size = Vector2(28, 44)
+		_arrowOverlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_arrowOverlay.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_arrowOverlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_arrowOverlay.visible = false
+		panel.add_child(_arrowOverlay)
 
 	while _currentStep < _steps.size():
 		if not _steps[_currentStep].get("fixed", false):
@@ -290,6 +285,7 @@ func _loadCurrentStep(animate_arrow: bool = true):
 		_currentStep += 1
 
 	if _currentStep >= _steps.size():
+		_arrowOverlay.visible = false
 		if completeOnSteps:
 			_onSuccess()
 		else:
@@ -306,31 +302,49 @@ func _loadCurrentStep(animate_arrow: bool = true):
 	choiceNum += 1
 	stepLabel.text = "Elección %d de %d" % [choiceNum, totalChoices]
 
-	var currentArrow: Label = null
+	# Encontrar el nodo del bloque/slot activo para leer su rect global
+	var targetNode: Control = null
 	for slot in _slots:
 		if slot["step_idx"] == _currentStep:
-			currentArrow = slot["arrow"]
+			if slot["kind"] == "empty":
+				targetNode = slot["slot_node"]
+			elif slot.has("block"):
+				targetNode = slot["block"]
 			break
 
-	if currentArrow != null:
-		currentArrow.visible = true
-		if animate_arrow and previousArrow != null and previousArrow != currentArrow:
-			# La flecha "viaja" hacia el siguiente bloque con una entrada
-			# vertical/lateral breve, sin alterar el ancho del bloque.
-			currentArrow.position = Vector2(14, -10)
-			currentArrow.scale = Vector2(0.65, 0.65)
-			currentArrow.modulate.a = 0.0
-			var oldTween = previousArrow.create_tween()
-			oldTween.tween_property(previousArrow, "modulate:a", 0.0, 0.12)
-			var arrowTween = currentArrow.create_tween()
-			arrowTween.set_parallel(true)
-			arrowTween.tween_property(currentArrow, "position", Vector2(0, 0), 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			arrowTween.tween_property(currentArrow, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			arrowTween.tween_property(currentArrow, "modulate:a", 1.0, 0.18)
-		else:
-			currentArrow.position = Vector2(0, 0)
-			currentArrow.scale = Vector2.ONE
-			currentArrow.modulate.a = 1.0
+	if targetNode == null:
+		return
+
+	# Esperar un frame para que el layout haya calculado los rects
+	await get_tree().process_frame
+
+	if not is_instance_valid(targetNode):
+		return
+
+	var targetRect: Rect2 = targetNode.get_global_rect()
+	# Convertir de global a local del panel
+	var panelRect: Rect2 = panel.get_global_rect()
+	var localX = targetRect.position.x - panelRect.position.x + targetRect.size.x + 4.0
+	var localY = targetRect.position.y - panelRect.position.y + (targetRect.size.y - 44.0) * 0.5
+
+	var prevVisible = _arrowOverlay.visible
+	var prevPos = _arrowOverlay.position
+
+	_arrowOverlay.position = Vector2(localX, localY)
+	_arrowOverlay.modulate.a = 1.0
+	_arrowOverlay.scale = Vector2.ONE
+	_arrowOverlay.visible = true
+
+	if animate_arrow and prevVisible:
+		# Animar desde la posición anterior a la nueva
+		_arrowOverlay.position = prevPos
+		_arrowOverlay.modulate.a = 0.5
+		_arrowOverlay.scale = Vector2(0.7, 0.7)
+		var tween = _arrowOverlay.create_tween()
+		tween.set_parallel(true)
+		tween.tween_property(_arrowOverlay, "position", Vector2(localX, localY), 0.30).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(_arrowOverlay, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(_arrowOverlay, "modulate:a", 1.0, 0.20)
 
 	var step = _steps[_currentStep]
 	var alternatives = step.get("alternatives", []).duplicate()
@@ -349,17 +363,12 @@ func _onAlternativeChosen(block):
 		for slot in _slots:
 			if slot["step_idx"] == _currentStep and slot["kind"] == "empty":
 				var row = slot["row"]
-				# Quitar el slot vacío
-				var arrowNode = slot["arrow"]
-				var arrowIdx = arrowNode.get_index()
+				# Quitar el slot vacío y poner el bloque real
 				slot["slot_node"].queue_free()
-				# Crear bloque colocado e insertarlo justo antes de la flecha
 				var placed = preload("res://scenes/CommandBlock.tscn").instantiate()
 				placed.setupPlaced(block.blockType, block.displayText, block.config, step.get("indent", 0))
 				placed.setLocked()
 				row.add_child(placed)
-				row.move_child(placed, arrowIdx)
-				# Actualizar slot
 				slot["kind"] = "filled"
 				slot["block"] = placed
 				slot.erase("slot_node")
@@ -589,12 +598,16 @@ func _disableCommandList():
 # el diálogo se encargará de devolver el control al jugador al cerrarse.
 func _closeKeepPlayerFrozen():
 	isOpen = false
+	if _arrowOverlay != null:
+		_arrowOverlay.visible = false
 	panel.visible = false
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
 		commandList.alternativeChosen.disconnect(_onAlternativeChosen)
 
 func close():
 	isOpen = false
+	if _arrowOverlay != null:
+		_arrowOverlay.visible = false
 	panel.visible = false
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
 		commandList.alternativeChosen.disconnect(_onAlternativeChosen)
