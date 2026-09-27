@@ -72,7 +72,7 @@
 					},
 					{
 						"type": "expr",
-						"text": "porcentaje = dias_asistidos * 40",
+						"text": "porcentaje = dias_asistidos * 40 / 100",
 						"correct": false,
 						"config": {
 							"var": "porcentaje",

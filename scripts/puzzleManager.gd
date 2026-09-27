@@ -152,7 +152,7 @@ func _ready():
 	feedbackLabel = Label.new()
 	feedbackLabel.custom_minimum_size = Vector2(0, 36)
 	feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	feedbackLabel.add_theme_font_size_override("font_size", FONT_SIZE - 1)
+	feedbackLabel.add_theme_font_size_override("font_size", FONT_SIZE + 3)
 	feedbackLabel.visible = false
 	cmdWrapper.add_child(feedbackLabel)
 
@@ -803,4 +803,5 @@ func _nameToType(name: String) -> int:
 		"print":  return 3
 		"assign": return 4
 		"expr":   return 5
+		"elif":   return 6
 	return 3

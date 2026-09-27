@@ -3,6 +3,43 @@ extends CanvasLayer
 const FONT_SIZE := 20
 
 # Datos de cada bloque: nombre, color, descripcion, ejemplo
+const CONTROLS := {
+	"name": "Controles",
+	"color": Color(0.30, 0.65, 0.75, 1.0),
+	"entries": [
+		{ "key": "← →", "desc": "Moverse" },
+		{ "key": "Espacio", "desc": "Saltar" },
+		{ "key": "E", "desc": "Hablar con un NPC / entrar a un edificio marcado con [color=#ff4444]![/color]" },
+	]
+}
+
+const TIPS := {
+	"name": "Consejos",
+	"color": Color(0.75, 0.65, 0.20, 1.0),
+	"items": [
+		{
+			"title": "Estructura de un algoritmo",
+			"body": "Un algoritmo bien armado sigue este orden:\n\n  1. Entrada   — leer los datos con input()\n  2. Proceso   — calcular o decidir\n  3. Salida    — mostrar el resultado con print()\n\nSi salteas la entrada, no tienes datos para procesar.\nSi salteas la salida, nadie ve el resultado."
+		},
+		{
+			"title": "Orden de los if / elif / else",
+			"body": "Python evalua las condiciones de arriba hacia abajo y ejecuta solo el primer bloque que sea verdadero.\n\nPon primero el caso mas especifico (rango mas estrecho) y despues el mas amplio, o de lo contrario el caso amplio \"atrapa\" todo y los elif de abajo nunca se ejecutan."
+		},
+		{
+			"title": "El else no lleva condicion",
+			"body": "El else no tiene comparacion: se ejecuta automaticamente cuando ninguno de los if/elif anteriores fue verdadero.\n\nUsalo para el caso por defecto, como un error o valor inesperado."
+		},
+		{
+			"title": "Variables y tipos",
+			"body": "input() siempre entrega texto. Si vas a comparar o calcular con numeros, convierte antes:\n\n  int(input())   -> entero\n  float(input()) -> decimal\n\nComparar texto con numero (\"5\" == 5) siempre da False."
+		},
+		{
+			"title": "print() muestra lo que le des",
+			"body": "Puedes pasarle texto entre comillas, una variable, o varios separados por coma:\n\n  print(\"Hola\")\n  print(nombre)\n  print(\"Resultado:\", total)\n\nLos valores separados por coma se imprimen juntos con un espacio entre ellos."
+		},
+	]
+}
+
 const BLOCKS := [
 	{
 		"name": "input()",
@@ -159,6 +196,41 @@ func _buildPanel() -> void:
 		btn.pressed.connect(func(): _selectBlock(idx))
 		sidebar.add_child(btn)
 
+	var extraSep = HSeparator.new()
+	extraSep.custom_minimum_size = Vector2(0, 8)
+	sidebar.add_child(extraSep)
+
+	for extra in [CONTROLS, TIPS]:
+		var ebtn = Button.new()
+		ebtn.text = extra["name"]
+		ebtn.add_theme_font_size_override("font_size", FONT_SIZE)
+		ebtn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+		var es = StyleBoxFlat.new()
+		es.bg_color = (extra["color"] as Color).darkened(0.3)
+		es.border_color = extra["color"]
+		es.border_width_left   = 3
+		es.border_width_right  = 3
+		es.border_width_top    = 3
+		es.border_width_bottom = 3
+		es.corner_radius_top_left     = 6
+		es.corner_radius_top_right    = 6
+		es.corner_radius_bottom_left  = 6
+		es.corner_radius_bottom_right = 6
+		es.content_margin_left  = 10
+		es.content_margin_right = 10
+		es.content_margin_top   = 8
+		es.content_margin_bottom = 8
+		ebtn.add_theme_stylebox_override("normal", es)
+
+		var esHover = es.duplicate()
+		esHover.bg_color = extra["color"]
+		ebtn.add_theme_stylebox_override("hover", esHover)
+
+		var modeName = extra["name"]
+		ebtn.pressed.connect(func(): _selectMode(modeName))
+		sidebar.add_child(ebtn)
+
 	# Separador vertical
 	var sep = VSeparator.new()
 	hbox.add_child(sep)
@@ -231,16 +303,7 @@ func _selectBlock(idx: int) -> void:
 	_selectedIdx = idx
 	var block = BLOCKS[idx]
 
-	var detail = _panel.get_node("HBoxContainer/Detail") if _panel.has_node("HBoxContainer/Detail") else null
-	if detail == null:
-		# fallback: buscar por nombre
-		for child in _panel.get_children():
-			if child is HBoxContainer:
-				for c2 in child.get_children():
-					if c2 is VBoxContainer and c2.name == "Detail":
-						detail = c2
-						break
-
+	var detail = _getDetail()
 	if detail == null:
 		return
 
@@ -249,10 +312,55 @@ func _selectBlock(idx: int) -> void:
 	nameLabel.add_theme_color_override("font_color", block["color"])
 
 	detail.get_node("Desc").text = block["desc"]
+	detail.get_node("DescTitle").text = "Para que sirve:"
+	detail.get_node("ExTitle").visible = true
+	detail.get_node("ExBox").visible = true
 	detail.get_node_or_null("ExBox/ExLabel").text = block["example"]
 
+func _getDetail() -> VBoxContainer:
+	if _panel.has_node("HBoxContainer/Detail"):
+		return _panel.get_node("HBoxContainer/Detail")
+	for child in _panel.get_children():
+		if child is HBoxContainer:
+			for c2 in child.get_children():
+				if c2 is VBoxContainer and c2.name == "Detail":
+					return c2
+	return null
+
+func _selectMode(modeName: String) -> void:
+	var detail = _getDetail()
+	if detail == null:
+		return
+
+	var nameLabel = detail.get_node("BlockName")
+	var descNode = detail.get_node("Desc")
+	var descTitle = detail.get_node("DescTitle")
+	var exTitle = detail.get_node("ExTitle")
+	var exBox = detail.get_node("ExBox")
+
+	if modeName == "Controles":
+		nameLabel.text = CONTROLS["name"]
+		nameLabel.add_theme_color_override("font_color", CONTROLS["color"])
+		descTitle.text = "Teclas:"
+		var lines = ""
+		for entry in CONTROLS["entries"]:
+			lines += "  " + entry["key"] + "  =  " + entry["desc"] + "\n"
+		descNode.text = lines.strip_edges()
+		exTitle.visible = false
+		exBox.visible = false
+
+	elif modeName == "Consejos":
+		nameLabel.text = TIPS["name"]
+		nameLabel.add_theme_color_override("font_color", TIPS["color"])
+		descTitle.text = ""
+		var allText = ""
+		for item in TIPS["items"]:
+			allText += "▸ " + item["title"] + "\n" + item["body"] + "\n\n"
+		descNode.text = allText.strip_edges()
+		exTitle.visible = false
+		exBox.visible = false
+
 func _onToggle() -> void:
-	# No abrir si hay un dialogo activo
 	var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 	if dialogBox and dialogBox.isOpen and not _isOpen:
 		return

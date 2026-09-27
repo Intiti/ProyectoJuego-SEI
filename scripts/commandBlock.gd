@@ -1,6 +1,6 @@
 extends PanelContainer
 
-enum Type { INPUT, IF, ELSE, PRINT, ASSIGN, EXPR }
+enum Type { INPUT, IF, ELSE, PRINT, ASSIGN, EXPR, ELIF }
 
 var blockType: Type
 var config: Dictionary = {}
@@ -20,6 +20,7 @@ const COLOR_ELSE   := Color(0.45, 0.15, 0.65, 1.0)
 const COLOR_PRINT  := Color(0.12, 0.52, 0.30, 1.0)
 const COLOR_ASSIGN := Color(0.50, 0.20, 0.20, 1.0)
 const COLOR_EXPR   := Color(0.20, 0.55, 0.60, 1.0)
+const COLOR_ELIF   := Color(0.65, 0.45, 0.08, 1.0)
 
 signal clicked(block)
 
@@ -62,6 +63,7 @@ func _applyStyle():
 		Type.PRINT:  style.bg_color = COLOR_PRINT
 		Type.ASSIGN: style.bg_color = COLOR_ASSIGN
 		Type.EXPR:   style.bg_color = COLOR_EXPR
+		Type.ELIF:   style.bg_color = COLOR_ELIF
 	style.corner_radius_top_left = 6
 	style.corner_radius_top_right = 6
 	style.corner_radius_bottom_left = 6
@@ -166,6 +168,7 @@ func setLocked():
 		Type.PRINT:  style.bg_color = COLOR_PRINT.darkened(0.35)
 		Type.ASSIGN: style.bg_color = COLOR_ASSIGN.darkened(0.35)
 		Type.EXPR:   style.bg_color = COLOR_EXPR.darkened(0.35)
+		Type.ELIF:   style.bg_color = COLOR_ELIF.darkened(0.35)
 	style.border_color = Color(0.55, 0.55, 0.55, 1.0)
 	style.border_width_left = 2
 	style.border_width_right = 2

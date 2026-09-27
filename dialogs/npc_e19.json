@@ -121,15 +121,10 @@
 						}
 					},
 					{
-						"type": "elif",
-						"text": "elif nivel_azucar >= 80:",
+						"type": "else",
+						"text": "else:",
 						"correct": false,
-						"config": {
-							"var": "nivel_azucar",
-							"op": ">=",
-							"value": "80",
-							"value_is_var": false
-						}
+						"config": {}
 					},
 					{
 						"type": "elif",

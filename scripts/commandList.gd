@@ -40,4 +40,5 @@ func _nameToType(name: String) -> int:
 		"print":  return 3
 		"assign": return 4
 		"expr":   return 5
+		"elif":   return 6
 	return 3
