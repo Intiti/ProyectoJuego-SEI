@@ -12,12 +12,7 @@ func _ready():
 	_applyGlobalTheme()
 	_showTutorialHint()
 	_buildExitTrigger()
-	_addManual()
 	call_deferred("_setup")
-
-func _addManual() -> void:
-	var manual = load("res://scripts/manualUI.gd").new()
-	add_child(manual)
 
 func _setup() -> void:
 	var dialogBox = get_tree().get_first_node_in_group("dialog_box")

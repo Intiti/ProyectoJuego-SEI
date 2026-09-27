@@ -32,7 +32,7 @@ const BLOCKS := [
 		"name": "print",
 		"color": Color(0.12, 0.52, 0.30, 1.0),
 		"desc": "Muestra un valor en la consola. Puedes imprimir texto entre comillas, variables, o mezclarlos con el operador +. Para mezclar un numero con texto hay que convertirlo a String primero con str().",
-		"example": "print(\"Hola\")\nprint(nombre)\nprint(\"Tu edad es: \" + edad)"
+		"example": "print(\"Hola\")\nprint(nombre)\nprint(\"Tu edad es: \", edad)"
 	},
 ]
 
@@ -252,5 +252,9 @@ func _selectBlock(idx: int) -> void:
 	detail.get_node_or_null("ExBox/ExLabel").text = block["example"]
 
 func _onToggle() -> void:
+	# No abrir si hay un dialogo activo
+	var dialogBox = get_tree().get_first_node_in_group("dialog_box")
+	if dialogBox and dialogBox.isOpen and not _isOpen:
+		return
 	_isOpen = !_isOpen
 	_panel.visible = _isOpen
