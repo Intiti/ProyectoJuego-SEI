@@ -9,7 +9,7 @@ const CONTROLS := {
 	"entries": [
 		{ "key": "← →", "desc": "Moverse" },
 		{ "key": "Espacio", "desc": "Saltar" },
-		{ "key": "E", "desc": "Hablar con un NPC / entrar a un edificio marcado con [color=#ff4444]![/color]" },
+		{ "key": "E", "desc": "Hablar con un NPC marcado / entrar a un edificio marcado" },
 	]
 }
 
@@ -19,7 +19,7 @@ const TIPS := {
 	"items": [
 		{
 			"title": "Estructura de un algoritmo",
-			"body": "Un algoritmo bien armado sigue este orden:\n\n  1. Entrada   — leer los datos con input()\n  2. Proceso   — calcular o decidir\n  3. Salida    — mostrar el resultado con print()\n\nSi salteas la entrada, no tienes datos para procesar.\nSi salteas la salida, nadie ve el resultado."
+			"body": "Un algoritmo bien armado sigue este orden:\n\n  1. Entrada   -> leer los datos con input()\n  2. Proceso   -> calcular o decidir\n  3. Salida    -> mostrar el resultado con print()\n\nSi salteas la entrada, no tienes datos para procesar.\nSi salteas la salida, nadie ve el resultado."
 		},
 		{
 			"title": "Orden de los if / elif / else",
