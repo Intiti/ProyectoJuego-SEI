@@ -30,7 +30,12 @@ var _slots: Array = []
 var _celebrating: bool = false
 var _arrowOverlay: Label = null  # flecha dentro de la row activa
 
-const FONT_SIZE := 22
+# Tracking de puntaje
+var _errores: int = 0
+var _rachaActual: int = 0
+var _rachaMax: int = 0
+
+const FONT_SIZE := 18
 const COMPLETION_DURATION := 3.5
 
 func _ready():
@@ -134,7 +139,7 @@ func _ready():
 	cmdWrapper.add_child(cmdTitle)
 
 	stepLabel = Label.new()
-	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	stepLabel.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cmdWrapper.add_child(stepLabel)
 
@@ -179,6 +184,9 @@ func open(data: Dictionary, npc: Node = null):
 	completeOnSteps = data.get("complete_on_steps", false)
 	_currentStep = 0
 	_slots = []
+	_errores = 0
+	_rachaActual = 0
+	_rachaMax = 0
 
 	promptLabel.text = _colorizePrompt(levelPrompt)
 	outputLabel.text = ""
@@ -360,10 +368,15 @@ func _onAlternativeChosen(block):
 				slot.erase("slot_node")
 				break
 
+		_rachaActual += 1
+		if _rachaActual > _rachaMax:
+			_rachaMax = _rachaActual
 		_showCorrect()
 		_currentStep += 1
 		_loadCurrentStep()
 	else:
+		_errores += 1
+		_rachaActual = 0
 		var hint = _steps[_currentStep].get("hint", "")
 		if hint != "":
 			_showError("Pista: " + hint)
@@ -477,10 +490,15 @@ func _onSuccess():
 	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
 		npc.onPuzzleSolved()
 
-	# Primero mostramos la celebración completa durante 3.5 segundos.
 	await _playCompletionCelebration()
 
 	_celebrating = false
+
+	# Calcular y mostrar puntaje, luego esperar que el jugador presione continuar
+	var puntaje = _calcularPuntaje()
+	GameData.gatopuntos += puntaje
+	await _mostrarTablon(puntaje)
+
 	var outroLines: Array = _currentData.get("outro_lines", [])
 	var playerScene: String = _currentData.get("player_scene", "")
 	var npcScene: String = _currentData.get("npc_scene", "")
@@ -495,6 +513,126 @@ func _onSuccess():
 			close()
 	else:
 		close()
+
+func _calcularPuntaje() -> int:
+	# Contar slots rellenables
+	var rellenables = 0
+	for s in _steps:
+		if not s.get("fixed", false):
+			rellenables += 1
+	var base = rellenables * 20
+
+	# Penalizacion por errores
+	var penalizacion = 0
+	if _errores == 1:
+		penalizacion = int(base * 0.25)
+	elif _errores >= 2:
+		penalizacion = int(base * 0.50)
+
+	# Bonificacion por racha (desde 3 correctas seguidas sin fallo)
+	var bonus = 0
+	if _errores == 0 and _rachaMax >= 3:
+		bonus = _rachaMax * 5
+
+	return max(0, base - penalizacion + bonus)
+
+func _mostrarTablon(puntaje: int) -> void:
+	# Calcular partes para mostrar en el tablon
+	var rellenables = 0
+	for s in _steps:
+		if not s.get("fixed", false):
+			rellenables += 1
+	var base = rellenables * 20
+	var penalizacion = 0
+	if _errores == 1:
+		penalizacion = int(base * 0.25)
+	elif _errores >= 2:
+		penalizacion = int(base * 0.50)
+	var bonus = 0
+	if _errores == 0 and _rachaMax >= 3:
+		bonus = _rachaMax * 5
+
+	# Fondo oscuro sobre todo
+	var overlay = ColorRect.new()
+	overlay.anchor_right = 1.0
+	overlay.anchor_bottom = 1.0
+	overlay.color = Color(0.0, 0.0, 0.0, 0.88)
+	add_child(overlay)
+
+	var vbox = VBoxContainer.new()
+	vbox.anchor_left   = 0.25
+	vbox.anchor_right  = 0.75
+	vbox.anchor_top    = 0.20
+	vbox.anchor_bottom = 0.85
+	vbox.add_theme_constant_override("separation", 18)
+	overlay.add_child(vbox)
+
+	# Titulo
+	var titulo = Label.new()
+	titulo.text = "Resultado del Puzzle"
+	titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titulo.add_theme_font_size_override("font_size", FONT_SIZE + 6)
+	titulo.add_theme_color_override("font_color", Color(0.9, 0.85, 1.0))
+	vbox.add_child(titulo)
+
+	var sep1 = HSeparator.new()
+	vbox.add_child(sep1)
+
+	# Puntaje base
+	var lblBase = Label.new()
+	lblBase.text = "Puntaje base  (%d bloques x 20): %d pts" % [rellenables, base]
+	lblBase.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	lblBase.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	vbox.add_child(lblBase)
+
+	# Penalizacion
+	var lblPen = Label.new()
+	if penalizacion == 0:
+		lblPen.text = "Penalizacion: ninguna  (sin errores)"
+		lblPen.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
+	else:
+		var pct = "25%" if _errores == 1 else "50%"
+		lblPen.text = "Penalizacion (%d error/es, -%s): -%d pts" % [_errores, pct, penalizacion]
+		lblPen.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
+	lblPen.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	vbox.add_child(lblPen)
+
+	# Bonus racha
+	var lblBonus = Label.new()
+	if bonus > 0:
+		lblBonus.text = "Bonus racha  (racha de %d): +%d pts" % [_rachaMax, bonus]
+		lblBonus.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+	else:
+		lblBonus.text = "Bonus racha: -  (racha minima de 3 sin errores)"
+		lblBonus.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	lblBonus.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	vbox.add_child(lblBonus)
+
+	var sep2 = HSeparator.new()
+	vbox.add_child(sep2)
+
+	# Total
+	var lblTotal = Label.new()
+	lblTotal.text = "Total: %d pts   (Gatopuntos acumulados: %d)" % [puntaje, GameData.gatopuntos]
+	lblTotal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lblTotal.add_theme_font_size_override("font_size", FONT_SIZE + 4)
+	lblTotal.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
+	vbox.add_child(lblTotal)
+
+	# Boton continuar
+	var btn = Button.new()
+	btn.text = "Continuar"
+	btn.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var pressed = false
+	btn.pressed.connect(func(): pressed = true)
+	vbox.add_child(btn)
+
+	# Esperar hasta que el jugador presione continuar
+	while not pressed:
+		await get_tree().process_frame
+
+	overlay.queue_free()
 
 # Celebración final: bloques de la consola en arcoíris + texto flotante.
 # El texto sube desde abajo, queda fijo en pantalla y sus letras hacen

@@ -11,6 +11,7 @@ var spawnSide: String = "left"
 # Flags de puzzles resueltos por NPC (indexados por dialogFile)
 # Se usan para que los NPCs no reseteen su "!" al reentrar a la escena
 var solvedDialogs: Dictionary = {}
+var gatopuntos: int = 0
 
 func markSolved(dialogFile: String) -> void:
 	solvedDialogs[dialogFile] = true
