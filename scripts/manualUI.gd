@@ -13,8 +13,8 @@ const CONTROLS := {
 	]
 }
 
-const TIPS := {
-	"name": "Consejos",
+const TIPS1 := {
+	"name": "Consejos 1",
 	"color": Color(0.75, 0.65, 0.20, 1.0),
 	"items": [
 		{
@@ -29,6 +29,13 @@ const TIPS := {
 			"title": "El else no lleva condicion",
 			"body": "El else no tiene comparacion: se ejecuta automaticamente cuando ninguno de los if/elif anteriores fue verdadero.\n\nUsalo para el caso por defecto, como un error o valor inesperado."
 		},
+	]
+}
+
+const TIPS2 := {
+	"name": "Consejos 2",
+	"color": Color(0.65, 0.50, 0.15, 1.0),
+	"items": [
 		{
 			"title": "Variables y tipos",
 			"body": "input() siempre entrega texto. Si vas a comparar o calcular con numeros, convierte antes:\n\n  int(input())   -> entero\n  float(input()) -> decimal\n\nComparar texto con numero (\"5\" == 5) siempre da False."
@@ -200,7 +207,7 @@ func _buildPanel() -> void:
 	extraSep.custom_minimum_size = Vector2(0, 8)
 	sidebar.add_child(extraSep)
 
-	for extra in [CONTROLS, TIPS]:
+	for extra in [CONTROLS, TIPS1, TIPS2]:
 		var ebtn = Button.new()
 		ebtn.text = extra["name"]
 		ebtn.add_theme_font_size_override("font_size", FONT_SIZE)
@@ -349,12 +356,13 @@ func _selectMode(modeName: String) -> void:
 		exTitle.visible = false
 		exBox.visible = false
 
-	elif modeName == "Consejos":
-		nameLabel.text = TIPS["name"]
-		nameLabel.add_theme_color_override("font_color", TIPS["color"])
+	elif modeName == "Consejos 1" or modeName == "Consejos 2":
+		var tipSet = TIPS1 if modeName == "Consejos 1" else TIPS2
+		nameLabel.text = tipSet["name"]
+		nameLabel.add_theme_color_override("font_color", tipSet["color"])
 		descTitle.text = ""
 		var allText = ""
-		for item in TIPS["items"]:
+		for item in tipSet["items"]:
 			allText += "▸ " + item["title"] + "\n" + item["body"] + "\n\n"
 		descNode.text = allText.strip_edges()
 		exTitle.visible = false

@@ -667,7 +667,7 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 		letter.size = Vector2(22, 60)
 		letter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		letter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		letter.add_theme_font_size_override("font_size", FONT_SIZE + 8)
+		letter.add_theme_font_size_override("font_size", FONT_SIZE + 18)
 		letter.add_theme_color_override("font_color", Color.WHITE)
 		letter.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 1.0))
 		letter.add_theme_constant_override("outline_size", 4)
