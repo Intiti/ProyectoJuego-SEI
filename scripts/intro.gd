@@ -16,6 +16,8 @@ func _ready():
 	fadeRect.color = Color(0, 0, 0, 1)
 	_blockPlayer()
 	dialogBox.cinematicDialogFinished.connect(_onIntroDialogFinished)
+	# ── Música de la intro (crossfade desde la del menú) ──────────────────
+	DJManager.playMusic("intro")
 	_fadeIn()
 
 func _applyGlobalTheme() -> void:
@@ -59,7 +61,6 @@ func _showTutorialHint():
 	tutorialLabel.add_theme_constant_override("shadow_offset_x", 2)
 	tutorialLabel.add_theme_constant_override("shadow_offset_y", 2)
 
-	# Centrado en la parte baja de la pantalla
 	tutorialLabel.anchor_left   = 0.5
 	tutorialLabel.anchor_right  = 0.5
 	tutorialLabel.anchor_top    = 1.0
@@ -71,8 +72,6 @@ func _showTutorialHint():
 	tutorialLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	tutorialLayer.add_child(tutorialLabel)
-
-	# Parpadeo suave
 	_blinkLabel(tutorialLabel)
 
 func _blinkLabel(label: Label):

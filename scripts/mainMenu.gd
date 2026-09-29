@@ -10,6 +10,8 @@ var skipButton: Button
 func _ready():
 	_applyGlobalTheme()
 	_createSkipButton()
+	# ── Música del menú principal ──────────────────────────────────────────
+	DJManager.playMusic("menu")
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/MotionControl-Bold.otf")

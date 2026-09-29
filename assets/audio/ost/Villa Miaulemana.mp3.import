@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cfu3c8j8jtppl"
+path="res://.godot/imported/Villa Miaulemana.mp3-6a35f71a1278629260319749bd2934b9.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/ost/Villa Miaulemana.mp3"
+dest_files=["res://.godot/imported/Villa Miaulemana.mp3-6a35f71a1278629260319749bd2934b9.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

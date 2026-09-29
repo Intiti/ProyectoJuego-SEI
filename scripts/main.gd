@@ -13,6 +13,8 @@ func _ready():
 	_showTutorialHint()
 	_buildExitTrigger()
 	call_deferred("_setup")
+	# ── Música de la villa (plaza/mapa principal) ──────────────────────────
+	DJManager.playMusic("villa")
 
 func _setup() -> void:
 	var dialogBox = get_tree().get_first_node_in_group("dialog_box")

@@ -240,10 +240,13 @@ func showLine():
 	typeText()
 
 func typeText():
+	var skipBleep = [" ", ".", ",", "!", "?", ":", ";", "\n", "(", ")"]
 	for i in fullText.length():
 		if not isTyping:
 			break
 		dialogLabel.text = fullText.substr(0, i + 1)
+		if fullText[i] not in skipBleep:
+			DJManager.playDialogBleep()
 		await get_tree().create_timer(letterSpeed).timeout
 	dialogLabel.text = fullText
 	isTyping = false
