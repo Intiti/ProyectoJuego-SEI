@@ -544,7 +544,13 @@ func _onSuccess():
 	var playerScene: String = _currentData.get("player_scene", "")
 	var npcScene: String = _currentData.get("npc_scene", "")
 
-	if outroLines.size() > 0:
+	# Si el NPC es el guardia de examen, delegarle el control en vez del outro normal
+	if is_instance_valid(_activeNpc) and _activeNpc.has_method("onExamPuzzleFinished"):
+		var examNpc = _activeNpc
+		_activeNpc = null
+		_closeKeepPlayerFrozen()
+		examNpc.onExamPuzzleFinished()
+	elif outroLines.size() > 0:
 		_closeKeepPlayerFrozen()
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 		if dialogBox:

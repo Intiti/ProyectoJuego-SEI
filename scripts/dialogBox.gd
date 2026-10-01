@@ -107,6 +107,38 @@ func openWithNpc(jsonPath: String, npc: Node):
 		_npcPortraitTexture = null
 	open(jsonPath)
 
+# Variante para el guardia de examen: recibe el JSON ya parseado (no una ruta)
+# y abre solo el diálogo de introducción, sin puzzle. Al cerrarse, el NPC
+# (npc_guardia.gd) lanzará el primer ejercicio mediante onExamPuzzleFinished.
+func openWithNpcExam(parsed: Dictionary, npc: Node):
+	if isOpen:
+		return
+	_activeNpc = npc
+	if npc.get("npcSprite") != null and npc.npcSprite:
+		_npcPortraitTexture = npc.npcSprite
+	else:
+		_npcPortraitTexture = null
+
+	lines = parsed["lines"]
+	currentLine = 0
+	isOpen = true
+	isCinematic = false
+	puzzleData = {}  # Sin puzzle: el examen lo gestiona el NPC
+
+	if _npcPortraitTexture:
+		rightPortrait.texture = _npcPortraitTexture
+	elif parsed.has("npc_scene"):
+		rightPortrait.texture = _getFirstFrameFromScene(parsed["npc_scene"])
+	if parsed.has("player_scene"):
+		leftPortrait.texture = _getFirstFrameFromScene(parsed["player_scene"])
+
+	overlay.visible = true
+	panel.visible = true
+	leftPortrait.visible = true
+	rightPortrait.visible = true
+	get_tree().get_first_node_in_group("player").set_physics_process(false)
+	showLine()
+
 func open(jsonPath: String):
 	if isOpen:
 		return
@@ -309,3 +341,8 @@ func closeDialog():
 		_activeNpc = null
 		if puzzle:
 			puzzle.open(dataToOpen, npcRef)
+	elif is_instance_valid(_activeNpc) and _activeNpc.has_method("onExamPuzzleFinished"):
+		# El guardia de examen maneja el lanzamiento del primer ejercicio
+		var npcRef = _activeNpc
+		_activeNpc = null
+		npcRef.onExamPuzzleFinished()

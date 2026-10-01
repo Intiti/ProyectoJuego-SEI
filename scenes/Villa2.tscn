@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/NPC.tscn" id="7_tlqdt"]
 [ext_resource type="Texture2D" uid="uid://dxm3q8eq0c6u1" path="res://assets/ambiente/school.png" id="7_v0d3p"]
+[ext_resource type="Script" uid="uid://c4supe7umnv8k" path="res://scenes/guardia.gd" id="8_tlqdt"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)
@@ -53,6 +54,12 @@ position = Vector2(382, 474)
 texture = ExtResource("7_v0d3p")
 
 [node name="NPC_E14" parent="." unique_id=1466623536 instance=ExtResource("7_tlqdt")]
-position = Vector2(677.00006, 544)
+position = Vector2(722, 541)
 scale = Vector2(1.25, 1.25)
 dialogFile = "res://dialogs/npc_e14.json"
+
+[node name="Guardia1" parent="." unique_id=359357008 instance=ExtResource("7_tlqdt")]
+position = Vector2(996.99994, 544.00006)
+scale = Vector2(1.25, 1.25)
+script = ExtResource("8_tlqdt")
+dialogFile = "res://dialogs/npc_guardia_villa2.json"

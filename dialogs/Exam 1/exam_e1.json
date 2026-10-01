@@ -1,0 +1,120 @@
+{
+	"puzzle": {
+		"prompt": "Pide un número entero. Calcula el doble de ese número asignándolo a una variable llamada 'doble'. Luego imprime el valor de 'doble'.",
+		"variables": {
+			"numero": 0,
+			"doble": 0
+		},
+		"inputs": [5],
+		"expected_output": [10],
+		"steps": [
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "numero = int(input())",
+						"correct": true,
+						"config": { "var": "numero" }
+					},
+					{
+						"type": "input",
+						"text": "numero = input()",
+						"correct": false,
+						"config": { "var": "numero" }
+					},
+					{
+						"type": "assign",
+						"text": "numero = 0",
+						"correct": false,
+						"config": { "var": "numero", "assign_value": "0" }
+					},
+					{
+						"type": "input",
+						"text": "doble = int(input())",
+						"correct": false,
+						"config": { "var": "doble" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "expr",
+				"alternatives": [
+					{
+						"type": "expr",
+						"text": "doble = numero * 2",
+						"correct": true,
+						"config": {
+							"var": "doble",
+							"expr_a": "numero",
+							"expr_op": "*",
+							"expr_b": "2"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "doble = numero + 2",
+						"correct": false,
+						"config": {
+							"var": "doble",
+							"expr_a": "numero",
+							"expr_op": "+",
+							"expr_b": "2"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "doble = numero * numero",
+						"correct": false,
+						"config": {
+							"var": "doble",
+							"expr_a": "numero",
+							"expr_op": "*",
+							"expr_b": "numero"
+						}
+					},
+					{
+						"type": "assign",
+						"text": "doble = 2",
+						"correct": false,
+						"config": { "var": "doble", "assign_value": "2" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "print(doble)",
+						"correct": true,
+						"config": { "value": "doble" }
+					},
+					{
+						"type": "print",
+						"text": "print(numero)",
+						"correct": false,
+						"config": { "value": "numero" }
+					},
+					{
+						"type": "print",
+						"text": "print(\"doble\")",
+						"correct": false,
+						"config": { "value": "\"doble\"" }
+					},
+					{
+						"type": "print",
+						"text": "print(numero * 2)",
+						"correct": false,
+						"config": { "value": "numero * 2" }
+					}
+				]
+			}
+		],
+		"show_output": true,
+		"complete_on_steps": true
+	}
+}

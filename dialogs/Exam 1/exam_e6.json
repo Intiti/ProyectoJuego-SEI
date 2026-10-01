@@ -1,0 +1,217 @@
+{
+	"puzzle": {
+		"prompt": "Pide un número entero. Calcula el resto de dividirlo entre 2 y guárdalo en una variable llamada 'resto'. Si el resto es igual a 0, imprime \"Par\". Si no, imprime \"Impar\".",
+		"variables": {
+			"numero": 0,
+			"resto": 0
+		},
+		"inputs": [6],
+		"expected_output": ["Par"],
+		"steps": [
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "numero = int(input())",
+						"correct": true,
+						"config": { "var": "numero" }
+					},
+					{
+						"type": "input",
+						"text": "numero = float(input())",
+						"correct": false,
+						"config": { "var": "numero" }
+					},
+					{
+						"type": "input",
+						"text": "resto = int(input())",
+						"correct": false,
+						"config": { "var": "resto" }
+					},
+					{
+						"type": "input",
+						"text": "numero = input()",
+						"correct": false,
+						"config": { "var": "numero" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "expr",
+				"alternatives": [
+					{
+						"type": "expr",
+						"text": "resto = numero % 2",
+						"correct": true,
+						"config": {
+							"var": "resto",
+							"expr_a": "numero",
+							"expr_op": "%",
+							"expr_b": "2"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "resto = numero / 2",
+						"correct": false,
+						"config": {
+							"var": "resto",
+							"expr_a": "numero",
+							"expr_op": "/",
+							"expr_b": "2"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "resto = numero // 2",
+						"correct": false,
+						"config": {
+							"var": "resto",
+							"expr_a": "numero",
+							"expr_op": "//",
+							"expr_b": "2"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "resto = numero % 10",
+						"correct": false,
+						"config": {
+							"var": "resto",
+							"expr_a": "numero",
+							"expr_op": "%",
+							"expr_b": "10"
+						}
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "if resto == 0:",
+						"correct": true,
+						"config": { "var": "resto", "op": "==", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if resto != 0:",
+						"correct": false,
+						"config": { "var": "resto", "op": "!=", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if numero == 0:",
+						"correct": false,
+						"config": { "var": "numero", "op": "==", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if numero % 2:",
+						"correct": false,
+						"config": { "var": "numero", "op": "%", "value": "2", "value_is_var": false }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Par\")",
+						"correct": true,
+						"config": { "value": "\"Par\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Impar\")",
+						"correct": false,
+						"config": { "value": "\"Impar\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(resto)",
+						"correct": false,
+						"config": { "value": "resto" }
+					},
+					{
+						"type": "print",
+						"text": "  print(numero)",
+						"correct": false,
+						"config": { "value": "numero" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "else",
+				"alternatives": [
+					{
+						"type": "else",
+						"text": "else:",
+						"correct": true,
+						"config": {}
+					},
+					{
+						"type": "elif",
+						"text": "elif resto == 1:",
+						"correct": false,
+						"config": { "var": "resto", "op": "==", "value": "1", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if resto != 0:",
+						"correct": false,
+						"config": { "var": "resto", "op": "!=", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "else",
+						"text": "elif numero != 0:",
+						"correct": false,
+						"config": {}
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Impar\")",
+						"correct": true,
+						"config": { "value": "\"Impar\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Par\")",
+						"correct": false,
+						"config": { "value": "\"Par\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(resto)",
+						"correct": false,
+						"config": { "value": "resto" }
+					},
+					{
+						"type": "print",
+						"text": "  print(numero)",
+						"correct": false,
+						"config": { "value": "numero" }
+					}
+				]
+			}
+		],
+		"show_output": true,
+		"complete_on_steps": true
+	}
+}

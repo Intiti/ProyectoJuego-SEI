@@ -1,0 +1,243 @@
+{
+	"puzzle": {
+		"prompt": "Pide dos números con decimales. Calcula la diferencia entre el primero y el segundo (primero menos segundo) y guárdala en una variable llamada 'diferencia'. Si la diferencia es mayor que 0, imprime \"Positivo\". Si no, imprime \"Negativo o cero\".",
+		"variables": {
+			"x": 0.0,
+			"y": 0.0,
+			"diferencia": 0.0
+		},
+		"inputs": [7.5, 3.0],
+		"expected_output": ["Positivo"],
+		"steps": [
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "x = float(input())",
+						"correct": true,
+						"config": { "var": "x" }
+					},
+					{
+						"type": "input",
+						"text": "x = int(input())",
+						"correct": false,
+						"config": { "var": "x" }
+					},
+					{
+						"type": "input",
+						"text": "x = input()",
+						"correct": false,
+						"config": { "var": "x" }
+					},
+					{
+						"type": "input",
+						"text": "diferencia = float(input())",
+						"correct": false,
+						"config": { "var": "diferencia" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "y = float(input())",
+						"correct": true,
+						"config": { "var": "y" }
+					},
+					{
+						"type": "input",
+						"text": "y = int(input())",
+						"correct": false,
+						"config": { "var": "y" }
+					},
+					{
+						"type": "input",
+						"text": "x = float(input())",
+						"correct": false,
+						"config": { "var": "x" }
+					},
+					{
+						"type": "assign",
+						"text": "y = 0.0",
+						"correct": false,
+						"config": { "var": "y", "assign_value": "0.0" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "expr",
+				"alternatives": [
+					{
+						"type": "expr",
+						"text": "diferencia = x - y",
+						"correct": true,
+						"config": {
+							"var": "diferencia",
+							"expr_a": "x",
+							"expr_op": "-",
+							"expr_b": "y"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "diferencia = y - x",
+						"correct": false,
+						"config": {
+							"var": "diferencia",
+							"expr_a": "y",
+							"expr_op": "-",
+							"expr_b": "x"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "diferencia = x + y",
+						"correct": false,
+						"config": {
+							"var": "diferencia",
+							"expr_a": "x",
+							"expr_op": "+",
+							"expr_b": "y"
+						}
+					},
+					{
+						"type": "assign",
+						"text": "diferencia = 0.0",
+						"correct": false,
+						"config": { "var": "diferencia", "assign_value": "0.0" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "if diferencia > 0:",
+						"correct": true,
+						"config": { "var": "diferencia", "op": ">", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if diferencia >= 0:",
+						"correct": false,
+						"config": { "var": "diferencia", "op": ">=", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if diferencia == 0:",
+						"correct": false,
+						"config": { "var": "diferencia", "op": "==", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if x > y:",
+						"correct": false,
+						"config": { "var": "x", "op": ">", "value": "y", "value_is_var": true }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Positivo\")",
+						"correct": true,
+						"config": { "value": "\"Positivo\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Negativo o cero\")",
+						"correct": false,
+						"config": { "value": "\"Negativo o cero\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(diferencia)",
+						"correct": false,
+						"config": { "value": "diferencia" }
+					},
+					{
+						"type": "print",
+						"text": "  print(x)",
+						"correct": false,
+						"config": { "value": "x" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "else",
+				"alternatives": [
+					{
+						"type": "else",
+						"text": "else:",
+						"correct": true,
+						"config": {}
+					},
+					{
+						"type": "if",
+						"text": "if diferencia <= 0:",
+						"correct": false,
+						"config": { "var": "diferencia", "op": "<=", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "elif",
+						"text": "elif diferencia < 0:",
+						"correct": false,
+						"config": { "var": "diferencia", "op": "<", "value": "0", "value_is_var": false }
+					},
+					{
+						"type": "else",
+						"text": "elif diferencia == 0:",
+						"correct": false,
+						"config": {}
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"Negativo o cero\")",
+						"correct": true,
+						"config": { "value": "\"Negativo o cero\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Positivo\")",
+						"correct": false,
+						"config": { "value": "\"Positivo\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(diferencia)",
+						"correct": false,
+						"config": { "value": "diferencia" }
+					},
+					{
+						"type": "print",
+						"text": "  print(y)",
+						"correct": false,
+						"config": { "value": "y" }
+					}
+				]
+			}
+		],
+		"show_output": true,
+		"complete_on_steps": true
+	}
+}

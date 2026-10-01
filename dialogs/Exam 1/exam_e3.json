@@ -1,0 +1,151 @@
+{
+	"puzzle": {
+		"prompt": "Pide dos números enteros. Calcula su suma y guárdala en una variable llamada 'resultado'. Luego imprime el valor de 'resultado'.",
+		"variables": {
+			"a": 0,
+			"b": 0,
+			"resultado": 0
+		},
+		"inputs": [8, 5],
+		"expected_output": [13],
+		"steps": [
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "a = int(input())",
+						"correct": true,
+						"config": { "var": "a" }
+					},
+					{
+						"type": "input",
+						"text": "a = input()",
+						"correct": false,
+						"config": { "var": "a" }
+					},
+					{
+						"type": "input",
+						"text": "resultado = int(input())",
+						"correct": false,
+						"config": { "var": "resultado" }
+					},
+					{
+						"type": "assign",
+						"text": "a = 0",
+						"correct": false,
+						"config": { "var": "a", "assign_value": "0" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "b = int(input())",
+						"correct": true,
+						"config": { "var": "b" }
+					},
+					{
+						"type": "input",
+						"text": "b = input()",
+						"correct": false,
+						"config": { "var": "b" }
+					},
+					{
+						"type": "input",
+						"text": "a = int(input())",
+						"correct": false,
+						"config": { "var": "a" }
+					},
+					{
+						"type": "assign",
+						"text": "b = 0",
+						"correct": false,
+						"config": { "var": "b", "assign_value": "0" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "expr",
+				"alternatives": [
+					{
+						"type": "expr",
+						"text": "resultado = a + b",
+						"correct": true,
+						"config": {
+							"var": "resultado",
+							"expr_a": "a",
+							"expr_op": "+",
+							"expr_b": "b"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "resultado = a - b",
+						"correct": false,
+						"config": {
+							"var": "resultado",
+							"expr_a": "a",
+							"expr_op": "-",
+							"expr_b": "b"
+						}
+					},
+					{
+						"type": "expr",
+						"text": "resultado = a * b",
+						"correct": false,
+						"config": {
+							"var": "resultado",
+							"expr_a": "a",
+							"expr_op": "*",
+							"expr_b": "b"
+						}
+					},
+					{
+						"type": "assign",
+						"text": "resultado = 0",
+						"correct": false,
+						"config": { "var": "resultado", "assign_value": "0" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "print(resultado)",
+						"correct": true,
+						"config": { "value": "resultado" }
+					},
+					{
+						"type": "print",
+						"text": "print(a)",
+						"correct": false,
+						"config": { "value": "a" }
+					},
+					{
+						"type": "print",
+						"text": "print(a + b)",
+						"correct": false,
+						"config": { "value": "a + b" }
+					},
+					{
+						"type": "print",
+						"text": "print(b)",
+						"correct": false,
+						"config": { "value": "b" }
+					}
+				]
+			}
+		],
+		"show_output": true,
+		"complete_on_steps": true
+	}
+}
