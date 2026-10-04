@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/NPC.tscn" id="7_tlqdt"]
 [ext_resource type="Texture2D" uid="uid://dxm3q8eq0c6u1" path="res://assets/ambiente/school.png" id="7_v0d3p"]
-[ext_resource type="Script" uid="uid://c4supe7umnv8k" path="res://scenes/guardia.gd" id="8_tlqdt"]
+[ext_resource type="Script" uid="uid://c4supe7umnv8k" path="res://scripts/guardia.gd" id="8_tlqdt"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)

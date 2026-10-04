@@ -36,6 +36,14 @@ var _errores: int = 0
 var _rachaActual: int = 0
 var _rachaMax: int = 0
 
+# --- Sistema de vidas del examen ---
+var _examMode: bool = false      # true cuando este puzzle es parte de un examen
+var _examLives: int = 3          # vidas restantes durante la sesión de examen
+var _examSessionActive: bool = false
+var _livesLabel: Label = null    # label de vidas en la UI
+
+const EXAM_MAX_ERRORS: int = 3   # errores antes de mostrar EXAMEN FALLIDO
+
 const FONT_SIZE := 18
 const COMPLETION_DURATION := 3.5
 
@@ -144,6 +152,13 @@ func _ready():
 	stepLabel.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cmdWrapper.add_child(stepLabel)
 
+	# Label de vidas (solo visible en modo examen)
+	_livesLabel = Label.new()
+	_livesLabel.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	_livesLabel.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
+	_livesLabel.visible = false
+	cmdWrapper.add_child(_livesLabel)
+
 	commandList = VBoxContainer.new()
 	commandList.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	commandList.set_script(load("res://scripts/commandList.gd"))
@@ -189,6 +204,25 @@ func open(data: Dictionary, npc: Node = null):
 	_rachaActual = 0
 	_rachaMax = 0
 
+	# Detectar si venimos de un examen
+	_examMode = data.get("exam_mode", false)
+	# En un examen, las vidas pertenecen a toda la sesión y NO se reinician
+	# al cargar el siguiente ejercicio. Solo se inicializan en beginExamSession().
+	if not _examMode:
+		_examSessionActive = false
+		_examLives = EXAM_MAX_ERRORS
+	elif not _examSessionActive:
+		# Respaldo por si se abre un ejercicio de examen sin pasar por beginExamSession().
+		_examLives = EXAM_MAX_ERRORS
+		_examSessionActive = true
+
+	# Mostrar/actualizar label de vidas
+	if _examMode:
+		_livesLabel.visible = true
+		_updateLivesLabel()
+	else:
+		_livesLabel.visible = false
+
 	promptLabel.text = _colorizePrompt(levelPrompt)
 	outputLabel.text = ""
 	outputLabel.visible = showOutput
@@ -209,6 +243,25 @@ func open(data: Dictionary, npc: Node = null):
 	player.set_physics_process(false)
 	player.set_process_unhandled_input(false)
 	player.set_process_input(false)
+
+func beginExamSession() -> void:
+	# Inicia una nueva sesión de examen con 3 vidas.
+	_examSessionActive = true
+	_examLives = EXAM_MAX_ERRORS
+	_updateLivesLabel()
+
+func endExamSession() -> void:
+	# Termina la sesión actual. El siguiente examen volverá a comenzar con 3 vidas.
+	_examSessionActive = false
+	_examLives = EXAM_MAX_ERRORS
+
+func _updateLivesLabel():
+	var hearts = ""
+	for i in range(_examLives):
+		hearts += "❤ "
+	for i in range(EXAM_MAX_ERRORS - _examLives):
+		hearts += "🖤 "
+	_livesLabel.text = "Vidas: " + hearts.strip_edges()
 
 # Crea TODOS los slots en orden: fijos completos, vacíos bordeados para los que hay que elegir
 func _buildAllSlots():
@@ -382,6 +435,16 @@ func _onAlternativeChosen(block):
 		_errores += 1
 		_rachaActual = 0
 		GameData.rachaGlobal = 0
+
+		# En modo examen: descontar vida
+		if _examMode:
+			_examLives -= 1
+			_updateLivesLabel()
+			if _examLives <= 0:
+				# Sin vidas: mostrar pantalla de EXAMEN FALLIDO
+				await _showExamFailed()
+				return
+
 		var hint = _steps[_currentStep].get("hint", "")
 		if hint != "":
 			_showError("Pista: " + hint)
@@ -517,6 +580,162 @@ func _showStreakPopup(n: int) -> void:
 	tw.tween_property(lbl, "modulate:a", 0.0, 1.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): lbl.queue_free())
 
+# Muestra la pantalla de EXAMEN FALLIDO (mismo estilo que el tablón de completado)
+# y espera a que el jugador presione "Intentar de nuevo" o "Salir".
+# Retorna true si quiere reintentar, false si quiere salir.
+func _showExamFailed() -> void:
+	panel.move_to_front()
+	_disableCommandList()
+
+	var failContinuar: bool = false
+	var failRetry: bool = false
+
+	# --- Contenedor de la pantalla de fallo (cubre todo el panel) ---
+	var overlay = ColorRect.new()
+	overlay.name = "ExamFailedOverlay"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0.0, 0.0, 0.0, 0.82)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.add_child(overlay)
+
+	# --- Tablón rojo que sube desde abajo ---
+	var tablonW = panel.size.x * 0.58
+	var tablonH = panel.size.y * 0.55
+	var tablonX = (panel.size.x - tablonW) * 0.5
+	var tablonTargetY = panel.size.y - tablonH - (panel.size.y * 0.14)
+
+	var tablon = PanelContainer.new()
+	var tablonStyle = StyleBoxFlat.new()
+	tablonStyle.bg_color = Color(0.08, 0.02, 0.02, 0.97)
+	tablonStyle.border_color = Color(0.85, 0.10, 0.10, 1.0)
+	tablonStyle.border_width_left = 3
+	tablonStyle.border_width_right = 3
+	tablonStyle.border_width_top = 3
+	tablonStyle.border_width_bottom = 3
+	tablonStyle.corner_radius_top_left = 12
+	tablonStyle.corner_radius_top_right = 12
+	tablonStyle.corner_radius_bottom_left = 12
+	tablonStyle.corner_radius_bottom_right = 12
+	tablonStyle.content_margin_left = 24
+	tablonStyle.content_margin_right = 24
+	tablonStyle.content_margin_top = 20
+	tablonStyle.content_margin_bottom = 20
+	tablon.add_theme_stylebox_override("panel", tablonStyle)
+	tablon.position = Vector2(tablonX, panel.size.y)
+	tablon.size = Vector2(tablonW, tablonH)
+	tablon.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.add_child(tablon)
+
+	var tablonTween = tablon.create_tween()
+	tablonTween.tween_property(tablon, "position:y", tablonTargetY, 0.65).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# --- Contenido del tablón ---
+	var tablonVbox = VBoxContainer.new()
+	tablonVbox.add_theme_constant_override("separation", 14)
+	tablon.add_child(tablonVbox)
+
+	# Título animado: "EXAMEN FALLIDO" letra por letra
+	var textContainer = HBoxContainer.new()
+	textContainer.alignment = BoxContainer.ALIGNMENT_CENTER
+	textContainer.add_theme_constant_override("separation", 0)
+	textContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	textContainer.custom_minimum_size = Vector2(0, 60)
+	tablonVbox.add_child(textContainer)
+
+	var message = "EXAMEN FALLIDO"
+	var letters: Array = []
+	for i in message.length():
+		var letterSlot = Control.new()
+		letterSlot.custom_minimum_size = Vector2(28, 60)
+		textContainer.add_child(letterSlot)
+
+		var letter = Label.new()
+		letter.text = message.substr(i, 1)
+		letter.position = Vector2(0, 0)
+		letter.size = Vector2(28, 60)
+		letter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		letter.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		letter.add_theme_font_size_override("font_size", FONT_SIZE + 18)
+		letter.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+		letter.add_theme_color_override("font_outline_color", Color(0.05, 0.00, 0.00, 1.0))
+		letter.add_theme_constant_override("outline_size", 4)
+		letter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		letterSlot.add_child(letter)
+		letters.append(letter)
+
+	var sep1 = HSeparator.new()
+	tablonVbox.add_child(sep1)
+
+	var lblMsg = Label.new()
+	lblMsg.text = "Cometiste 3 errores en este ejercicio.\nDebes intentarlo de nuevo."
+	lblMsg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lblMsg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lblMsg.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	lblMsg.add_theme_color_override("font_color", Color(0.95, 0.75, 0.75))
+	tablonVbox.add_child(lblMsg)
+
+	var sep2 = HSeparator.new()
+	tablonVbox.add_child(sep2)
+
+	# Botón Intentar de nuevo
+	var btnRetry = Button.new()
+	btnRetry.text = "Intentar de nuevo"
+	btnRetry.add_theme_font_size_override("font_size", FONT_SIZE + 6)
+	btnRetry.custom_minimum_size = Vector2(260, 52)
+	btnRetry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	btnRetry.mouse_filter = Control.MOUSE_FILTER_STOP
+	btnRetry.pressed.connect(func(): failRetry = true)
+	tablonVbox.add_child(btnRetry)
+
+	# --- Loop de animación: letras parpadeando en rojo, borde ciclando ---
+	var startTime = Time.get_ticks_msec()
+	while not failRetry:
+		var elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
+
+		# Letras: pulso de brillo rojo
+		for i in letters.size():
+			var letter: Label = letters[i]
+			var wave = sin(elapsed * 5.0 - float(i) * 0.4) * 5.0
+			letter.position.y = wave
+			var brightness = 0.7 + 0.3 * abs(sin(elapsed * 2.5 + float(i) * 0.3))
+			letter.add_theme_color_override("font_color", Color(brightness, 0.05, 0.05))
+
+		# Borde del tablón: cicla entre rojo y naranja oscuro
+		var borderHue = 0.02 + 0.04 * abs(sin(elapsed * 1.2))
+		tablonStyle.border_color = Color.from_hsv(borderHue, 0.95, 0.9)
+		tablon.add_theme_stylebox_override("panel", tablonStyle)
+
+		await get_tree().process_frame
+
+	overlay.queue_free()
+
+	# Reiniciar el ejercicio actual desde cero (sin cerrar el puzzleManager)
+	_restartCurrentExercise()
+
+# Reinicia el ejercicio actual: limpia slots, errores, vidas y vuelve a construir todo.
+func _restartCurrentExercise() -> void:
+	_errores = 0
+	_examLives = EXAM_MAX_ERRORS
+	_currentStep = 0
+	_slots = []
+	_rachaActual = 0
+
+	_updateLivesLabel()
+	outputLabel.text = ""
+	feedbackLabel.visible = false
+
+	dropZone.clear()
+	dropZone.setup(levelVars, [])
+
+	_buildAllSlots()
+	_loadCurrentStep()
+
+	# Re-habilitar la lista de alternativas
+	for child in commandList.get_children():
+		if child is PanelContainer:
+			child.mouse_filter = Control.MOUSE_FILTER_STOP
+			child.modulate.a = 1.0
+
 func _onSuccess():
 	if _celebrating:
 		return
@@ -528,9 +747,7 @@ func _onSuccess():
 	_disableCommandList()
 
 	var npc = _activeNpc
-	_activeNpc = null
-	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
-		npc.onPuzzleSolved()
+	# NO limpiamos _activeNpc aquí todavía; lo necesitamos para onExamPuzzleFinished
 
 	var puntaje = _calcularPuntaje()
 	GameData.gatopuntos += puntaje
@@ -540,17 +757,21 @@ func _onSuccess():
 
 	_celebrating = false
 
+	# Si venimos de un examen, delegarle el control al guardia
+	if _examMode and is_instance_valid(npc) and npc.has_method("onExamPuzzleFinished"):
+		_activeNpc = null
+		_closeKeepPlayerFrozen()
+		npc.onExamPuzzleFinished()
+		return
+
 	var outroLines: Array = _currentData.get("outro_lines", [])
 	var playerScene: String = _currentData.get("player_scene", "")
 	var npcScene: String = _currentData.get("npc_scene", "")
 
-	# Si el NPC es el guardia de examen, delegarle el control en vez del outro normal
-	if is_instance_valid(_activeNpc) and _activeNpc.has_method("onExamPuzzleFinished"):
-		var examNpc = _activeNpc
-		_activeNpc = null
-		_closeKeepPlayerFrozen()
-		examNpc.onExamPuzzleFinished()
-	elif outroLines.size() > 0:
+	if is_instance_valid(npc) and npc.has_method("onPuzzleSolved"):
+		npc.onPuzzleSolved()
+
+	if outroLines.size() > 0:
 		_closeKeepPlayerFrozen()
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 		if dialogBox:

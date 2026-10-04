@@ -95,7 +95,7 @@ func onPuzzleSolved():
 			GameData.markSolved(dialogFile)
 		if solvedFlag != "" and GameData.get(solvedFlag) != null:
 			GameData.set(solvedFlag, true)
-		# El outro del examen se abre en _onExamPuzzleFinished después de la celebración
+		# El outro del examen se abre en onExamPuzzleFinished después de la celebración
 
 func tryStartDialog():
 	if not playerNearby or not needsHelp:
@@ -147,6 +147,11 @@ func _initExam(parsed: Dictionary, dialogBox: Node) -> void:
 
 	_examIndex = 0
 	_examMode = true
+
+	# Iniciar una nueva sesión: las 3 vidas se mantienen entre los 3 ejercicios.
+	var puzzle = get_tree().get_first_node_in_group("puzzle")
+	if puzzle and puzzle.has_method("beginExamSession"):
+		puzzle.beginExamSession()
 	_examOutroLines = parsed.get("outro_lines", [])
 	_examPlayerScene = parsed.get("player_scene", "")
 	_examNpcScene = parsed.get("npc_scene", "")
@@ -159,14 +164,31 @@ func _initExam(parsed: Dictionary, dialogBox: Node) -> void:
 # Llamado desde puzzleManager cuando termina la celebración del ejercicio de examen
 # (en lugar del outro normal). Lanza el siguiente ejercicio o el outro final.
 func onExamPuzzleFinished() -> void:
+	# El ejercicio que acaba de terminar ya fue resuelto correctamente.
+	# Avanzamos el índice ANTES de cargar el siguiente para no repetirlo.
+	_examIndex += 1
+
 	if _examIndex < _examPicked.size():
-		# Hay más ejercicios
+		# Hay más ejercicios — cargar el siguiente directamente
 		var puzzle = get_tree().get_first_node_in_group("puzzle")
 		var nextPuzzleData = _loadPuzzleData(_examPicked[_examIndex])
 		if puzzle and nextPuzzleData:
 			puzzle.open(nextPuzzleData, self)
 	else:
 		# Todos resueltos: mostrar outro del guardia
+		needsHelp = false
+		if is_instance_valid(_exclamLabel):
+			_exclamLabel.queue_free()
+			_exclamLabel = null
+		if dialogFile != "":
+			GameData.markSolved(dialogFile)
+		if solvedFlag != "" and GameData.get(solvedFlag) != null:
+			GameData.set(solvedFlag, true)
+
+		var puzzle = get_tree().get_first_node_in_group("puzzle")
+		if puzzle and puzzle.has_method("endExamSession"):
+			puzzle.endExamSession()
+
 		var dialogBox = get_tree().get_first_node_in_group("dialog_box")
 		if dialogBox and _examOutroLines.size() > 0:
 			var savedTexture: Texture2D = dialogBox._npcPortraitTexture
@@ -181,9 +203,10 @@ func _loadPuzzleData(path: String) -> Dictionary:
 	var parsed = JSON.parse_string(file.get_as_text())
 	file.close()
 	var puzzleData: Dictionary = parsed.get("puzzle", {})
-	# Inyectar npc_scene y player_scene para que puzzleManager tenga contexto
+	# Inyectar contexto de examen y escenas
 	if not puzzleData.is_empty():
 		puzzleData["npc_scene"] = _examNpcScene
 		puzzleData["player_scene"] = _examPlayerScene
+		puzzleData["exam_mode"] = true   # ← activa sistema de vidas en puzzleManager
 		# Sin outro_lines: el examen usa onExamPuzzleFinished en su lugar
 	return puzzleData

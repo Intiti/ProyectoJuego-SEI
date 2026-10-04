@@ -1,120 +1,292 @@
 {
-	"puzzle": {
-		"prompt": "Pide un número entero. Calcula el doble de ese número asignándolo a una variable llamada 'doble'. Luego imprime el valor de 'doble'.",
-		"variables": {
-			"numero": 0,
-			"doble": 0
-		},
-		"inputs": [5],
-		"expected_output": [10],
-		"steps": [
-			{
-				"fixed": false,
-				"type": "input",
-				"alternatives": [
-					{
-						"type": "input",
-						"text": "numero = int(input())",
-						"correct": true,
-						"config": { "var": "numero" }
-					},
-					{
-						"type": "input",
-						"text": "numero = input()",
-						"correct": false,
-						"config": { "var": "numero" }
-					},
-					{
-						"type": "assign",
-						"text": "numero = 0",
-						"correct": false,
-						"config": { "var": "numero", "assign_value": "0" }
-					},
-					{
-						"type": "input",
-						"text": "doble = int(input())",
-						"correct": false,
-						"config": { "var": "doble" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "expr",
-				"alternatives": [
-					{
-						"type": "expr",
-						"text": "doble = numero * 2",
-						"correct": true,
-						"config": {
-							"var": "doble",
-							"expr_a": "numero",
-							"expr_op": "*",
-							"expr_b": "2"
-						}
-					},
-					{
-						"type": "expr",
-						"text": "doble = numero + 2",
-						"correct": false,
-						"config": {
-							"var": "doble",
-							"expr_a": "numero",
-							"expr_op": "+",
-							"expr_b": "2"
-						}
-					},
-					{
-						"type": "expr",
-						"text": "doble = numero * numero",
-						"correct": false,
-						"config": {
-							"var": "doble",
-							"expr_a": "numero",
-							"expr_op": "*",
-							"expr_b": "numero"
-						}
-					},
-					{
-						"type": "assign",
-						"text": "doble = 2",
-						"correct": false,
-						"config": { "var": "doble", "assign_value": "2" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "print",
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "print(doble)",
-						"correct": true,
-						"config": { "value": "doble" }
-					},
-					{
-						"type": "print",
-						"text": "print(numero)",
-						"correct": false,
-						"config": { "value": "numero" }
-					},
-					{
-						"type": "print",
-						"text": "print(\"doble\")",
-						"correct": false,
-						"config": { "value": "\"doble\"" }
-					},
-					{
-						"type": "print",
-						"text": "print(numero * 2)",
-						"correct": false,
-						"config": { "value": "numero * 2" }
-					}
-				]
-			}
-		],
-		"show_output": true,
-		"complete_on_steps": true
-	}
+  "puzzle": {
+    "prompt": "Un viaje de ida y vuelta se cobra según la distancia recorrida. Cada kilómetro del trayecto de ida cuesta 3 unidades y el regreso tiene un costo equivalente al doble de la ida. Con la distancia indicada, determina cuánto cuesta cada trayecto y muestra ambos valores. Si el costo del regreso supera las 60 unidades, indica que se trata de un viaje caro.",
+    "variables": {
+      "kilometros": 0,
+      "costo_ida": 0,
+      "costo_vuelta": 0
+    },
+    "inputs": [
+      15
+    ],
+    "expected_output": [
+      45,
+      90,
+      "Viaje caro"
+    ],
+    "steps": [
+      {
+        "fixed": false,
+        "type": "input",
+        "alternatives": [
+          {
+            "type": "input",
+            "text": "kilometros = int(input())",
+            "correct": true,
+            "config": {
+              "var": "kilometros"
+            }
+          },
+          {
+            "type": "input",
+            "text": "kilometros = input()",
+            "correct": false,
+            "config": {
+              "var": "kilometros"
+            }
+          },
+          {
+            "type": "input",
+            "text": "costo_ida = int(input())",
+            "correct": false,
+            "config": {
+              "var": "costo_ida"
+            }
+          },
+          {
+            "type": "assign",
+            "text": "kilometros = 0",
+            "correct": false,
+            "config": {
+              "var": "kilometros",
+              "assign_value": "0"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "expr",
+        "alternatives": [
+          {
+            "type": "expr",
+            "text": "costo_ida = kilometros * 3",
+            "correct": true,
+            "config": {
+              "var": "costo_ida",
+              "expr_a": "kilometros",
+              "expr_op": "*",
+              "expr_b": "3"
+            }
+          },
+          {
+            "type": "expr",
+            "text": "costo_ida = kilometros + 3",
+            "correct": false,
+            "config": {
+              "var": "costo_ida",
+              "expr_a": "kilometros",
+              "expr_op": "+",
+              "expr_b": "3"
+            }
+          },
+          {
+            "type": "expr",
+            "text": "costo_ida = kilometros * 2",
+            "correct": false,
+            "config": {
+              "var": "costo_ida",
+              "expr_a": "kilometros",
+              "expr_op": "*",
+              "expr_b": "2"
+            }
+          },
+          {
+            "type": "assign",
+            "text": "costo_ida = 3",
+            "correct": false,
+            "config": {
+              "var": "costo_ida",
+              "assign_value": "3"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "expr",
+        "alternatives": [
+          {
+            "type": "expr",
+            "text": "costo_vuelta = costo_ida * 2",
+            "correct": true,
+            "config": {
+              "var": "costo_vuelta",
+              "expr_a": "costo_ida",
+              "expr_op": "*",
+              "expr_b": "2"
+            }
+          },
+          {
+            "type": "expr",
+            "text": "costo_vuelta = kilometros * 2",
+            "correct": false,
+            "config": {
+              "var": "costo_vuelta",
+              "expr_a": "kilometros",
+              "expr_op": "*",
+              "expr_b": "2"
+            }
+          },
+          {
+            "type": "expr",
+            "text": "costo_vuelta = costo_ida + 2",
+            "correct": false,
+            "config": {
+              "var": "costo_vuelta",
+              "expr_a": "costo_ida",
+              "expr_op": "+",
+              "expr_b": "2"
+            }
+          },
+          {
+            "type": "assign",
+            "text": "costo_vuelta = 2",
+            "correct": false,
+            "config": {
+              "var": "costo_vuelta",
+              "assign_value": "2"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": true,
+        "type": "print",
+        "text": "print(costo_ida)",
+        "config": {
+          "value": "costo_ida"
+        }
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "print(costo_vuelta)",
+            "correct": true,
+            "config": {
+              "value": "costo_vuelta"
+            }
+          },
+          {
+            "type": "print",
+            "text": "print(costo_ida)",
+            "correct": false,
+            "config": {
+              "value": "costo_ida"
+            }
+          },
+          {
+            "type": "print",
+            "text": "print(kilometros)",
+            "correct": false,
+            "config": {
+              "value": "kilometros"
+            }
+          },
+          {
+            "type": "print",
+            "text": "print(\"costo_vuelta\")",
+            "correct": false,
+            "config": {
+              "value": "\"costo_vuelta\""
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "if",
+        "alternatives": [
+          {
+            "type": "if",
+            "text": "if costo_vuelta > 60:",
+            "correct": true,
+            "config": {
+              "var": "costo_vuelta",
+              "op": ">",
+              "value": "60",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "if",
+            "text": "if costo_ida > 60:",
+            "correct": false,
+            "config": {
+              "var": "costo_ida",
+              "op": ">",
+              "value": "60",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "if",
+            "text": "if costo_vuelta >= 60:",
+            "correct": false,
+            "config": {
+              "var": "costo_vuelta",
+              "op": ">=",
+              "value": "60",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "if",
+            "text": "if kilometros > 60:",
+            "correct": false,
+            "config": {
+              "var": "kilometros",
+              "op": ">",
+              "value": "60",
+              "value_is_var": false
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Viaje caro\")",
+            "correct": true,
+            "config": {
+              "value": "\"Viaje caro\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Viaje barato\")",
+            "correct": false,
+            "config": {
+              "value": "\"Viaje barato\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(costo_vuelta)",
+            "correct": false,
+            "config": {
+              "value": "costo_vuelta"
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"viaje caro\")",
+            "correct": false,
+            "config": {
+              "value": "\"viaje caro\""
+            }
+          }
+        ]
+      }
+    ],
+    "show_output": true,
+    "complete_on_steps": true
+  }
 }

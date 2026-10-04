@@ -1,227 +1,295 @@
 {
-	"puzzle": {
-		"prompt": "Pide un número entero. Si el número es mayor que 100, imprime \"Grande\". Si el número está entre 50 y 100 (ambos incluidos), imprime \"Mediano\". Si no, imprime \"Pequeño\".",
-		"variables": {
-			"numero": 0
-		},
-		"inputs": [75],
-		"expected_output": ["Mediano"],
-		"steps": [
-			{
-				"fixed": false,
-				"type": "input",
-				"alternatives": [
-					{
-						"type": "input",
-						"text": "numero = int(input())",
-						"correct": true,
-						"config": { "var": "numero" }
-					},
-					{
-						"type": "input",
-						"text": "numero = float(input())",
-						"correct": false,
-						"config": { "var": "numero" }
-					},
-					{
-						"type": "assign",
-						"text": "numero = 100",
-						"correct": false,
-						"config": { "var": "numero", "assign_value": "100" }
-					},
-					{
-						"type": "input",
-						"text": "numero = input()",
-						"correct": false,
-						"config": { "var": "numero" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "if",
-				"alternatives": [
-					{
-						"type": "if",
-						"text": "if numero > 100:",
-						"correct": true,
-						"config": { "var": "numero", "op": ">", "value": "100", "value_is_var": false }
-					},
-					{
-						"type": "if",
-						"text": "if numero >= 100:",
-						"correct": false,
-						"config": { "var": "numero", "op": ">=", "value": "100", "value_is_var": false }
-					},
-					{
-						"type": "if",
-						"text": "if numero >= 50:",
-						"correct": false,
-						"config": { "var": "numero", "op": ">=", "value": "50", "value_is_var": false }
-					},
-					{
-						"type": "if",
-						"text": "if numero == 100:",
-						"correct": false,
-						"config": { "var": "numero", "op": "==", "value": "100", "value_is_var": false }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "print",
-				"indent": 1,
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "  print(\"Grande\")",
-						"correct": true,
-						"config": { "value": "\"Grande\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Mediano\")",
-						"correct": false,
-						"config": { "value": "\"Mediano\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Pequeño\")",
-						"correct": false,
-						"config": { "value": "\"Pequeño\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(numero)",
-						"correct": false,
-						"config": { "value": "numero" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "elif",
-				"alternatives": [
-					{
-						"type": "elif",
-						"text": "elif numero >= 50:",
-						"correct": true,
-						"config": { "var": "numero", "op": ">=", "value": "50", "value_is_var": false }
-					},
-					{
-						"type": "elif",
-						"text": "elif numero > 50:",
-						"correct": false,
-						"config": { "var": "numero", "op": ">", "value": "50", "value_is_var": false }
-					},
-					{
-						"type": "else",
-						"text": "else:",
-						"correct": false,
-						"config": {}
-					},
-					{
-						"type": "elif",
-						"text": "elif numero <= 100:",
-						"correct": false,
-						"config": { "var": "numero", "op": "<=", "value": "100", "value_is_var": false }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "print",
-				"indent": 1,
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "  print(\"Mediano\")",
-						"correct": true,
-						"config": { "value": "\"Mediano\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Grande\")",
-						"correct": false,
-						"config": { "value": "\"Grande\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Pequeño\")",
-						"correct": false,
-						"config": { "value": "\"Pequeño\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(numero)",
-						"correct": false,
-						"config": { "value": "numero" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "else",
-				"alternatives": [
-					{
-						"type": "else",
-						"text": "else:",
-						"correct": true,
-						"config": {}
-					},
-					{
-						"type": "elif",
-						"text": "elif numero < 50:",
-						"correct": false,
-						"config": { "var": "numero", "op": "<", "value": "50", "value_is_var": false }
-					},
-					{
-						"type": "elif",
-						"text": "elif numero <= 49:",
-						"correct": false,
-						"config": { "var": "numero", "op": "<=", "value": "49", "value_is_var": false }
-					},
-					{
-						"type": "else",
-						"text": "elif numero == 0:",
-						"correct": false,
-						"config": {}
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "print",
-				"indent": 1,
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "  print(\"Pequeño\")",
-						"correct": true,
-						"config": { "value": "\"Pequeño\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Mediano\")",
-						"correct": false,
-						"config": { "value": "\"Mediano\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Grande\")",
-						"correct": false,
-						"config": { "value": "\"Grande\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(numero)",
-						"correct": false,
-						"config": { "value": "numero" }
-					}
-				]
-			}
-		],
-		"show_output": true,
-		"complete_on_steps": true
-	}
+  "puzzle": {
+    "prompt": "Un vehículo circula por una vía y se registra su velocidad. Según el valor obtenido, clasifica la situación en una de estas categorías: muy lenta, velocidad normal, exceso leve o exceso grave. Una velocidad superior a 120 corresponde a un exceso grave. Si no supera ese límite, una velocidad de 80 o más corresponde a un exceso leve. Por debajo de 80, una velocidad de 50 o más se considera normal; cualquier valor inferior a 50 corresponde a una velocidad muy lenta.",
+    "variables": {
+      "velocidad": 0
+    },
+    "inputs": [
+      95
+    ],
+    "expected_output": [
+      "Exceso leve"
+    ],
+    "steps": [
+      {
+        "fixed": false,
+        "type": "input",
+        "alternatives": [
+          {
+            "type": "input",
+            "text": "velocidad = int(input())",
+            "correct": true,
+            "config": {
+              "var": "velocidad"
+            }
+          },
+          {
+            "type": "input",
+            "text": "velocidad = float(input())",
+            "correct": false,
+            "config": {
+              "var": "velocidad"
+            }
+          },
+          {
+            "type": "input",
+            "text": "velocidad = input()",
+            "correct": false,
+            "config": {
+              "var": "velocidad"
+            }
+          },
+          {
+            "type": "assign",
+            "text": "velocidad = 0",
+            "correct": false,
+            "config": {
+              "var": "velocidad",
+              "assign_value": "0"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "if",
+        "alternatives": [
+          {
+            "type": "if",
+            "text": "if velocidad > 120:",
+            "correct": true,
+            "config": {
+              "var": "velocidad",
+              "op": ">",
+              "value": "120",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "if",
+            "text": "if velocidad >= 120:",
+            "correct": false,
+            "config": {
+              "var": "velocidad",
+              "op": ">=",
+              "value": "120",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "if",
+            "text": "if velocidad >= 80:",
+            "correct": false,
+            "config": {
+              "var": "velocidad",
+              "op": ">=",
+              "value": "80",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "if",
+            "text": "if velocidad == 120:",
+            "correct": false,
+            "config": {
+              "var": "velocidad",
+              "op": "==",
+              "value": "120",
+              "value_is_var": false
+            }
+          }
+        ]
+      },
+      {
+        "fixed": true,
+        "type": "print",
+        "indent": 1,
+        "text": "  print(\"Exceso grave\")",
+        "config": {
+          "value": "\"Exceso grave\""
+        }
+      },
+      {
+        "fixed": false,
+        "type": "elif",
+        "alternatives": [
+          {
+            "type": "elif",
+            "text": "elif velocidad >= 80:",
+            "correct": true,
+            "config": {
+              "var": "velocidad",
+              "op": ">=",
+              "value": "80",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "elif",
+            "text": "elif velocidad > 80:",
+            "correct": false,
+            "config": {
+              "var": "velocidad",
+              "op": ">",
+              "value": "80",
+              "value_is_var": false
+            }
+          },
+          {
+            "type": "else",
+            "text": "else:",
+            "correct": false,
+            "config": {}
+          },
+          {
+            "type": "elif",
+            "text": "elif velocidad >= 50:",
+            "correct": false,
+            "config": {
+              "var": "velocidad",
+              "op": ">=",
+              "value": "50",
+              "value_is_var": false
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Exceso leve\")",
+            "correct": true,
+            "config": {
+              "value": "\"Exceso leve\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Exceso grave\")",
+            "correct": false,
+            "config": {
+              "value": "\"Exceso grave\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Velocidad normal\")",
+            "correct": false,
+            "config": {
+              "value": "\"Velocidad normal\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(velocidad)",
+            "correct": false,
+            "config": {
+              "value": "velocidad"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": true,
+        "type": "elif",
+        "text": "elif velocidad >= 50:",
+        "config": {
+          "var": "velocidad",
+          "op": ">=",
+          "value": "50",
+          "value_is_var": false
+        }
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Velocidad normal\")",
+            "correct": true,
+            "config": {
+              "value": "\"Velocidad normal\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Exceso leve\")",
+            "correct": false,
+            "config": {
+              "value": "\"Exceso leve\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Muy lento\")",
+            "correct": false,
+            "config": {
+              "value": "\"Muy lento\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(velocidad)",
+            "correct": false,
+            "config": {
+              "value": "velocidad"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": true,
+        "type": "else",
+        "text": "else:",
+        "config": {}
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Muy lento\")",
+            "correct": true,
+            "config": {
+              "value": "\"Muy lento\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Velocidad normal\")",
+            "correct": false,
+            "config": {
+              "value": "\"Velocidad normal\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Exceso leve\")",
+            "correct": false,
+            "config": {
+              "value": "\"Exceso leve\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(velocidad)",
+            "correct": false,
+            "config": {
+              "value": "velocidad"
+            }
+          }
+        ]
+      }
+    ],
+    "show_output": true,
+    "complete_on_steps": true
+  }
 }

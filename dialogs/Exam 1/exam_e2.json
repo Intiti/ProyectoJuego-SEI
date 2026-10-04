@@ -1,166 +1,251 @@
 {
-	"puzzle": {
-		"prompt": "Pide una palabra. Si la palabra es \"hola\", imprime \"Saludo recibido.\". Si no, imprime \"Palabra desconocida.\".",
-		"variables": {
-			"palabra": ""
-		},
-		"inputs": ["hola"],
-		"expected_output": ["Saludo recibido."],
-		"steps": [
-			{
-				"fixed": false,
-				"type": "input",
-				"alternatives": [
-					{
-						"type": "input",
-						"text": "palabra = input()",
-						"correct": true,
-						"config": { "var": "palabra" }
-					},
-					{
-						"type": "input",
-						"text": "palabra = int(input())",
-						"correct": false,
-						"config": { "var": "palabra" }
-					},
-					{
-						"type": "assign",
-						"text": "palabra = \"hola\"",
-						"correct": false,
-						"config": { "var": "palabra", "assign_value": "hola" }
-					},
-					{
-						"type": "print",
-						"text": "print(palabra)",
-						"correct": false,
-						"config": { "value": "palabra" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "if",
-				"alternatives": [
-					{
-						"type": "if",
-						"text": "if palabra == \"hola\":",
-						"correct": true,
-						"config": { "var": "palabra", "op": "==", "value": "hola", "value_is_var": false }
-					},
-					{
-						"type": "if",
-						"text": "if palabra != \"hola\":",
-						"correct": false,
-						"config": { "var": "palabra", "op": "!=", "value": "hola", "value_is_var": false }
-					},
-					{
-						"type": "if",
-						"text": "if palabra == \"Saludo recibido.\":",
-						"correct": false,
-						"config": { "var": "palabra", "op": "==", "value": "Saludo recibido.", "value_is_var": false }
-					},
-					{
-						"type": "if",
-						"text": "if palabra == \"Palabra desconocida.\":",
-						"correct": false,
-						"config": { "var": "palabra", "op": "==", "value": "Palabra desconocida.", "value_is_var": false }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "print",
-				"indent": 1,
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "  print(\"Saludo recibido.\")",
-						"correct": true,
-						"config": { "value": "\"Saludo recibido.\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Palabra desconocida.\")",
-						"correct": false,
-						"config": { "value": "\"Palabra desconocida.\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(palabra)",
-						"correct": false,
-						"config": { "value": "palabra" }
-					},
-					{
-						"type": "assign",
-						"text": "  palabra = \"hola\"",
-						"correct": false,
-						"config": { "var": "palabra", "assign_value": "hola" }
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "else",
-				"alternatives": [
-					{
-						"type": "else",
-						"text": "else:",
-						"correct": true,
-						"config": {}
-					},
-					{
-						"type": "if",
-						"text": "if palabra != \"hola\":",
-						"correct": false,
-						"config": { "var": "palabra", "op": "!=", "value": "hola", "value_is_var": false }
-					},
-					{
-						"type": "elif",
-						"text": "elif palabra == \"\":",
-						"correct": false,
-						"config": { "var": "palabra", "op": "==", "value": "", "value_is_var": false }
-					},
-					{
-						"type": "else",
-						"text": "elif palabra != \"hola\":",
-						"correct": false,
-						"config": {}
-					}
-				]
-			},
-			{
-				"fixed": false,
-				"type": "print",
-				"indent": 1,
-				"alternatives": [
-					{
-						"type": "print",
-						"text": "  print(\"Palabra desconocida.\")",
-						"correct": true,
-						"config": { "value": "\"Palabra desconocida.\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"Saludo recibido.\")",
-						"correct": false,
-						"config": { "value": "\"Saludo recibido.\"" }
-					},
-					{
-						"type": "print",
-						"text": "  print(palabra)",
-						"correct": false,
-						"config": { "value": "palabra" }
-					},
-					{
-						"type": "print",
-						"text": "  print(\"hola\")",
-						"correct": false,
-						"config": { "value": "\"hola\"" }
-					}
-				]
-			}
-		],
-		"show_output": true,
-		"complete_on_steps": true
-	}
+  "puzzle": {
+    "prompt": "Dos corredores completan la misma carrera y cada uno registra su tiempo. A partir de esos dos tiempos, determina quién llegó primero. Si ambos registraron exactamente el mismo tiempo, indícalo como un empate.",
+    "variables": {
+      "tiempo1": 0,
+      "tiempo2": 0
+    },
+    "inputs": [
+      42,
+      55
+    ],
+    "expected_output": [
+      "Gana el corredor 1"
+    ],
+    "steps": [
+      {
+        "fixed": true,
+        "type": "input",
+        "text": "tiempo1 = int(input())",
+        "config": {
+          "var": "tiempo1"
+        }
+      },
+      {
+        "fixed": false,
+        "type": "input",
+        "alternatives": [
+          {
+            "type": "input",
+            "text": "tiempo2 = int(input())",
+            "correct": true,
+            "config": {
+              "var": "tiempo2"
+            }
+          },
+          {
+            "type": "input",
+            "text": "tiempo2 = input()",
+            "correct": false,
+            "config": {
+              "var": "tiempo2"
+            }
+          },
+          {
+            "type": "input",
+            "text": "tiempo1 = int(input())",
+            "correct": false,
+            "config": {
+              "var": "tiempo1"
+            }
+          },
+          {
+            "type": "assign",
+            "text": "tiempo2 = 0",
+            "correct": false,
+            "config": {
+              "var": "tiempo2",
+              "assign_value": "0"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "if",
+        "alternatives": [
+          {
+            "type": "if",
+            "text": "if tiempo1 < tiempo2:",
+            "correct": true,
+            "config": {
+              "var": "tiempo1",
+              "op": "<",
+              "value": "tiempo2",
+              "value_is_var": true
+            }
+          },
+          {
+            "type": "if",
+            "text": "if tiempo1 > tiempo2:",
+            "correct": false,
+            "config": {
+              "var": "tiempo1",
+              "op": ">",
+              "value": "tiempo2",
+              "value_is_var": true
+            }
+          },
+          {
+            "type": "if",
+            "text": "if tiempo1 == tiempo2:",
+            "correct": false,
+            "config": {
+              "var": "tiempo1",
+              "op": "==",
+              "value": "tiempo2",
+              "value_is_var": true
+            }
+          },
+          {
+            "type": "if",
+            "text": "if tiempo1 <= tiempo2:",
+            "correct": false,
+            "config": {
+              "var": "tiempo1",
+              "op": "<=",
+              "value": "tiempo2",
+              "value_is_var": true
+            }
+          }
+        ]
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Gana el corredor 1\")",
+            "correct": true,
+            "config": {
+              "value": "\"Gana el corredor 1\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Gana el corredor 2\")",
+            "correct": false,
+            "config": {
+              "value": "\"Gana el corredor 2\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Empate\")",
+            "correct": false,
+            "config": {
+              "value": "\"Empate\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(tiempo1)",
+            "correct": false,
+            "config": {
+              "value": "tiempo1"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": true,
+        "type": "elif",
+        "text": "elif tiempo2 < tiempo1:",
+        "config": {
+          "var": "tiempo2",
+          "op": "<",
+          "value": "tiempo1",
+          "value_is_var": true
+        }
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Gana el corredor 2\")",
+            "correct": true,
+            "config": {
+              "value": "\"Gana el corredor 2\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Gana el corredor 1\")",
+            "correct": false,
+            "config": {
+              "value": "\"Gana el corredor 1\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Empate\")",
+            "correct": false,
+            "config": {
+              "value": "\"Empate\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(tiempo2)",
+            "correct": false,
+            "config": {
+              "value": "tiempo2"
+            }
+          }
+        ]
+      },
+      {
+        "fixed": true,
+        "type": "else",
+        "text": "else:",
+        "config": {}
+      },
+      {
+        "fixed": false,
+        "type": "print",
+        "indent": 1,
+        "alternatives": [
+          {
+            "type": "print",
+            "text": "  print(\"Empate\")",
+            "correct": true,
+            "config": {
+              "value": "\"Empate\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Gana el corredor 1\")",
+            "correct": false,
+            "config": {
+              "value": "\"Gana el corredor 1\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(\"Gana el corredor 2\")",
+            "correct": false,
+            "config": {
+              "value": "\"Gana el corredor 2\""
+            }
+          },
+          {
+            "type": "print",
+            "text": "  print(tiempo1)",
+            "correct": false,
+            "config": {
+              "value": "tiempo1"
+            }
+          }
+        ]
+      }
+    ],
+    "show_output": true,
+    "complete_on_steps": true
+  }
 }
