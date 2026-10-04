@@ -1,0 +1,8 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/common/puzzle/puzzleManager.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/common/puzzle/dropZone.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/common/puzzle/commandList.gd" id="3"]
+
+[node name="PuzzleUI" type="CanvasLayer"]
+script = ExtResource("1")

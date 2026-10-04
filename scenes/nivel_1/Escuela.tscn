@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://escuela"]
+
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/common/actors/Player.tscn" id="1"]
+[ext_resource type="Script" uid="uid://drg6frqmfgddp" path="res://scripts/nivel_1/escuela.gd" id="2"]
+[ext_resource type="Script" uid="uid://lcna0wiwgn5w" path="res://scripts/nivel_1/background_escuela.gd" id="3"]
+[ext_resource type="PackedScene" uid="uid://dqgdwchjfc0p7" path="res://scenes/common/ui/DialogBox.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/common/ui/PuzzleUI.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/common/actors/NPC.tscn" id="6_hvy7h"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(1152, 32)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(32, 400)
+
+[node name="Escuela" type="Node2D" unique_id=912837465]
+script = ExtResource("2")
+
+[node name="Background" type="Node2D" parent="." unique_id=314588231]
+z_index = -10
+script = ExtResource("3")
+
+[node name="Player" parent="." unique_id=597768826 instance=ExtResource("1")]
+z_index = 3
+position = Vector2(80, 570)
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=473919025]
+position = Vector2(576, 620)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1938472653]
+shape = SubResource("1")
+
+[node name="WallLeft" type="StaticBody2D" parent="." unique_id=1578582378]
+position = Vector2(0, 400)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft" unique_id=1246395462]
+shape = SubResource("2")
+
+[node name="WallRight" type="StaticBody2D" parent="." unique_id=101139833]
+position = Vector2(1152, 400)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight" unique_id=1457505378]
+shape = SubResource("2")
+
+[node name="DialogBox" parent="." unique_id=1827364593 instance=ExtResource("4")]
+
+[node name="PuzzleUI" parent="." unique_id=1275682542 instance=ExtResource("5")]
+
+[node name="NPC_E16" parent="." unique_id=1466623536 instance=ExtResource("6_hvy7h")]
+position = Vector2(337, 554)
+dialogFile = "res://dialogs/nivel_1/npc_e16.json"
+
+[node name="NPC_E19" parent="." unique_id=1488189590 instance=ExtResource("6_hvy7h")]
+position = Vector2(912, 558)
+dialogFile = "res://dialogs/nivel_1/npc_e19.json"
+
+[node name="NPC_E20" parent="." unique_id=610928664 instance=ExtResource("6_hvy7h")]
+position = Vector2(626, 554)
+dialogFile = "res://dialogs/nivel_1/npc_e20.json"

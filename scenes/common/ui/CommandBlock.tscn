@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bvkbbonlg6kp1"]
+
+[ext_resource type="Script" uid="uid://bkyl3tcfo53u6" path="res://scripts/common/puzzle/commandBlock.gd" id="1"]
+
+[node name="CommandBlock" type="PanelContainer" unique_id=1430378066]
+script = ExtResource("1")

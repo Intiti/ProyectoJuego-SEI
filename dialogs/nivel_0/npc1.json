@@ -1,0 +1,186 @@
+{
+	"npc_portrait": "res://assets/misc/sad.png",
+	"player_portrait": "res://assets/misc/player.png",
+	"lines": [
+		{
+			"speaker": "Monito",
+			"text": "¡Oh, un viajero! Por fin alguien que puede ayudarme..."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Qué te pasa? Se te ve muy triste."
+		},
+		{
+			"speaker": "Monito",
+			"text": "Tengo un hongo aquí, pero no sé si es peligroso. ¡Necesito que me digas el color y luego me avises!"
+		},
+		{
+			"speaker": "Monito",
+			"text": "Si el color que ingresas es rojo, imprime peligroso. Si no, imprime seguro."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Entendido, lo resuelvo ahora..."
+		}
+	],
+	"puzzle": {
+		"prompt": "Pide el color del hongo con input(). Si el color es \"rojo\", imprime \"peligroso\". Si no, imprime \"seguro\".",
+		"variables": { "color": "" },
+		"inputs": ["rojo"],
+		"expected_output": ["peligroso"],
+		"steps": [
+			{
+				"fixed": false,
+				"type": "input",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "color = input()",
+						"correct": true,
+						"config": { "var": "color" }
+					},
+					{
+						"type": "assign",
+						"text": "color = \"verde\"",
+						"correct": false,
+						"config": { "var": "color", "assign_value": "verde" }
+					},
+					{
+						"type": "print",
+						"text": "print(color)",
+						"correct": false,
+						"config": { "value": "color" }
+					},
+					{
+						"type": "if",
+						"text": "if color == \"rojo\"",
+						"correct": false,
+						"config": { "var": "color", "op": "==", "value": "rojo", "value_is_var": false }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "if",
+				"alternatives": [
+					{
+						"type": "if",
+						"text": "if color == \"rojo\"",
+						"correct": true,
+						"config": { "var": "color", "op": "==", "value": "rojo", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if color != \"rojo\"",
+						"correct": false,
+						"config": { "var": "color", "op": "!=", "value": "rojo", "value_is_var": false }
+					},
+					{
+						"type": "if",
+						"text": "if color == \"verde\"",
+						"correct": false,
+						"config": { "var": "color", "op": "==", "value": "verde", "value_is_var": false }
+					},
+					{
+						"type": "print",
+						"text": "print(\"rojo\")",
+						"correct": false,
+						"config": { "value": "\"rojo\"" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"peligroso\")",
+						"correct": true,
+						"config": { "value": "\"peligroso\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(\"seguro\")",
+						"correct": false,
+						"config": { "value": "\"seguro\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(color)",
+						"correct": false,
+						"config": { "value": "color" }
+					},
+					{
+						"type": "assign",
+						"text": "  color = \"peligroso\"",
+						"correct": false,
+						"config": { "var": "color", "assign_value": "peligroso" }
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "else",
+				"alternatives": [
+					{
+						"type": "else",
+						"text": "else",
+						"correct": true,
+						"config": {}
+					},
+					{
+						"type": "if",
+						"text": "if color == \"seguro\"",
+						"correct": false,
+						"config": { "var": "color", "op": "==", "value": "seguro", "value_is_var": false }
+					},
+					{
+						"type": "print",
+						"text": "print(\"seguro\")",
+						"correct": false,
+						"config": { "value": "\"seguro\"" }
+					},
+					{
+						"type": "else",
+						"text": "elif color != \"rojo\"",
+						"correct": false,
+						"config": {}
+					}
+				]
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"seguro\")",
+						"correct": true,
+						"config": { "value": "\"seguro\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(\"peligroso\")",
+						"correct": false,
+						"config": { "value": "\"peligroso\"" }
+					},
+					{
+						"type": "print",
+						"text": "  print(color)",
+						"correct": false,
+						"config": { "value": "color" }
+					},
+					{
+						"type": "assign",
+						"text": "  color = \"seguro\"",
+						"correct": false,
+						"config": { "var": "color", "assign_value": "seguro" }
+					}
+				]
+			}
+		]
+	}
+}

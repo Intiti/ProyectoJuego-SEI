@@ -1,0 +1,219 @@
+{
+	"lines": [
+		{
+			"speaker": "Ying",
+			"text": "¡Ey, tú! Sí, tú, el que anda por aquí. ¿Puedes echarnos una pata con algo antes de la competencia de pesca? ¡Faltan solo 3 días!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Una competencia de pesca? ¿Qué necesitan?"
+		},
+		{
+			"speaker": "Yang",
+			"text": "En tres días será la gran competencia de pesca de la aldea. Hemos estado practicando y queremos comparar nuestros puntajes para saber quién ganará."
+		},
+		{
+			"speaker": "Ying",
+			"text": "Exacto. Queremos dejar preparado el miaugoritmo que determine cuál de los dos obtiene el puntaje más alto."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Entonces podemos comparar ambos puntajes y dejar listo el veredicto para cuando llegue la competencia."
+		},
+		{
+			"speaker": "Yang",
+			"text": "¡Eso mismo! Solo necesitamos que el código compare los dos puntajes correctamente."
+		}
+	],
+	"puzzle": {
+		"prompt": "Faltan 3 días para la competencia de pesca de la aldea y dos gatos quieren comparar sus puntajes de práctica. Recibe ambos puntajes. Si el puntaje del Gato 1 es mayor, imprime '¡Gato 1 gana la competencia de pesca!'; de lo contrario, imprime '¡Gato 2 gana la competencia de pesca!'.",
+		"variables": {
+			"puntaje_gato1": 0,
+			"puntaje_gato2": 0
+		},
+		"steps": [
+			{
+				"fixed": true,
+				"type": "input",
+				"text": "puntaje_gato1 = int(input())",
+				"config": {
+					"var": "puntaje_gato1"
+				}
+			},
+			{
+				"fixed": false,
+				"type": "input",
+				"hint": "Necesitas recibir el puntaje del Gato 2 como número entero. Fíjate cómo se hizo con el Gato 1 en la línea de arriba.",
+				"alternatives": [
+					{
+						"type": "input",
+						"text": "puntaje_gato2 = int(input())",
+						"correct": true,
+						"config": {
+							"var": "puntaje_gato2"
+						}
+					},
+					{
+						"type": "input",
+						"text": "puntaje_gato2 = input()",
+						"correct": false,
+						"config": {
+							"var": "puntaje_gato2"
+						}
+					},
+					{
+						"type": "input",
+						"text": "puntaje_gato1 = int(input())",
+						"correct": false,
+						"config": {
+							"var": "puntaje_gato1"
+						}
+					},
+					{
+						"type": "input",
+						"text": "puntaje_gato2 = int(puntaje_gato1)",
+						"correct": false,
+						"config": {
+							"var": "puntaje_gato2"
+						}
+					}
+				]
+			},
+			{
+				"fixed": true,
+				"type": "if",
+				"text": "if puntaje_gato1 > puntaje_gato2:",
+				"config": {
+					"var": "puntaje_gato1",
+					"op": ">",
+					"value": "puntaje_gato2",
+					"value_is_var": true
+				}
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"hint": "Entramos aquí solo cuando puntaje_gato1 es mayor. ¿Cuál gato debería ganar en ese caso?",
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"¡Gato 1 gana la competencia de pesca!\")",
+						"correct": true,
+						"config": {
+							"value": "\"¡Gato 1 gana la competencia de pesca!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
+						"correct": false,
+						"config": {
+							"value": "\"¡Gato 2 gana la competencia de pesca!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(puntaje_gato1)",
+						"correct": false,
+						"config": {
+							"value": "puntaje_gato1"
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"Empate\")",
+						"correct": false,
+						"config": {
+							"value": "\"Empate\""
+						}
+					}
+				]
+			},
+			{
+				"fixed": true,
+				"type": "elif",
+				"text": "elif puntaje_gato2 > puntaje_gato1:",
+				"config": {
+					"var": "puntaje_gato2",
+					"op": ">",
+					"value": "puntaje_gato1",
+					"value_is_var": true
+				}
+			},
+			{
+				"fixed": false,
+				"type": "print",
+				"indent": 1,
+				"alternatives": [
+					{
+						"type": "print",
+						"text": "  print(\"¡Gato 2 gana la competencia de pesca!\")",
+						"correct": true,
+						"config": {
+							"value": "\"¡Gato 2 gana la competencia de pesca!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"¡Gato 1 gana la competencia de pesca!\")",
+						"correct": false,
+						"config": {
+							"value": "\"¡Gato 1 gana la competencia de pesca!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(\"¡Empate!\")",
+						"correct": false,
+						"config": {
+							"value": "\"¡Empate!\""
+						}
+					},
+					{
+						"type": "print",
+						"text": "  print(puntaje_gato2)",
+						"correct": false,
+						"config": {
+							"value": "puntaje_gato2"
+						}
+					}
+				],
+				"hint": "Estamos dentro del elif, o sea el Gato 2 tiene el puntaje mayor. ¿Que debe imprimirse en ese caso?"
+			},
+			{
+				"fixed": true,
+				"type": "else",
+				"text": "else:",
+				"config": {}
+			},
+			{
+				"fixed": true,
+				"type": "print",
+				"indent": 1,
+				"text": "  print(\"¡Empate!\")",
+				"config": {
+					"value": "\"¡Empate!\""
+				}
+			}
+		],
+		"show_output": false,
+		"complete_on_steps": true
+	},
+	"outro_lines": [
+		{
+			"speaker": "Ying",
+			"text": "¡Miau! Perfecto. Ahora tenemos listo el veredicto, todos sabrán que yo fuí quién te venció mujejejej."
+		},
+		{
+			"speaker": "Yang",
+			"text": "Aún faltan 3 días. Así que no cantes victoria!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "(Menudo espíritu deportivo...)"
+		}
+	],
+	"npc_scene": "res://scenes/common/actors/NPC.tscn",
+	"player_scene": "res://scenes/common/actors/Player.tscn"
+}

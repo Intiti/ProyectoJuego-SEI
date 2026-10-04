@@ -1,0 +1,71 @@
+{
+	"lines": [
+		{
+			"speaker": "Guardia",
+			"text": "¡Alto ahí! Esta es la entrada a la segunda villa. No pasa cualquiera."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Solo estoy buscando a mi gato Panko. ¿No habrá forma de pasar?"
+		},
+		{
+			"speaker": "Guardia",
+			"text": "Mmm. Hay UNA forma. Todos los que quieren entrar deben demostrar que dominan los miaugoritmos. No basta con haber resuelto los ejercicios de por ahí."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Qué tipo de prueba es?"
+		},
+		{
+			"speaker": "Guardia",
+			"text": "Un examen oficial. Tendrás que construir tres miaugoritmos desde cero, sin ayudas ni pistas. Si los completas correctamente, te abro la puerta. Si no... ya sabes el camino de vuelta."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Desde cero? ¿Sin pistas?"
+		},
+		{
+			"speaker": "Guardia",
+			"text": "Así es. Las instrucciones serán claras, pero el código lo construyes tú. Cada ejercicio tiene varias alternativas para cada línea, y algunas están ahí para confundirte. Elige bien."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "(Tres ejercicios sin ayuda... mejor me concentro. Tengo que llegar a Panko.)"
+		},
+		{
+			"speaker": "Guardia",
+			"text": "Cuando estés listo, dímelo. El examen comienza."
+		}
+	],
+	"exam": {
+		"pool": [
+			"res://dialogs/nivel_1/exams/exam_e1.json",
+			"res://dialogs/nivel_1/exams/exam_e2.json",
+			"res://dialogs/nivel_1/exams/exam_e3.json",
+			"res://dialogs/nivel_1/exams/exam_e4.json",
+			"res://dialogs/nivel_1/exams/exam_e5.json",
+			"res://dialogs/nivel_1/exams/exam_e6.json"
+		],
+		"pick": 3
+	},
+	"outro_lines": [
+		{
+			"speaker": "Guardia",
+			"text": "..."
+		},
+		{
+			"speaker": "Guardia",
+			"text": "Examen superado. No esperaba que lo lograras tan rápido."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Ahora puedo pasar?"
+		},
+		{
+			"speaker": "Guardia",
+			"text": "Trato es trato. Adelante. Y si encuentras a tu gato... dile que pague los impuestos de la villa."
+		}
+	],
+	"npc_scene": "res://scenes/common/actors/NPC.tscn",
+	"player_scene": "res://scenes/common/actors/Player.tscn"
+}
