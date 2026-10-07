@@ -7,9 +7,16 @@ const CONTROLS := {
 	"name": "Controles",
 	"color": Color(0.30, 0.65, 0.75, 1.0),
 	"entries": [
-		{ "key": "← →", "desc": "Moverse" },
-		{ "key": "Espacio", "desc": "Saltar" },
-		{ "key": "E", "desc": "Hablar con un NPC marcado / entrar a un edificio marcado" },
+		{ "key": "← →  o  A D", "desc": "Moverse a la izquierda / derecha" },
+		{ "key": "Espacio  o  W", "desc": "Saltar" },
+		{ "key": "E", "desc": "Hablar con un NPC o interactuar con un objeto (cuando aparece la tecla E sobre él)" },
+		{ "key": "E  (en un diálogo)", "desc": "Pasar al siguiente texto. Si el texto aún se está escribiendo, lo muestra completo" },
+		{ "key": "Clic izquierdo", "desc": "Elegir la línea de código correcta en los ejercicios" },
+		{ "key": "Botón Manual", "desc": "Abrir / cerrar este manual (arriba a la derecha)" },
+		{ "key": "", "desc": "" },
+		{ "key": "Símbolo  !  rojo", "desc": "Un NPC o un objeto necesita tu ayuda. Acércate y aparecerá la tecla E" },
+		{ "key": "Flecha amarilla  ▼", "desc": "Aparece al llegar a la puerta de un edificio (panadería, escuela...). Pulsa E para entrar" },
+		{ "key": "Salir de un edificio", "desc": "Camina hasta el borde de la pantalla" },
 	]
 }
 
@@ -351,7 +358,10 @@ func _selectMode(modeName: String) -> void:
 		descTitle.text = "Teclas:"
 		var lines = ""
 		for entry in CONTROLS["entries"]:
-			lines += "  " + entry["key"] + "  =  " + entry["desc"] + "\n"
+			if entry["key"] == "":
+				lines += "\n"
+			else:
+				lines += "  " + entry["key"] + "  =  " + entry["desc"] + "\n"
 		descNode.text = lines.strip_edges()
 		exTitle.visible = false
 		exBox.visible = false

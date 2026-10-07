@@ -1,5 +1,7 @@
 extends Node2D
 
+const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+
 const SPAWN_LEFT_X  := 80.0
 const SPAWN_RIGHT_X := 1070.0
 const SPAWN_Y       := 570.0
@@ -11,8 +13,8 @@ const SPAWN_ESCUELA_X := 382.0
 const ESCUELA_POS     := Vector2(382, 474)
 const INTERACT_RADIUS := 150.0
 
-var escuelaLabel: Label = null
-var escuelaLabelLayer: CanvasLayer = null
+# Flecha ▼ + tecla [E] que aparece SOLO cuando el jugador está cerca de la puerta
+var escuelaPrompt: Node2D = null
 var escuela_nearby: bool = false
 var escuelaInteracted: bool = false
 
@@ -21,7 +23,7 @@ func _ready():
 	_positionPlayer()
 	_fadeIn()
 	_buildExitTrigger()
-	_showEscuelaExclamation()
+	_showEscuelaPrompt()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
@@ -97,49 +99,16 @@ func _goToVilla1() -> void:
 	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 0.8)
 	tween.tween_callback(func(): get_tree().change_scene_to_file("res://scenes/nivel_1/Villa1.tscn"))
 
-# Simbolo "!" sobre la escuela
-func _showEscuelaExclamation() -> void:
-	escuelaLabelLayer = CanvasLayer.new()
-	escuelaLabelLayer.layer = 0
-	add_child(escuelaLabelLayer)
+# ─── Flecha de entrada ▼ (aparece al acercarse) ───────────────────────────────
+# Offset desde ESCUELA_POS hasta el punto donde apunta la flecha (la puerta).
+# Si la flecha queda muy alta/baja o corrida, ajusta este valor.
+const ESCUELA_PROMPT_OFFSET := Vector2(0, -50)
 
-	escuelaLabel = Label.new()
-	escuelaLabel.text = "!"
-	escuelaLabel.add_theme_font_size_override("font_size", 64)
-	escuelaLabel.add_theme_color_override("font_color", Color(1, 0, 0, 1))
-	escuelaLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	escuelaLabel.add_theme_constant_override("shadow_offset_x", 3)
-	escuelaLabel.add_theme_constant_override("shadow_offset_y", 3)
-
-	escuelaLabelLayer.add_child(escuelaLabel)
-	_updateEscuelaLabelPosition()
-	_floatLabel(escuelaLabel)
-
-func _updateEscuelaLabelPosition() -> void:
-	if not is_instance_valid(escuelaLabel):
-		return
-	var camera = get_viewport().get_camera_2d()
-	var screenPos: Vector2
-	if camera:
-		screenPos = get_viewport().get_canvas_transform() * ESCUELA_POS
-	else:
-		screenPos = ESCUELA_POS
-	escuelaLabel.position = screenPos + Vector2(0, -120)
-
-func _floatLabel(label: Label) -> void:
-	while is_instance_valid(label):
-		_updateEscuelaLabelPosition()
-		var camera = get_viewport().get_camera_2d()
-		var screenPos: Vector2
-		if camera:
-			screenPos = get_viewport().get_canvas_transform() * ESCUELA_POS
-		else:
-			screenPos = ESCUELA_POS
-		var baseY = screenPos.y + (-120)
-		var t = create_tween()
-		t.tween_property(label, "position:y", baseY - 12.0, 0.5).set_trans(Tween.TRANS_SINE)
-		t.tween_property(label, "position:y", baseY, 0.5).set_trans(Tween.TRANS_SINE)
-		await t.finished
+func _showEscuelaPrompt() -> void:
+	escuelaPrompt = WorldPromptScript.new()
+	escuelaPrompt.setup(WorldPromptScript.Marker.ARROW, "Entrar")
+	escuelaPrompt.position = ESCUELA_POS + ESCUELA_PROMPT_OFFSET
+	add_child(escuelaPrompt)
 
 # Deteccion de proximidad y entrada a Escuela
 func _process(_delta) -> void:
@@ -149,9 +118,11 @@ func _process(_delta) -> void:
 	if not player:
 		return
 	var dist = player.global_position.distance_to(ESCUELA_POS)
-	escuela_nearby = dist < INTERACT_RADIUS
-	if escuela_nearby and is_instance_valid(escuelaLabel):
-		_updateEscuelaLabelPosition()
+	var nowNearby = dist < INTERACT_RADIUS
+	if nowNearby != escuela_nearby:
+		escuela_nearby = nowNearby
+		if is_instance_valid(escuelaPrompt):
+			escuelaPrompt.setNear(escuela_nearby)
 
 func _unhandled_input(event) -> void:
 	if escuelaInteracted:
@@ -167,10 +138,8 @@ func _unhandled_input(event) -> void:
 func _enterEscuela() -> void:
 	escuelaInteracted = true
 
-	if is_instance_valid(escuelaLabel):
-		escuelaLabel.queue_free()
-	if is_instance_valid(escuelaLabelLayer):
-		escuelaLabelLayer.queue_free()
+	if is_instance_valid(escuelaPrompt):
+		escuelaPrompt.queue_free()
 
 	var player = get_tree().get_first_node_in_group("player")
 	if player:

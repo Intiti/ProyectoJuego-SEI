@@ -8,8 +8,19 @@ var introDialogLines = [
 @onready var fadeRect = $FadeLayer/FadeRect
 @onready var dialogBox = $DialogBox
 
-var tutorialLabel: Label = null
-var tutorialLayer: CanvasLayer = null
+const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
+
+# Tutorial de movimiento: se completa solo cuando el jugador realmente se mueve
+# y salta. Así el mensaje desaparece al aprender, no se queda parpadeando.
+const MOVE_DISTANCE := 150.0   # px que debe recorrer para contar como "ya se movió"
+const JUMP_GRACE    := 6.0     # s que esperamos el salto antes de cerrar igual
+const GO_RIGHT_TEXT := "[color=yellow]Sigue hacia la derecha  →[/color]"
+
+var hint = null
+var _tutorialActive := false
+var _startX := 0.0
+var _moved := false
+var _jumped := false
 
 func _ready():
 	_applyGlobalTheme()
@@ -46,40 +57,66 @@ func _onIntroDialogFinished():
 	if player:
 		player.set_physics_process(true)
 
-# ─── Tutorial "usa <- y -> para moverte" ─────────────────────────────────────
+# ─── Tutorial de movimiento ──────────────────────────────────────────────────
 
 func _showTutorialHint():
-	tutorialLayer = CanvasLayer.new()
-	tutorialLayer.layer = 5
-	add_child(tutorialLayer)
+	hint = TutorialHintScript.new()
+	hint.setup(_hintText())
+	add_child(hint)
 
-	tutorialLabel = Label.new()
-	tutorialLabel.text = "Usa  ←  y  →  para moverte"
-	tutorialLabel.add_theme_font_size_override("font_size", 32)
-	tutorialLabel.add_theme_color_override("font_color", Color(1, 1, 1, 1))
-	tutorialLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	tutorialLabel.add_theme_constant_override("shadow_offset_x", 2)
-	tutorialLabel.add_theme_constant_override("shadow_offset_y", 2)
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		_startX = player.global_position.x
+	_tutorialActive = true
 
-	tutorialLabel.anchor_left   = 0.5
-	tutorialLabel.anchor_right  = 0.5
-	tutorialLabel.anchor_top    = 1.0
-	tutorialLabel.anchor_bottom = 1.0
-	tutorialLabel.offset_left   = -250.0
-	tutorialLabel.offset_right  = 250.0
-	tutorialLabel.offset_top    = -60.0
-	tutorialLabel.offset_bottom = -20.0
-	tutorialLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+# Siempre UNA sola línea. Va quitando lo que el jugador ya hizo:
+#   nada hecho     → "Moverte: ... | Saltar: ..."
+#   ya se movió    → solo "Saltar: ..."
+#   ya saltó       → solo "Moverte: ..."
+#   ambos          → "Sigue hacia la derecha →"
+func _hintText() -> String:
+	var moveTxt = "Moverte:  %s %s  o  %s %s" % [
+		TutorialHintScript.key("←"), TutorialHintScript.key("→"),
+		TutorialHintScript.key("A"), TutorialHintScript.key("D")]
+	var jumpTxt = "Saltar:  %s  o  %s" % [TutorialHintScript.key("ESPACIO"), TutorialHintScript.key("W")]
+	if _moved and _jumped:
+		return GO_RIGHT_TEXT
+	if _moved:
+		return jumpTxt
+	if _jumped:
+		return moveTxt
+	return moveTxt + "      " + jumpTxt
 
-	tutorialLayer.add_child(tutorialLabel)
-	_blinkLabel(tutorialLabel)
+func _process(_delta):
+	if not _tutorialActive:
+		return
+	var player = get_tree().get_first_node_in_group("player")
+	if not player or not player.is_physics_processing():
+		return
 
-func _blinkLabel(label: Label):
-	while is_instance_valid(label):
-		var t = create_tween()
-		t.tween_property(label, "modulate:a", 0.2, 0.6)
-		t.tween_property(label, "modulate:a", 1.0, 0.6)
-		await t.finished
+	var changed := false
+	if not _moved and absf(player.global_position.x - _startX) > MOVE_DISTANCE:
+		_moved = true
+		changed = true
+		# Si no salta, cerramos igual tras unos segundos para no estorbar
+		get_tree().create_timer(JUMP_GRACE).timeout.connect(_finishTutorial)
+	if not _jumped and player.velocity.y < -50.0:
+		_jumped = true
+		changed = true
+	if changed and is_instance_valid(hint):
+		hint.setText(_hintText())
+		hint.flash()   # destello: acción completada
+	if _moved and _jumped:
+		_finishTutorial()
+
+func _finishTutorial():
+	if not _tutorialActive:
+		return
+	_tutorialActive = false
+	if is_instance_valid(hint):
+		hint.setText(GO_RIGHT_TEXT)
+		hint.flash()
+		hint.dismiss(3.0)
 
 func _on_exit_trigger_body_entered(body):
 	if not body.is_in_group("player"):

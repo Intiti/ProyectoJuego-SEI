@@ -1,10 +1,9 @@
 extends Node2D
 
-var tutorialLayer: CanvasLayer = null
-var tutorialLabel: Node = null
+const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
 
-var _exploreTutorialLayer: CanvasLayer = null
-var _exploreTutorialLabel: Node = null
+var hint = null              # tutorial "habla con el alcalde"
+var _exploreHint = null      # tutorial "explora la villa"
 var _exploreTutorialShown: bool = false
 var _exitBlocked: bool = true
 
@@ -30,38 +29,15 @@ func _applyGlobalTheme() -> void:
 	theme.default_font_size = 20
 	get_tree().root.theme = theme
 
-# ─── Tutorial inicial "pulsa E" ───────────────────────────────────────────────
+# ─── Tutorial inicial: hablar con el alcalde ─────────────────────────────────
+# Dice QUÉ hacer (acercarse al NPC marcado) y CON QUÉ tecla. El NPC muestra
+# además su propia tecla [E] cuando el jugador está cerca.
 
 func _showTutorialHint() -> void:
-	tutorialLayer = CanvasLayer.new()
-	tutorialLayer.layer = 5
-	add_child(tutorialLayer)
-
-	var richLabel = RichTextLabel.new()
-	richLabel.bbcode_enabled = true
-	richLabel.text = "Pulsa  E  para interactuar con NPCs marcados ([color=red]![/color])"
-	richLabel.add_theme_font_size_override("normal_font_size", 32)
-	richLabel.add_theme_font_size_override("bold_font_size", 32)
-	richLabel.add_theme_color_override("default_color", Color(1, 1, 1, 1))
-	richLabel.add_theme_constant_override("shadow_offset_x", 2)
-	richLabel.add_theme_constant_override("shadow_offset_y", 2)
-	richLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	richLabel.fit_content = true
-	richLabel.scroll_active = false
-	richLabel.autowrap_mode = TextServer.AUTOWRAP_OFF
-	richLabel.anchor_left   = 0.5
-	richLabel.anchor_right  = 0.5
-	richLabel.anchor_top    = 1.0
-	richLabel.anchor_bottom = 1.0
-	richLabel.offset_left   = -420.0
-	richLabel.offset_right  = 420.0
-	richLabel.offset_top    = -80.0
-	richLabel.offset_bottom = -20.0
-	richLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	tutorialLayer.add_child(richLabel)
-	tutorialLabel = richLabel
-	_blinkLabel(tutorialLabel)
+	hint = TutorialHintScript.new()
+	hint.setup("Acércate al alcalde  (%s)  y pulsa  %s  para hablar" % [
+		TutorialHintScript.bang(), TutorialHintScript.key("E")])
+	add_child(hint)
 
 # Espera a que abra el primer diálogo y oculta el tutorial
 func _watchFirstDialog() -> void:
@@ -72,20 +48,10 @@ func _watchFirstDialog() -> void:
 			return
 		await get_tree().process_frame
 
-func _blinkLabel(label: Node) -> void:
-	while is_instance_valid(label):
-		var t = create_tween()
-		t.tween_property(label, "modulate:a", 0.2, 0.6)
-		t.tween_property(label, "modulate:a", 1.0, 0.6)
-		await t.finished
-
 func _hideTutorial() -> void:
-	if is_instance_valid(tutorialLabel):
-		tutorialLabel.queue_free()
-		tutorialLabel = null
-	if is_instance_valid(tutorialLayer):
-		tutorialLayer.queue_free()
-		tutorialLayer = null
+	if is_instance_valid(hint):
+		hint.dismiss()
+	hint = null
 
 # ─── Señal del dialogBox: se llama al cerrar cualquier outro (isCinematic) ────
 
@@ -100,34 +66,11 @@ func _onCinematicDialogFinished() -> void:
 # ─── Tutorial "Explora Villa Miaulemana" ──────────────────────────────────────
 
 func _showExploreTutorial() -> void:
-	_exploreTutorialLayer = CanvasLayer.new()
-	_exploreTutorialLayer.layer = 5
-	add_child(_exploreTutorialLayer)
-
-	var lbl = RichTextLabel.new()
-	lbl.bbcode_enabled = true
-	lbl.text = "Ahora puedes explorar Villa Miaulemana libremente  [color=yellow]→[/color]"
-	lbl.add_theme_font_size_override("normal_font_size", 28)
-	lbl.add_theme_color_override("default_color", Color(1, 1, 1, 1))
-	lbl.add_theme_constant_override("shadow_offset_x", 2)
-	lbl.add_theme_constant_override("shadow_offset_y", 2)
-	lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	lbl.fit_content = true
-	lbl.scroll_active = false
-	lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	lbl.anchor_left   = 0.5
-	lbl.anchor_right  = 0.5
-	lbl.anchor_top    = 1.0
-	lbl.anchor_bottom = 1.0
-	lbl.offset_left   = -480.0
-	lbl.offset_right  = 480.0
-	lbl.offset_top    = -80.0
-	lbl.offset_bottom = -20.0
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	_exploreTutorialLayer.add_child(lbl)
-	_exploreTutorialLabel = lbl
-	_blinkLabel(_exploreTutorialLabel)
+	_exploreHint = TutorialHintScript.new()
+	_exploreHint.setup("Ahora puedes explorar Villa Miaulemana  [color=yellow]→[/color]")
+	add_child(_exploreHint)
+	# Se retira solo después de unos segundos
+	_exploreHint.dismiss(7.0)
 
 # ─── Trigger de salida hacia Villa1 ──────────────────────────────────────────
 

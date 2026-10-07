@@ -1,12 +1,14 @@
 extends CharacterBody2D
 
+const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+
 @export var dialogFile: String = ""
 @export var needsHelp: bool = true
 @export var npcSprite: Texture2D
 @export var solvedFlag: String = ""
 
 var playerNearby: bool = false
-var _exclamLabel: Label = null
+var _prompt: Node2D = null
 
 # --- Examen ---
 var _examPool: Array = []      # rutas completas de los 6 JSONs
@@ -29,34 +31,30 @@ func _ready():
 		_createExclamation()
 
 func _createExclamation():
-	_exclamLabel = Label.new()
-	_exclamLabel.text = "!"
-	_exclamLabel.add_theme_font_size_override("font_size", 80)
-	_exclamLabel.add_theme_color_override("font_color", Color(1, 0, 0, 1))
-	_exclamLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	_exclamLabel.add_theme_constant_override("shadow_offset_x", 3)
-	_exclamLabel.add_theme_constant_override("shadow_offset_y", 3)
-	_exclamLabel.position = Vector2(-16, -155)
-	add_child(_exclamLabel)
-	_floatExclam()
+	_prompt = WorldPromptScript.new()
+	_prompt.setup(WorldPromptScript.Marker.EXCLAIM, "Hablar")
+	# Centro del indicador sobre la cabeza del NPC (coordenadas locales)
+	_prompt.position = Vector2(0, -115)
+	add_child(_prompt)
+	if playerNearby:
+		_prompt.setNear(true)
 
-func _floatExclam():
-	if not is_instance_valid(_exclamLabel):
-		return
-	var baseY: float = _exclamLabel.position.y
-	while is_instance_valid(_exclamLabel):
-		var t = create_tween()
-		t.tween_property(_exclamLabel, "position:y", baseY - 12.0, 0.5).set_trans(Tween.TRANS_SINE)
-		t.tween_property(_exclamLabel, "position:y", baseY, 0.5).set_trans(Tween.TRANS_SINE)
-		await t.finished
+func _removePrompt():
+	if is_instance_valid(_prompt):
+		_prompt.queue_free()
+	_prompt = null
 
 func _on_detection_body_entered(body):
 	if body.is_in_group("player"):
 		playerNearby = true
+		if is_instance_valid(_prompt) and needsHelp:
+			_prompt.setNear(true)
 
 func _on_detection_body_exited(body):
 	if body.is_in_group("player"):
 		playerNearby = false
+		if is_instance_valid(_prompt):
+			_prompt.setNear(false)
 
 func _unhandled_input(event):
 	if not needsHelp:
@@ -73,9 +71,7 @@ func onPuzzleSolved():
 	# Si no estamos en modo examen, comportamiento normal
 	if not _examMode:
 		needsHelp = false
-		if is_instance_valid(_exclamLabel):
-			_exclamLabel.queue_free()
-			_exclamLabel = null
+		_removePrompt()
 		if dialogFile != "":
 			GameData.markSolved(dialogFile)
 		if solvedFlag != "" and GameData.get(solvedFlag) != null:
@@ -88,9 +84,7 @@ func onPuzzleSolved():
 		# Examen completado
 		_examMode = false
 		needsHelp = false
-		if is_instance_valid(_exclamLabel):
-			_exclamLabel.queue_free()
-			_exclamLabel = null
+		_removePrompt()
 		if dialogFile != "":
 			GameData.markSolved(dialogFile)
 		if solvedFlag != "" and GameData.get(solvedFlag) != null:
@@ -177,9 +171,7 @@ func onExamPuzzleFinished() -> void:
 	else:
 		# Todos resueltos: mostrar outro del guardia
 		needsHelp = false
-		if is_instance_valid(_exclamLabel):
-			_exclamLabel.queue_free()
-			_exclamLabel = null
+		_removePrompt()
 		if dialogFile != "":
 			GameData.markSolved(dialogFile)
 		if solvedFlag != "" and GameData.get(solvedFlag) != null:

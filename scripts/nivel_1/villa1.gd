@@ -1,5 +1,7 @@
 extends Node2D
 
+const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+
 # X donde aparece el jugador según de dónde viene
 const SPAWN_LEFT_X   := 80.0
 const SPAWN_RIGHT_X  := 1070.0
@@ -12,8 +14,8 @@ const SPAWN_PANADERIA_X := 478.0
 const PANADERIA_POS   := Vector2(478, 464)
 const INTERACT_RADIUS := 150.0
 
-var panaderiaLabel: Label = null
-var panaderiaLabelLayer: CanvasLayer = null
+# Flecha ▼ + tecla [E] que aparece SOLO cuando el jugador está cerca de la puerta
+var panaderiaPrompt: Node2D = null
 var panadering_nearby: bool = false
 var panaderiaInteracted: bool = false
 
@@ -22,7 +24,7 @@ func _ready():
 	_positionPlayer()
 	_fadeIn()
 	_buildExitTrigger()
-	_showPanaderiaExclamation()
+	_showPanaderiaPrompt()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
@@ -99,51 +101,16 @@ func _goToVilla2() -> void:
 	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 0.8)
 	tween.tween_callback(func(): get_tree().change_scene_to_file("res://scenes/nivel_1/Villa2.tscn"))
 
-# ─── Símbolo "!" sobre la panadería ──────────────────────────────────────────
+# ─── Flecha de entrada ▼ (aparece al acercarse) ───────────────────────────────
+# Offset desde PANADERIA_POS hasta el punto donde apunta la flecha (la puerta).
+# Si la flecha queda muy alta/baja o corrida, ajusta este valor.
+const PANADERIA_PROMPT_OFFSET := Vector2(0, -50)
 
-func _showPanaderiaExclamation() -> void:
-	panaderiaLabelLayer = CanvasLayer.new()
-	panaderiaLabelLayer.layer = 0
-	add_child(panaderiaLabelLayer)
-
-	panaderiaLabel = Label.new()
-	panaderiaLabel.text = "!"
-	panaderiaLabel.add_theme_font_size_override("font_size", 64)
-	panaderiaLabel.add_theme_color_override("font_color", Color(1, 0, 0, 1))
-	panaderiaLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	panaderiaLabel.add_theme_constant_override("shadow_offset_x", 3)
-	panaderiaLabel.add_theme_constant_override("shadow_offset_y", 3)
-
-	panaderiaLabelLayer.add_child(panaderiaLabel)
-	_updatePanaderiaLabelPosition()
-	_floatLabel(panaderiaLabel)
-
-func _updatePanaderiaLabelPosition() -> void:
-	if not is_instance_valid(panaderiaLabel):
-		return
-	var camera = get_viewport().get_camera_2d()
-	var screenPos: Vector2
-	if camera:
-		screenPos = get_viewport().get_canvas_transform() * PANADERIA_POS
-	else:
-		screenPos = PANADERIA_POS
-	panaderiaLabel.position = screenPos + Vector2(80, -120)
-
-func _floatLabel(label: Label) -> void:
-	var baseOffset := Vector2(80, -120)
-	while is_instance_valid(label):
-		_updatePanaderiaLabelPosition()
-		var camera = get_viewport().get_camera_2d()
-		var screenPos: Vector2
-		if camera:
-			screenPos = get_viewport().get_canvas_transform() * PANADERIA_POS
-		else:
-			screenPos = PANADERIA_POS
-		var baseY = screenPos.y + baseOffset.y
-		var t = create_tween()
-		t.tween_property(label, "position:y", baseY - 12.0, 0.5).set_trans(Tween.TRANS_SINE)
-		t.tween_property(label, "position:y", baseY, 0.5).set_trans(Tween.TRANS_SINE)
-		await t.finished
+func _showPanaderiaPrompt() -> void:
+	panaderiaPrompt = WorldPromptScript.new()
+	panaderiaPrompt.setup(WorldPromptScript.Marker.ARROW, "Entrar")
+	panaderiaPrompt.position = PANADERIA_POS + PANADERIA_PROMPT_OFFSET
+	add_child(panaderiaPrompt)
 
 # ─── Detección de proximidad y entrada a Panadería ───────────────────────────
 
@@ -154,9 +121,11 @@ func _process(_delta) -> void:
 	if not player:
 		return
 	var dist = player.global_position.distance_to(PANADERIA_POS)
-	panadering_nearby = dist < INTERACT_RADIUS
-	if panadering_nearby and is_instance_valid(panaderiaLabel):
-		_updatePanaderiaLabelPosition()
+	var nowNearby = dist < INTERACT_RADIUS
+	if nowNearby != panadering_nearby:
+		panadering_nearby = nowNearby
+		if is_instance_valid(panaderiaPrompt):
+			panaderiaPrompt.setNear(panadering_nearby)
 
 func _unhandled_input(event) -> void:
 	if panaderiaInteracted:
@@ -172,10 +141,8 @@ func _unhandled_input(event) -> void:
 func _enterPanaderia() -> void:
 	panaderiaInteracted = true
 
-	if is_instance_valid(panaderiaLabel):
-		panaderiaLabel.queue_free()
-	if is_instance_valid(panaderiaLabelLayer):
-		panaderiaLabelLayer.queue_free()
+	if is_instance_valid(panaderiaPrompt):
+		panaderiaPrompt.queue_free()
 
 	var player = get_tree().get_first_node_in_group("player")
 	if player:

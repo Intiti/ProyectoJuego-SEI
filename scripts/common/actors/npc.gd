@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+
 @export var dialogFile: String = ""
 @export var needsHelp: bool = true
 @export var npcSprite: Texture2D
@@ -7,8 +9,8 @@ extends CharacterBody2D
 
 var playerNearby: bool = false
 
-# "!" rojo como hijo 2D directo del NPC (coordenadas mundo, se mueve con el NPC)
-var _exclamLabel: Label = null
+# Indicador sobre el NPC: "!" de lejos, tecla [E] "Hablar" al acercarse
+var _prompt: Node2D = null
 
 func _ready():
 	add_to_group("npc")
@@ -24,35 +26,30 @@ func _ready():
 		_createExclamation()
 
 func _createExclamation():
-	_exclamLabel = Label.new()
-	_exclamLabel.text = "!"
-	_exclamLabel.add_theme_font_size_override("font_size", 80)
-	_exclamLabel.add_theme_color_override("font_color", Color(1, 0, 0, 1))
-	_exclamLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	_exclamLabel.add_theme_constant_override("shadow_offset_x", 3)
-	_exclamLabel.add_theme_constant_override("shadow_offset_y", 3)
-	# Offset local: centrado sobre el sprite (que mide ~140px en world space)
-	_exclamLabel.position = Vector2(-16, -155)
-	add_child(_exclamLabel)
-	_floatExclam()
+	_prompt = WorldPromptScript.new()
+	_prompt.setup(WorldPromptScript.Marker.EXCLAIM, "Hablar")
+	# Centro del indicador sobre la cabeza del NPC (coordenadas locales)
+	_prompt.position = Vector2(0, -115)
+	add_child(_prompt)
+	if playerNearby:
+		_prompt.setNear(true)
 
-func _floatExclam():
-	if not is_instance_valid(_exclamLabel):
-		return
-	var baseY: float = _exclamLabel.position.y
-	while is_instance_valid(_exclamLabel):
-		var t = create_tween()
-		t.tween_property(_exclamLabel, "position:y", baseY - 12.0, 0.5).set_trans(Tween.TRANS_SINE)
-		t.tween_property(_exclamLabel, "position:y", baseY, 0.5).set_trans(Tween.TRANS_SINE)
-		await t.finished
+func _removePrompt():
+	if is_instance_valid(_prompt):
+		_prompt.queue_free()
+	_prompt = null
 
 func _on_detection_body_entered(body):
 	if body.is_in_group("player"):
 		playerNearby = true
+		if is_instance_valid(_prompt) and needsHelp:
+			_prompt.setNear(true)
 
 func _on_detection_body_exited(body):
 	if body.is_in_group("player"):
 		playerNearby = false
+		if is_instance_valid(_prompt):
+			_prompt.setNear(false)
 
 func _unhandled_input(event):
 	# Sin problema pendiente: no hay interacción posible
@@ -68,9 +65,7 @@ func _unhandled_input(event):
 
 func onPuzzleSolved():
 	needsHelp = false
-	if is_instance_valid(_exclamLabel):
-		_exclamLabel.queue_free()
-		_exclamLabel = null
+	_removePrompt()
 	# Persistir que este NPC fue resuelto para cuando el jugador vuelva a la escena
 	if dialogFile != "":
 		GameData.markSolved(dialogFile)

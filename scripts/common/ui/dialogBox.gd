@@ -81,7 +81,7 @@ func _ready():
 
 	panel = Panel.new()
 	panel.anchor_left = 0.1
-	panel.anchor_top = 0.75
+	panel.anchor_top = 0.72
 	panel.anchor_right = 0.9
 	panel.anchor_bottom = 0.97
 	panel.visible = false
@@ -117,7 +117,7 @@ func _ready():
 	dialogLabel.offset_left = 12.0
 	dialogLabel.offset_top = 34.0
 	dialogLabel.offset_right = -12.0
-	dialogLabel.offset_bottom = -28.0
+	dialogLabel.offset_bottom = -46.0
 	dialogLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	panel.add_child(dialogLabel)
 
@@ -125,9 +125,10 @@ func _ready():
 	continueHint.anchor_right = 1.0
 	continueHint.anchor_top = 1.0
 	continueHint.anchor_bottom = 1.0
-	continueHint.offset_top = -24.0
-	continueHint.offset_right = -10.0
-	continueHint.offset_bottom = -4.0
+	continueHint.offset_top = -50.0
+	continueHint.offset_right = -18.0
+	continueHint.offset_bottom = -12.0
+	continueHint.add_theme_font_size_override("font_size", 34)
 	continueHint.text = "▼ E"
 	continueHint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	continueHint.visible = false

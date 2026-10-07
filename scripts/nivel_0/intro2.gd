@@ -14,10 +14,14 @@ const INTERACT_RADIUS = 150.0
 @onready var fadeRect = $FadeLayer/FadeRect
 @onready var dialogBox = $DialogBox
 
-var pozoLabel: Label = null
-var pozoLabelLayer: CanvasLayer = null
-var tutorialLabel: Node = null
-var tutorialLayer: CanvasLayer = null
+const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
+
+# Dónde flota el indicador respecto al centro del pozo
+const POZO_PROMPT_OFFSET := Vector2(0, -80)
+
+var pozoPrompt: Node2D = null
+var hint = null
 var pozoNearby: bool = false
 var wellInteracted: bool = false
 
@@ -107,105 +111,31 @@ func _afterPankoGone():
 
 	# Mostrar tutorial y símbolo "!" sobre el pozo
 	_showTutorialHint()
-	_showPozoExclamation()
+	_showPozoPrompt()
 
-# ─── Tutorial "pulsa E para interactuar" ──────────────────────────────────────
+# ─── Tutorial de interacción ─────────────────────────────────────────────────
+# Dos mensajes según la distancia, para que quede claro QUÉ hacer y CUÁNDO:
+#   lejos  → "Acércate al pozo (!)"
+#   cerca  → "Pulsa [E] para interactuar"
+
+func _farHintText() -> String:
+	return "Acércate al pozo  (%s)" % TutorialHintScript.bang()
+
+func _nearHintText() -> String:
+	return "Pulsa  %s  para interactuar" % TutorialHintScript.key("E")
 
 func _showTutorialHint():
-	tutorialLayer = CanvasLayer.new()
-	tutorialLayer.layer = 5
-	add_child(tutorialLayer)
+	hint = TutorialHintScript.new()
+	hint.setup(_farHintText())
+	add_child(hint)
 
-	# RichTextLabel para poder colorear el "(!)" en rojo
-	var richLabel = RichTextLabel.new()
-	richLabel.bbcode_enabled = true
-	richLabel.text = "Pulsa  E  para interactuar con objetos marcados ([color=red]![/color])"
-	richLabel.add_theme_font_size_override("normal_font_size", 32)
-	richLabel.add_theme_font_size_override("bold_font_size", 32)
-	richLabel.add_theme_color_override("default_color", Color(1, 1, 1, 1))
-	richLabel.add_theme_constant_override("shadow_offset_x", 2)
-	richLabel.add_theme_constant_override("shadow_offset_y", 2)
-	richLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	richLabel.fit_content = true
-	richLabel.scroll_active = false
-	richLabel.autowrap_mode = TextServer.AUTOWRAP_OFF
+# ─── Indicador sobre el pozo: "!" de lejos, tecla [E] de cerca ────────────────
 
-	richLabel.anchor_left   = 0.5
-	richLabel.anchor_right  = 0.5
-	richLabel.anchor_top    = 1.0
-	richLabel.anchor_bottom = 1.0
-	richLabel.offset_left   = -420.0
-	richLabel.offset_right  = 420.0
-	richLabel.offset_top    = -80.0
-	richLabel.offset_bottom = -20.0
-	richLabel.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	tutorialLayer.add_child(richLabel)
-
-	# Guardar referencia para parpadeo
-	tutorialLabel = richLabel
-
-	# Parpadeo suave
-	_blinkLabel(tutorialLabel)
-
-func _blinkLabel(label: Node):
-	while is_instance_valid(label):
-		var t = create_tween()
-		t.tween_property(label, "modulate:a", 0.2, 0.6)
-		t.tween_property(label, "modulate:a", 1.0, 0.6)
-		await t.finished
-
-# ─── Símbolo "!" sobre el pozo (en CanvasLayer para que no se mueva con la cámara) ──
-
-func _showPozoExclamation():
-	# Usamos un CanvasLayer para que el "!" aparezca en coordenadas de pantalla
-	# y no se desplace si hay cámara activa
-	pozoLabelLayer = CanvasLayer.new()
-	pozoLabelLayer.layer = 4
-	add_child(pozoLabelLayer)
-
-	pozoLabel = Label.new()
-	pozoLabel.text = "!"
-	pozoLabel.add_theme_font_size_override("font_size", 64)
-	pozoLabel.add_theme_color_override("font_color", Color(1, 0, 0, 1))
-	pozoLabel.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1))
-	pozoLabel.add_theme_constant_override("shadow_offset_x", 3)
-	pozoLabel.add_theme_constant_override("shadow_offset_y", 3)
-
-	pozoLabelLayer.add_child(pozoLabel)
-
-	# Posicionar el label convirtiendo las coordenadas del mundo a pantalla
-	_updatePozoLabelPosition()
-
-	# Animación de flotación
-	_floatLabel(pozoLabel)
-
-func _updatePozoLabelPosition():
-	if not is_instance_valid(pozoLabel):
-		return
-	var camera = get_viewport().get_camera_2d()
-	var screenPos: Vector2
-	if camera:
-		screenPos = get_viewport().get_canvas_transform() * POZO_POS
-	else:
-		screenPos = POZO_POS
-	pozoLabel.position = screenPos + Vector2(-16, -120)
-
-func _floatLabel(label: Label):
-	var baseOffset := Vector2(-16, -120)
-	while is_instance_valid(label):
-		_updatePozoLabelPosition()
-		var camera = get_viewport().get_camera_2d()
-		var screenPos: Vector2
-		if camera:
-			screenPos = get_viewport().get_canvas_transform() * POZO_POS
-		else:
-			screenPos = POZO_POS
-		var baseY = screenPos.y + baseOffset.y
-		var t = create_tween()
-		t.tween_property(label, "position:y", baseY - 12.0, 0.5).set_trans(Tween.TRANS_SINE)
-		t.tween_property(label, "position:y", baseY, 0.5).set_trans(Tween.TRANS_SINE)
-		await t.finished
+func _showPozoPrompt():
+	pozoPrompt = WorldPromptScript.new()
+	pozoPrompt.setup(WorldPromptScript.Marker.EXCLAIM, "Interactuar")
+	pozoPrompt.position = POZO_POS + POZO_PROMPT_OFFSET
+	add_child(pozoPrompt)
 
 # ─── Detección de interacción con el pozo ─────────────────────────────────────
 
@@ -219,11 +149,13 @@ func _process(_delta):
 
 	# Verificar si el jugador está cerca del pozo
 	var dist = player.global_position.distance_to(POZO_POS)
-	pozoNearby = dist < INTERACT_RADIUS
-
-	# Actualizar posición del "!" si hay cámara que se mueve
-	if pozoNearby and is_instance_valid(pozoLabel):
-		_updatePozoLabelPosition()
+	var nowNearby = dist < INTERACT_RADIUS
+	if nowNearby != pozoNearby:
+		pozoNearby = nowNearby
+		if is_instance_valid(pozoPrompt):
+			pozoPrompt.setNear(pozoNearby)
+		if is_instance_valid(hint):
+			hint.setText(_nearHintText() if pozoNearby else _farHintText())
 
 func _unhandled_input(event):
 	if wellInteracted:
@@ -240,15 +172,11 @@ func _unhandled_input(event):
 func _onWellInteract():
 	wellInteracted = true
 
-	# Ocultar UI de tutorial y "!"
-	if is_instance_valid(pozoLabel):
-		pozoLabel.queue_free()
-	if is_instance_valid(pozoLabelLayer):
-		pozoLabelLayer.queue_free()
-	if is_instance_valid(tutorialLabel):
-		tutorialLabel.queue_free()
-	if is_instance_valid(tutorialLayer):
-		tutorialLayer.queue_free()
+	# Ocultar UI de tutorial e indicador
+	if is_instance_valid(pozoPrompt):
+		pozoPrompt.queue_free()
+	if is_instance_valid(hint):
+		hint.dismiss()
 
 	# Bloquear al jugador
 	_blockPlayer()
