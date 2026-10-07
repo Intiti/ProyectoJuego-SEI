@@ -13,14 +13,27 @@ func _physics_process(delta):
 	if not is_on_floor():
 		velocity.y += gravity * delta
 
+	# Flechas (ui_left/ui_right) + A/D
 	var dir = Input.get_axis("ui_left", "ui_right")
+	if dir == 0.0:
+		dir = float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A))
 	velocity.x = dir * speed
 
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+	# Salto: ui_accept (espacio/enter) + W
+	var jumpPressed = Input.is_action_just_pressed("ui_accept") or _wJustPressed()
+	if jumpPressed and is_on_floor():
 		velocity.y = jumpForce
 
 	move_and_slide()
 	_updateAnimation(dir)
+
+# Detecta el flanco de subida de W (Input.is_action_just_pressed no aplica a teclas sueltas)
+var _wWasDown := false
+func _wJustPressed() -> bool:
+	var down = Input.is_physical_key_pressed(KEY_W)
+	var just = down and not _wWasDown
+	_wWasDown = down
+	return just
 
 func _updateAnimation(dir: float):
 	if not is_on_floor():

@@ -17,11 +17,39 @@ var _restorePlayerOnClose: bool = false
 
 signal cinematicDialogFinished
 
+# ── Colores por hablante ──────────────────────────────────────────────────────
+# Cada hablante tiene un color propio: tiñe su nombre, el borde del panel y
+# un tinte suave del texto. Los pensamientos "(...)" siguen siendo azul claro.
+# Para agregar un hablante nuevo basta añadir una línea aquí; si no está, se
+# genera un color estable a partir de su nombre (siempre el mismo).
+const SPEAKER_COLORS := {
+	"Jugador":              Color(1.00, 0.85, 0.35),
+	"Panko":                Color(1.00, 0.60, 0.25),
+	"Monito":               Color(0.70, 0.55, 0.95),
+	"Alcalde Boris":        Color(0.95, 0.35, 0.35),
+	"Facundo":              Color(0.40, 0.90, 0.60),
+	"Yang":                 Color(0.95, 0.95, 0.95),
+	"Ying":                 Color(0.55, 0.55, 0.60),
+	"Bob":                  Color(0.35, 0.85, 0.85),
+	"Miette":               Color(1.00, 0.55, 0.80),
+	"Profesor Félix":       Color(0.60, 0.80, 0.30),
+	"Rosalinda":            Color(0.95, 0.45, 0.65),
+	"Don Plateado":         Color(0.75, 0.80, 0.88),
+	"Heisencat":            Color(0.45, 0.95, 0.35),
+	"Grupo de Estudiantes": Color(1.00, 0.65, 0.30),
+	"Guardia":              Color(0.85, 0.30, 0.30),
+}
+# Separadores para hablantes simultáneos, p. ej. "Yang & Ying" o "Yang y Ying".
+# Cada nombre se pinta con su color y el texto lo dice "el grupo" (borde mixto).
+const MULTI_SEPARATORS := [" & ", "+", " y "]
+
+var speakerStyle: StyleBoxFlat
+
 var overlay: ColorRect
 var leftPortrait: TextureRect
 var rightPortrait: TextureRect
 var panel: Panel
-var speakerLabel: Label
+var speakerLabel: RichTextLabel
 var dialogLabel: Label
 var continueHint: Label
 
@@ -59,6 +87,9 @@ func _ready():
 	panel.visible = false
 	var panelStyle = StyleBoxFlat.new()
 	panelStyle.bg_color = Color(0, 0, 0, 1)
+	panelStyle.set_border_width_all(3)
+	panelStyle.border_color = Color.WHITE
+	speakerStyle = panelStyle
 	panel.add_theme_stylebox_override("panel", panelStyle)
 
 	var dialogTheme = Theme.new()
@@ -68,7 +99,11 @@ func _ready():
 
 	add_child(panel)
 
-	speakerLabel = Label.new()
+	speakerLabel = RichTextLabel.new()
+	speakerLabel.bbcode_enabled = true
+	speakerLabel.fit_content = false
+	speakerLabel.scroll_active = false
+	speakerLabel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	speakerLabel.anchor_right = 1.0
 	speakerLabel.offset_left = 12.0
 	speakerLabel.offset_top = 8.0
@@ -246,27 +281,72 @@ func _findSprite2D(node: Node) -> Sprite2D:
 			return result
 	return null
 
+# Color estable para hablantes que no están en SPEAKER_COLORS
+func _colorForSpeaker(speakerName: String) -> Color:
+	if SPEAKER_COLORS.has(speakerName):
+		return SPEAKER_COLORS[speakerName]
+	var h := float(abs(speakerName.hash()) % 360) / 360.0
+	return Color.from_hsv(h, 0.55, 1.0)
+
+# Separa "Yang & Ying" en ["Yang", "Ying"]. Un hablante normal devuelve [nombre].
+func _splitSpeakers(raw: String) -> Array:
+	# Si el nombre completo ya está registrado (p. ej. "Grupo de Estudiantes"),
+	# no lo partimos.
+	if SPEAKER_COLORS.has(raw):
+		return [raw]
+	for sep in MULTI_SEPARATORS:
+		if raw.contains(sep):
+			var parts: Array = []
+			for p in raw.split(sep):
+				var t: String = p.strip_edges()
+				if t != "":
+					parts.append(t)
+			if parts.size() > 1:
+				return parts
+	return [raw]
+
 func showLine():
 	var lineData = lines[currentLine]
-	var isPlayer = lineData["speaker"] == "Jugador"
-	var displaySpeaker = lineData["speaker"]
-	if isPlayer:
-		displaySpeaker = GameData.playerName
+	var rawSpeaker: String = lineData["speaker"]
+	var speakers: Array = _splitSpeakers(rawSpeaker)
+	var isPlayer: bool = speakers.has("Jugador")
 
-	speakerLabel.text = displaySpeaker
+	# ── Nombre(s) con color ───────────────────────────────────────────────────
+	var bbName := ""
+	for i in speakers.size():
+		var nm: String = speakers[i]
+		var shown: String = GameData.playerName if nm == "Jugador" else nm
+		if i > 0:
+			bbName += "[color=#ffffff] & [/color]"
+		bbName += "[color=#%s]%s[/color]" % [_colorForSpeaker(nm).to_html(false), shown]
+	speakerLabel.text = bbName
+
+	# Color principal: el del primer hablante (o el del NPC si hablan jugador + NPC)
+	var mainSpeaker: String = speakers[0]
+	var mainColor: Color = _colorForSpeaker(mainSpeaker)
+	speakerStyle.border_color = mainColor
+
 	fullText = lineData["text"].replace("{nombre}", GameData.playerName)
 	continueHint.visible = false
 	dialogLabel.text = ""
+	continueHint.modulate = mainColor
 
-	# Pensamientos: líneas que empiezan y terminan con paréntesis → color azul claro
+	# Pensamientos: líneas que empiezan y terminan con paréntesis → azul claro.
+	# El resto de líneas llevan un tinte suave del color del hablante.
 	var isThought = fullText.begins_with("(") and fullText.ends_with(")")
 	if isThought:
 		dialogLabel.modulate = Color(0.55, 0.78, 1.0)
 	else:
-		dialogLabel.modulate = Color(1.0, 1.0, 1.0)
+		dialogLabel.modulate = Color(1.0, 1.0, 1.0).lerp(mainColor, 0.35)
 
+	# Retratos: se resalta el lado de quien habla. Si hablan jugador y NPC a la
+	# vez ("Jugador & Yang") se resaltan los dos.
+	var npcSpeaks: bool = false
+	for nm in speakers:
+		if nm != "Jugador":
+			npcSpeaks = true
 	leftPortrait.modulate.a = 1.0 if isPlayer else 0.4
-	rightPortrait.modulate.a = 0.4 if isPlayer else 1.0
+	rightPortrait.modulate.a = 1.0 if npcSpeaks else 0.4
 
 	isTyping = true
 	typeText()

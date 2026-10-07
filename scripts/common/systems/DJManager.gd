@@ -24,7 +24,7 @@ const MUSIC_TRACKS: Dictionary = {
 }
 
 const FADE_DURATION := 1.2   # segundos de crossfade
-const MUSIC_VOLUME  := -6.0  # dB de volumen normal para la música
+const MUSIC_VOLUME  := -14.0 # dB de volumen normal para la música (antes -6; bajado para no tapar los bleeps)
 
 # ── Estado interno ─────────────────────────────────────────────────────────────
 
