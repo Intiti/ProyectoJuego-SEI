@@ -2,7 +2,7 @@
 	"lines": [
 		{
 			"speaker": "Miette",
-			"text": "¡Miau bienvenue! Soy Miette, la gata pastelera de la panadería. Tengo una fiesta mañana y necesito calcular los ingredientes... ¿me ayudas?"
+			"text": "¡Miau bienvenue! Soy Miette, yo hago los pasteles aquí en la panadeguía. Tengo una fiesta mañana y necesito calculag los inguedientes... ¿me ayudas?"
 		},
 		{
 			"speaker": "Jugador",
@@ -10,7 +10,7 @@
 		},
 		{
 			"speaker": "Miette",
-			"text": "¡Dime cuántos pasteles necesitas para la fiesta y calcularé todo! Recuerda: cada pastel lleva 6 tazas de harina, 4 huevos y 2 de azúcar."
+			"text": "Necesito sabeg cuantos inguedientes debo usar según la cantidad de pasteles pedidos. Recuegda: cada pastel lleva 6 tazas de haguina, 4 huevos y 2 de azúcag."
 		},
 		{
 			"speaker": "Jugador",
@@ -18,7 +18,7 @@
 		},
 		{
 			"speaker": "Miette",
-			"text": "¡Exactamente! Y al final imprime cada resultado con su etiqueta, así no me confundo entre la harina y el azúcar. ¡Empecemos!"
+			"text": "¡Touché! Y al final impguime cada guesultado con su etiqueta, así no me confundo entguee la haguina y el azúcag. ¡Empecemos!"
 		}
 	],
 	"puzzle": {
@@ -233,7 +233,7 @@
 	"outro_lines": [
 		{
 			"speaker": "Miette",
-			"text": "¡Meoooow! ¡Perfecto! Ahora sé exactamente cuánto necesito. ¡La fiesta será un éxito!"
+			"text": "¡Meoooow! ¡Pegfecto! Ahoga sé exactamente cuánto necesito. ¡La fiesta segá un éxito!"
 		},
 		{
 			"speaker": "Jugador",

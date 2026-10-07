@@ -18,8 +18,25 @@ var gatopuntos: int = 0:
 		gatopuntos = value
 		gatopuntosChanged.emit(value)
 
+# Problemas de la villa: los 10 NPC (npc_e11 = alcalde ... npc_e20). El guardia/examen no cuenta.
+const TOTAL_PROBLEMS := 10
+const FIRST_PROBLEM := "res://dialogs/nivel_1/npc_e11.json"   # el del alcalde
+
+signal problemsChanged
+
 func markSolved(dialogFile: String) -> void:
 	solvedDialogs[dialogFile] = true
+	problemsChanged.emit()
+
+func solvedProblemsCount() -> int:
+	var n := 0
+	for k in solvedDialogs.keys():
+		if String(k).get_file().begins_with("npc_e"):
+			n += 1
+	return n
+
+func firstProblemSolved() -> bool:
+	return isSolved(FIRST_PROBLEM)
 
 func isSolved(dialogFile: String) -> bool:
 	return solvedDialogs.get(dialogFile, false)

@@ -16,17 +16,8 @@ const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
 const EXIT_LABEL := "Seguir"
 var exitMarker = null
 
-# Tutorial de movimiento: se completa solo cuando el jugador realmente se mueve
-# y salta. Así el mensaje desaparece al aprender, no se queda parpadeando.
-const MOVE_DISTANCE := 150.0   # px que debe recorrer para contar como "ya se movió"
-const JUMP_GRACE    := 6.0     # s que esperamos el salto antes de cerrar igual
-const GO_RIGHT_TEXT := "[color=yellow]Sigue hacia la derecha  →[/color]"
-
+# Tutorial de movimiento: se queda en pantalla todo el nivel (no se cierra solo)
 var hint = null
-var _tutorialActive := false
-var _startX := 0.0
-var _moved := false
-var _jumped := false
 
 func _ready():
 	_applyGlobalTheme()
@@ -76,65 +67,19 @@ func _buildExitMarker() -> void:
 	add_child(exitMarker)
 
 # ─── Tutorial de movimiento ──────────────────────────────────────────────────
+# Siempre visible, con las dos indicaciones (moverse y saltar).
 
 func _showTutorialHint():
 	hint = TutorialHintScript.new()
 	hint.setup(_hintText())
 	add_child(hint)
 
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		_startX = player.global_position.x
-	_tutorialActive = true
-
-# Siempre UNA sola línea. Va quitando lo que el jugador ya hizo:
-#   nada hecho     → "Moverte: ... | Saltar: ..."
-#   ya se movió    → solo "Saltar: ..."
-#   ya saltó       → solo "Moverte: ..."
-#   ambos          → "Sigue hacia la derecha →"
 func _hintText() -> String:
 	var moveTxt = "Moverte:  %s %s  o  %s %s" % [
 		TutorialHintScript.key("←"), TutorialHintScript.key("→"),
 		TutorialHintScript.key("A"), TutorialHintScript.key("D")]
 	var jumpTxt = "Saltar:  %s  o  %s" % [TutorialHintScript.key("ESPACIO"), TutorialHintScript.key("W")]
-	if _moved and _jumped:
-		return GO_RIGHT_TEXT
-	if _moved:
-		return jumpTxt
-	if _jumped:
-		return moveTxt
 	return moveTxt + "      " + jumpTxt
-
-func _process(_delta):
-	if not _tutorialActive:
-		return
-	var player = get_tree().get_first_node_in_group("player")
-	if not player or not player.is_physics_processing():
-		return
-
-	var changed := false
-	if not _moved and absf(player.global_position.x - _startX) > MOVE_DISTANCE:
-		_moved = true
-		changed = true
-		# Si no salta, cerramos igual tras unos segundos para no estorbar
-		get_tree().create_timer(JUMP_GRACE).timeout.connect(_finishTutorial)
-	if not _jumped and player.velocity.y < -50.0:
-		_jumped = true
-		changed = true
-	if changed and is_instance_valid(hint):
-		hint.setText(_hintText())
-		hint.flash()   # destello: acción completada
-	if _moved and _jumped:
-		_finishTutorial()
-
-func _finishTutorial():
-	if not _tutorialActive:
-		return
-	_tutorialActive = false
-	if is_instance_valid(hint):
-		hint.setText(GO_RIGHT_TEXT)
-		hint.flash()
-		hint.dismiss(3.0)
 
 func _on_exit_trigger_body_entered(body):
 	if not body.is_in_group("player"):

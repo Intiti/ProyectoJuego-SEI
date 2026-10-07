@@ -1,6 +1,7 @@
 extends Node2D
 
 const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const FaderScript = preload("res://scripts/common/ui/sceneFader.gd")
 const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
 
 # Texto de las flechas de los bordes (se puede salir por izquierda y derecha)
@@ -33,21 +34,7 @@ func _positionPlayer() -> void:
 	player.position = Vector2(x, SPAWN_Y)
 
 func _fadeIn() -> void:
-	var fadeLayer = CanvasLayer.new()
-	fadeLayer.layer = 10
-	add_child(fadeLayer)
-	var fadeRect = ColorRect.new()
-	fadeRect.anchor_right = 1.0
-	fadeRect.anchor_bottom = 1.0
-	fadeRect.color = Color(0, 0, 0, 1)
-	fadeLayer.add_child(fadeRect)
-
-	var tween = create_tween()
-	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 0), 0.8)
-	tween.tween_callback(func():
-		fadeRect.queue_free()
-		fadeLayer.queue_free()
-	)
+	FaderScript.fadeIn(self, 0.8)
 
 # Flechas "Salir" en ambos bordes
 func _buildExitMarkers() -> void:
@@ -88,15 +75,4 @@ func _goToVilla1() -> void:
 	# Siempre spawnear frente a la panadería en Villa1
 	GameData.spawnSide = "panaderia"
 
-	var fadeLayer = CanvasLayer.new()
-	fadeLayer.layer = 10
-	add_child(fadeLayer)
-	var fadeRect = ColorRect.new()
-	fadeRect.anchor_right = 1.0
-	fadeRect.anchor_bottom = 1.0
-	fadeRect.color = Color(0, 0, 0, 0)
-	fadeLayer.add_child(fadeRect)
-
-	var tween = create_tween()
-	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 0.8)
-	tween.tween_callback(func(): get_tree().change_scene_to_file("res://scenes/nivel_1/Villa1.tscn"))
+	FaderScript.fadeOutAndChange(self, "res://scenes/nivel_1/Villa1.tscn", 0.8)

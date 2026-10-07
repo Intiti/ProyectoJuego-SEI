@@ -10,7 +10,15 @@
 		},
 		{
 			"speaker": "Don Plateado",
-			"text": "Hmmm...? ¿Acaso puedes determinar si ya cumplí mis diez años? Si es así, imprime Verdadero. Si no, imprime Falso."
+			"text": "Hmmm...Viejo dices? ¿Acaso puedes determinar si ya cumplí mis diez años?"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Uhh bueno solo con verlo ya me doy cuenta que usted tiene cierta edad."
+		},
+		{
+			"speaker": "Don Plateado",
+			"text": "Las apariencias engañan. Si tan seguro estás, escribe un miaugoritmo para comprobar si una edad ingresada es mayor o igual a diez."
 		},
 		{
 			"speaker": "Jugador",

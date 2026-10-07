@@ -2,23 +2,23 @@
 	"lines": [
 		{
 			"speaker": "Rosalinda",
-			"text": "¡Miau, bienvenido al puesto de la señorita Rosalinda! Vendo las mejores manzanas del pueblo, ¿te interesa alguna?"
+			"text": "¡Miau, bienvenido! Aquí se venden las mejores manzanas del pueblo, pero necesito tu ayuda para cobrarle a los clientes."
 		},
 		{
 			"speaker": "Jugador",
-			"text": "No sabía que los gatos podían comer manzanas... ¿cuánto cuestan?"
+			"text": "¿Cómo funciona la venta?"
 		},
 		{
 			"speaker": "Rosalinda",
-			"text": "El precio por manzana llega por input, igual que la cantidad que quieres y el dinero que traes. Así el miaugoritmo decide si hay trato."
+			"text": "Primero recibimos tres datos: el precio de la manzana, cuántas quieren llevar y el dinero que entrega el cliente."
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Entiendo: calculo el precio total, y luego comparo con el dinero disponible."
+			"text": "Entendido, debo hacer un programa que calcule el costo total según la cantidad de manzanas y su precio, y luego lo comparo con el dinero recibido."
 		},
 		{
 			"speaker": "Rosalinda",
-			"text": "¡Exactito! Si el dinero alcanza, di cuánto sobra. Si no, di cuánto falta. Los clientes ya esperan nerviosos... ¡vamos!"
+			"text": "¡Exacto! Si el dinero alcanza o sobra, entregamos el vuelto. Si no alcanza, le decimos cuántas monedas le faltan."
 		}
 	],
 	"puzzle": {

@@ -17,6 +17,7 @@ const INTERACT_RADIUS = 150.0
 const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
 const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
 const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const FaderScript = preload("res://scripts/common/ui/sceneFader.gd")
 
 # Dónde flota el indicador respecto al centro del pozo
 const POZO_PROMPT_OFFSET := Vector2(0, -80)
@@ -188,6 +189,7 @@ func _onWellInteract():
 	var tween = create_tween()
 	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 1.0)
 	tween.tween_callback(func():
+		FaderScript.coverNow(self)   # el negro pasa a la raíz y sobrevive al cambio de escena
 		get_tree().change_scene_to_file("res://scenes/nivel_1/Main.tscn")
 	)
 

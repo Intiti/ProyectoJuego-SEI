@@ -2,10 +2,11 @@ extends Node2D
 
 const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
 const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const FaderScript = preload("res://scripts/common/ui/sceneFader.gd")
 const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
 
 # Texto de la flecha de salida (hacia Villa1)
-const EXIT_LABEL := "A la Villa"
+const EXIT_LABEL := "A la villa"
 var _exitMarker = null
 
 var hint = null              # tutorial "habla con el alcalde"
@@ -15,6 +16,7 @@ var _exitBlocked: bool = true
 
 func _ready():
 	_applyGlobalTheme()
+	FaderScript.fadeIn(self, 0.8)
 	add_child(ScoreHudScript.new())
 	_showTutorialHint()
 	_buildExitTrigger()
@@ -116,15 +118,4 @@ func _goToVilla1() -> void:
 	if player:
 		player.set_physics_process(false)
 
-	var fadeLayer = CanvasLayer.new()
-	fadeLayer.layer = 10
-	add_child(fadeLayer)
-	var fadeRect = ColorRect.new()
-	fadeRect.anchor_right = 1.0
-	fadeRect.anchor_bottom = 1.0
-	fadeRect.color = Color(0, 0, 0, 0)
-	fadeLayer.add_child(fadeRect)
-
-	var tween = create_tween()
-	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 0.8)
-	tween.tween_callback(func(): get_tree().change_scene_to_file("res://scenes/nivel_1/Villa1.tscn"))
+	FaderScript.fadeOutAndChange(self, "res://scenes/nivel_1/Villa1.tscn", 0.8)

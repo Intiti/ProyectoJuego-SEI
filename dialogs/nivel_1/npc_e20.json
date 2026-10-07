@@ -14,7 +14,7 @@
 		},
 		{
 			"speaker": "Grupo de Estudiantes",
-			"text": "El problema es que el miaugoritmo esta incompleto y el profe vuelve en 5 minutos. ¡Ayúdanos por favor!"
+			"text": "El problema es que el miaugoritmo esta incompleto y el profe lo revisará en 5 minutos. ¡Ayúdanos por favor!"
 		},
 		{
 			"speaker": "Jugador",
@@ -22,11 +22,11 @@
 		},
 		{
 			"speaker": "Grupo de Estudiantes",
-			"text": "Son 40 clases en el semestre. Si asististe a 28, tienes exactamente 70%. Se recibe los dias que fuiste y calculamos el porcentaje. Si es 70 o mas, puedes rendir. Si no... repechaje."
+			"text": "Son 40 clases en total durante el semestre. Nuestro Miaugoritmo debe recibir los dias que fuiste y calcular el porcentaje. Si es 70 o mas, puedes rendir. Si no... repechaje."
 		},
 		{
 			"speaker": "Jugador",
-			"text": "Entendido. Dejenme ver ese codigo."
+			"text": "Entendido. Déjenme ver ese codigo."
 		}
 	],
 	"puzzle": {
