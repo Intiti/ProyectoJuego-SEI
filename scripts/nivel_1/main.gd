@@ -1,6 +1,12 @@
 extends Node2D
 
 const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
+
+# Texto de la flecha de salida (hacia Villa1)
+const EXIT_LABEL := "A la Villa"
+var _exitMarker = null
 
 var hint = null              # tutorial "habla con el alcalde"
 var _exploreHint = null      # tutorial "explora la villa"
@@ -9,8 +15,10 @@ var _exitBlocked: bool = true
 
 func _ready():
 	_applyGlobalTheme()
+	add_child(ScoreHudScript.new())
 	_showTutorialHint()
 	_buildExitTrigger()
+	_buildExitMarker()
 	call_deferred("_setup")
 	# ── Música de la villa (plaza/mapa principal) ──────────────────────────
 	DJManager.playMusic("villa")
@@ -61,6 +69,8 @@ func _onCinematicDialogFinished() -> void:
 	if npc and not npc.needsHelp and not _exploreTutorialShown:
 		_exploreTutorialShown = true
 		_exitBlocked = false
+		if is_instance_valid(_exitMarker):
+			_exitMarker.setActive(true)   # recién ahora se puede pasar a Villa1
 		_showExploreTutorial()
 
 # ─── Tutorial "Explora Villa Miaulemana" ──────────────────────────────────────
@@ -71,6 +81,15 @@ func _showExploreTutorial() -> void:
 	add_child(_exploreHint)
 	# Se retira solo después de unos segundos
 	_exploreHint.dismiss(7.0)
+
+# ─── Flecha de salida hacia Villa1 ───────────────────────────────────────────
+# Escondida hasta que el jugador habla con el alcalde (misma condición que
+# _exitBlocked = false).
+
+func _buildExitMarker() -> void:
+	_exitMarker = ExitMarkerScript.new()
+	_exitMarker.setup(ExitMarkerScript.Side.RIGHT, EXIT_LABEL, not _exitBlocked)
+	add_child(_exitMarker)
 
 # ─── Trigger de salida hacia Villa1 ──────────────────────────────────────────
 

@@ -9,6 +9,12 @@ var introDialogLines = [
 @onready var dialogBox = $DialogBox
 
 const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
+
+# Texto de la flecha de salida (hacia Intro2)
+const EXIT_LABEL := "Seguir"
+var exitMarker = null
 
 # Tutorial de movimiento: se completa solo cuando el jugador realmente se mueve
 # y salta. Así el mensaje desaparece al aprender, no se queda parpadeando.
@@ -26,6 +32,8 @@ func _ready():
 	_applyGlobalTheme()
 	fadeRect.color = Color(0, 0, 0, 1)
 	_blockPlayer()
+	add_child(ScoreHudScript.new())
+	_buildExitMarker()
 	dialogBox.cinematicDialogFinished.connect(_onIntroDialogFinished)
 	# ── Música de la intro (crossfade desde la del menú) ──────────────────
 	DJManager.playMusic("intro")
@@ -53,9 +61,19 @@ func _startDialog():
 
 func _onIntroDialogFinished():
 	_showTutorialHint()
+	if is_instance_valid(exitMarker):
+		exitMarker.setActive(true)
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		player.set_physics_process(true)
+
+# ─── Flecha de salida (borde derecho → Intro2) ───────────────────────────────
+# Empieza escondida; aparece cuando termina el diálogo y el jugador ya puede moverse.
+
+func _buildExitMarker() -> void:
+	exitMarker = ExitMarkerScript.new()
+	exitMarker.setup(ExitMarkerScript.Side.RIGHT, EXIT_LABEL, false)
+	add_child(exitMarker)
 
 # ─── Tutorial de movimiento ──────────────────────────────────────────────────
 

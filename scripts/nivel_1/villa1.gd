@@ -1,6 +1,11 @@
 extends Node2D
 
 const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
+
+# Texto de la flecha del borde derecho (hacia Villa2)
+const EXIT_RIGHT_LABEL := ""
 
 # X donde aparece el jugador según de dónde viene
 const SPAWN_LEFT_X   := 80.0
@@ -25,6 +30,8 @@ func _ready():
 	_fadeIn()
 	_buildExitTrigger()
 	_showPanaderiaPrompt()
+	add_child(ScoreHudScript.new())
+	_buildExitMarker()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
@@ -62,6 +69,13 @@ func _fadeIn() -> void:
 		fadeRect.queue_free()
 		fadeLayer.queue_free()
 	)
+
+# ─── Flecha del borde derecho (→ Villa2) ──────────────────────────────────────
+
+func _buildExitMarker() -> void:
+	var m = ExitMarkerScript.new()
+	m.setup(ExitMarkerScript.Side.RIGHT, EXIT_RIGHT_LABEL)
+	add_child(m)
 
 # ─── Trigger de salida hacia Villa2 (borde derecho) ───────────────────────────
 

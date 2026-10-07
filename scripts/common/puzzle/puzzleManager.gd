@@ -51,7 +51,10 @@ var _rachaMax: int = 0
 var _examMode: bool = false      # true cuando este puzzle es parte de un examen
 var _examLives: int = 3          # vidas restantes durante la sesión de examen
 var _examSessionActive: bool = false
-var _livesLabel: Label = null    # label de vidas en la UI
+var _livesBox: HBoxContainer = null   # "Vidas:" + 3 patitas dibujadas, en la UI
+var _paws: Array = []                  # los 3 PawIcon, en orden
+
+const PawIconScript = preload("res://scripts/common/ui/pawIcon.gd")
 
 const EXAM_MAX_ERRORS: int = 3   # errores antes de mostrar EXAMEN FALLIDO
 
@@ -165,11 +168,24 @@ func _ready():
 	cmdWrapper.add_child(stepLabel)
 
 	# Label de vidas (solo visible en modo examen)
-	_livesLabel = Label.new()
-	_livesLabel.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	_livesLabel.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
-	_livesLabel.visible = false
-	cmdWrapper.add_child(_livesLabel)
+	_livesBox = HBoxContainer.new()
+	_livesBox.add_theme_constant_override("separation", 6)
+	_livesBox.alignment = BoxContainer.ALIGNMENT_BEGIN
+	_livesBox.visible = false
+	cmdWrapper.add_child(_livesBox)
+
+	var livesTitle = Label.new()
+	livesTitle.text = "Vidas:"
+	livesTitle.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	livesTitle.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	livesTitle.add_theme_color_override("font_color", Color(1.0, 0.6, 0.78))
+	_livesBox.add_child(livesTitle)
+
+	_paws = []
+	for i in EXAM_MAX_ERRORS:
+		var paw = PawIconScript.new()
+		_livesBox.add_child(paw)
+		_paws.append(paw)
 
 	commandList = VBoxContainer.new()
 	commandList.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -230,10 +246,10 @@ func open(data: Dictionary, npc: Node = null):
 
 	# Mostrar/actualizar label de vidas
 	if _examMode:
-		_livesLabel.visible = true
+		_livesBox.visible = true
 		_updateLivesLabel()
 	else:
-		_livesLabel.visible = false
+		_livesBox.visible = false
 
 	promptLabel.text = _colorizePrompt(levelPrompt)
 	outputLabel.text = ""
@@ -271,12 +287,9 @@ func endExamSession() -> void:
 	_examLives = EXAM_MAX_ERRORS
 
 func _updateLivesLabel():
-	var hearts = ""
-	for i in range(_examLives):
-		hearts += "❤ "
-	for i in range(EXAM_MAX_ERRORS - _examLives):
-		hearts += "🖤 "
-	_livesLabel.text = "Vidas: " + hearts.strip_edges()
+	# Patitas rosadas = vidas que quedan; grises = vidas perdidas
+	for i in _paws.size():
+		_paws[i].alive = i < _examLives
 
 # Crea TODOS los slots en orden: fijos completos, vacíos bordeados para los que hay que elegir
 func _buildAllSlots():

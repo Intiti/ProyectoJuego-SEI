@@ -1,6 +1,11 @@
 extends Node2D
 
 const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
+
+# Texto de la flecha del borde izquierdo (de vuelta a Villa1)
+const EXIT_LEFT_LABEL := ""
 
 const SPAWN_LEFT_X  := 80.0
 const SPAWN_RIGHT_X := 1070.0
@@ -24,6 +29,8 @@ func _ready():
 	_fadeIn()
 	_buildExitTrigger()
 	_showEscuelaPrompt()
+	add_child(ScoreHudScript.new())
+	_buildExitMarker()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
@@ -61,6 +68,12 @@ func _fadeIn() -> void:
 		fadeRect.queue_free()
 		fadeLayer.queue_free()
 	)
+
+# Flecha del borde izquierdo (← Villa1)
+func _buildExitMarker() -> void:
+	var m = ExitMarkerScript.new()
+	m.setup(ExitMarkerScript.Side.LEFT, EXIT_LEFT_LABEL)
+	add_child(m)
 
 # Trigger de salida hacia Villa1 (borde izquierdo)
 func _buildExitTrigger() -> void:

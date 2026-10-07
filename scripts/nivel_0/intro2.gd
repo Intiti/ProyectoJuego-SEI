@@ -16,6 +16,7 @@ const INTERACT_RADIUS = 150.0
 
 const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
 const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
 
 # Dónde flota el indicador respecto al centro del pozo
 const POZO_PROMPT_OFFSET := Vector2(0, -80)
@@ -30,6 +31,7 @@ func _ready():
 	fadeRect.color = Color(0, 0, 0, 1)
 	$FadeLayer.visible = true
 	_blockPlayer()
+	add_child(ScoreHudScript.new())
 	dialogBox.cinematicDialogFinished.connect(_onDialogFinished)
 	_fadeIn()
 

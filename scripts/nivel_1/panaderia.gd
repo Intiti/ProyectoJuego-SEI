@@ -1,5 +1,11 @@
 extends Node2D
 
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
+const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
+
+# Texto de las flechas de los bordes (se puede salir por izquierda y derecha)
+const EXIT_LABEL := "Salir"
+
 const SPAWN_LEFT_X  := 80.0
 const SPAWN_RIGHT_X := 1070.0
 const SPAWN_Y       := 570.0
@@ -9,6 +15,8 @@ func _ready():
 	_positionPlayer()
 	_fadeIn()
 	_buildExitTriggers()
+	add_child(ScoreHudScript.new())
+	_buildExitMarkers()
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
@@ -40,6 +48,13 @@ func _fadeIn() -> void:
 		fadeRect.queue_free()
 		fadeLayer.queue_free()
 	)
+
+# Flechas "Salir" en ambos bordes
+func _buildExitMarkers() -> void:
+	for s in [ExitMarkerScript.Side.LEFT, ExitMarkerScript.Side.RIGHT]:
+		var m = ExitMarkerScript.new()
+		m.setup(s, EXIT_LABEL)
+		add_child(m)
 
 # ─── Triggers de salida (ambos lados → vuelve a Villa1 frente a la panadería) ─
 
