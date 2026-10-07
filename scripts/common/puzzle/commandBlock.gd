@@ -12,6 +12,7 @@ var displayText: String = ""
 var isCorrect: bool = false
 
 var label: Label
+var isWrongLocked: bool = false   # alternativa incorrecta ya elegida: no se puede volver a clickear
 
 const FONT_SIZE := 17
 const COLOR_INPUT  := Color(0.20, 0.45, 0.85, 1.0)
@@ -51,6 +52,8 @@ func setupPlaced(type: Type, text: String, cfg: Dictionary = {}, indent: int = 0
 	_applyStyle()
 
 func _onGuiInput(event: InputEvent):
+	if isWrongLocked:
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		clicked.emit(self)
 
@@ -156,6 +159,33 @@ func _compare(left, op: String, right) -> bool:
 		"==": return str(left) == str(right)
 		"!=": return str(left) != str(right)
 	return false
+
+# Bloquea una alternativa incorrecta: se oscurece, borde rojo, cursor "prohibido"
+# y deja de responder a clicks. (Se vuelve a crear limpia en el siguiente paso.)
+func setWrongLocked() -> void:
+	if isWrongLocked:
+		return
+	isWrongLocked = true
+	mouse_default_cursor_shape = Control.CURSOR_FORBIDDEN
+
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.16, 0.11, 0.11, 1.0)
+	style.border_color = Color(0.85, 0.25, 0.25, 1.0)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	add_theme_stylebox_override("panel", style)
+
+	if label:
+		label.add_theme_color_override("font_color", Color(0.6, 0.45, 0.45, 1.0))
+
+	# Pequeño "golpe" visual al bloquearse
+	pivot_offset = size / 2.0
+	scale = Vector2(1.06, 1.06)
+	create_tween().tween_property(self, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func setLocked():
 	mouse_filter = Control.MOUSE_FILTER_IGNORE

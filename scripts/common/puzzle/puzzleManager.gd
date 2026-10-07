@@ -13,6 +13,17 @@ var feedbackLabel: Label
 var stepLabel: Label
 var _feedbackTween: Tween = null
 
+# Consola con scroll + contenido (para el auto-scroll y el temblor)
+var consoleScroll: ScrollContainer = null
+var _contentBox: Control = null
+var _scrollTween: Tween = null
+
+# Temblor de pantalla
+var _shakeTween: Tween = null
+var _shakeBaseOffsets: Array = []   # [left, top, right, bottom] originales del contenido
+var _shakeVec: Vector2 = Vector2.ZERO
+var _shaking: bool = false
+
 var isOpen: bool = false
 var _currentData: Dictionary = {}
 var _activeNpc: Node = null  # NPC que abrió este puzzle
@@ -66,6 +77,7 @@ func _ready():
 	vbox.offset_bottom = -32.0
 	vbox.add_theme_constant_override("separation", 16)
 	panel.add_child(vbox)
+	_contentBox = vbox
 
 	var titleLabel = Label.new()
 	titleLabel.text = "Instruccion del nivel"
@@ -120,17 +132,17 @@ func _ready():
 	consoleTitle.add_theme_color_override("font_color", Color(0.5, 0.9, 0.5))
 	consoleInner.add_child(consoleTitle)
 
-	var scrollContainer = ScrollContainer.new()
-	scrollContainer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scrollContainer.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	consoleInner.add_child(scrollContainer)
+	consoleScroll = ScrollContainer.new()
+	consoleScroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	consoleScroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	consoleInner.add_child(consoleScroll)
 
 	dropZone = VBoxContainer.new()
 	dropZone.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	dropZone.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	dropZone.set_script(load("res://scripts/common/puzzle/dropZone.gd"))
 	dropZone.add_theme_constant_override("separation", 4)
-	scrollContainer.add_child(dropZone)
+	consoleScroll.add_child(dropZone)
 
 	var sep = VSeparator.new()
 	hbox.add_child(sep)
@@ -227,6 +239,9 @@ func open(data: Dictionary, npc: Node = null):
 	outputLabel.text = ""
 	outputLabel.visible = showOutput
 	feedbackLabel.visible = false
+
+	_resetShake()
+	consoleScroll.scroll_vertical = 0
 
 	dropZone.clear()
 	dropZone.setup(levelVars, [])
@@ -397,6 +412,9 @@ func _loadCurrentStep(animate_arrow: bool = true):
 		commandList.alternativeChosen.disconnect(_onAlternativeChosen)
 	commandList.alternativeChosen.connect(_onAlternativeChosen)
 
+	# Si el código ya es largo y usa scroll, baja solo hasta la línea activa
+	_scrollToActiveRow()
+
 # Elimina la flecha actual de su row padre
 func _removeArrow():
 	if is_instance_valid(_arrowOverlay):
@@ -435,6 +453,10 @@ func _onAlternativeChosen(block):
 		_errores += 1
 		_rachaActual = 0
 		GameData.rachaGlobal = 0
+
+		# Bloquear la alternativa mala (no se puede volver a elegir) y hacer temblar la pantalla
+		block.setWrongLocked()
+		_shakeScreen()
 
 		# En modo examen: descontar vida
 		if _examMode:
@@ -519,6 +541,94 @@ func _runBlocks(blocks: Array, vars: Dictionary, inputQueue: Array) -> Array:
 		else:
 			i += 1
 	return output
+
+# ─── Temblor de pantalla ──────────────────────────────────────────────────────
+# Sacude el contenido del puzzle (no el fondo, para no dejar bordes al descubierto).
+# IMPORTANTE: se mueven los OFFSETS (márgenes) y no `position`. Asignar `position`
+# a un nodo anclado hace que Godot recalcule y GUARDE los márgenes con el tamaño
+# actual; si en ese momento el contenido estaba creciendo (p. ej. una pista larga),
+# quedaba agrandado para siempre. Con offsets se restauran exactamente los originales.
+
+func _applyShake(v: Vector2) -> void:
+	if _contentBox == null or _shakeBaseOffsets.size() < 4:
+		return
+	_shakeVec = v
+	_contentBox.offset_left   = _shakeBaseOffsets[0] + v.x
+	_contentBox.offset_top    = _shakeBaseOffsets[1] + v.y
+	_contentBox.offset_right  = _shakeBaseOffsets[2] + v.x
+	_contentBox.offset_bottom = _shakeBaseOffsets[3] + v.y
+
+func _shakeScreen(strength: float = 9.0, duration: float = 0.4) -> void:
+	if _contentBox == null or not panel.visible:
+		return
+	if _shakeTween and _shakeTween.is_valid():
+		_shakeTween.kill()
+	if not _shaking:
+		_shakeBaseOffsets = [_contentBox.offset_left, _contentBox.offset_top,
+			_contentBox.offset_right, _contentBox.offset_bottom]
+		_shakeVec = Vector2.ZERO
+	_shaking = true
+
+	var steps := 8
+	var stepTime := duration / float(steps + 1)
+	var prev := _shakeVec
+	_shakeTween = create_tween()
+	for i in steps:
+		var decay := 1.0 - float(i) / float(steps)
+		var dir := 1.0 if i % 2 == 0 else -1.0
+		var off := Vector2(dir * randf_range(0.6, 1.0), randf_range(-0.5, 0.5)) * strength * decay
+		_shakeTween.tween_method(_applyShake, prev, off, stepTime)
+		prev = off
+	_shakeTween.tween_method(_applyShake, prev, Vector2.ZERO, stepTime)
+	_shakeTween.tween_callback(func(): _shaking = false)
+
+# Deja el contenido en su sitio si se cierra/abre el puzzle en medio de un temblor
+func _resetShake() -> void:
+	if _shakeTween and _shakeTween.is_valid():
+		_shakeTween.kill()
+	if _shaking:
+		_applyShake(Vector2.ZERO)
+	_shaking = false
+
+# ─── Auto-scroll de la consola ────────────────────────────────────────────────
+# Cuando el código es largo y aparece la barra de scroll, desplaza la consola
+# hasta la línea activa (la que se está completando) si no se ve bien.
+
+func _scrollToActiveRow() -> void:
+	# Esperamos 2 frames para que el layout de las filas nuevas ya tenga su tamaño final
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not isOpen or consoleScroll == null:
+		return
+
+	var targetRow: Control = null
+	for slot in _slots:
+		if slot["step_idx"] == _currentStep:
+			targetRow = slot["row"]
+			break
+	if not is_instance_valid(targetRow):
+		return
+
+	var bar := consoleScroll.get_v_scroll_bar()
+	var maxScroll: float = maxf(0.0, bar.max_value - bar.page)
+	if maxScroll <= 0.0:
+		return   # todo cabe en pantalla: no hay nada que desplazar
+
+	var rowTop: float = targetRow.global_position.y - dropZone.global_position.y
+	var rowBottom: float = rowTop + targetRow.size.y
+	var viewH: float = consoleScroll.size.y
+	var current: float = float(consoleScroll.scroll_vertical)
+	const MARGIN := 24.0
+	if rowTop >= current + MARGIN and rowBottom <= current + viewH - MARGIN:
+		return   # ya se ve cómoda
+
+	# Dejar la línea activa centrada en la consola
+	var target: float = clampf(rowTop - (viewH - targetRow.size.y) / 2.0, 0.0, maxScroll)
+	if _scrollTween and _scrollTween.is_valid():
+		_scrollTween.kill()
+	_scrollTween = create_tween()
+	_scrollTween.tween_property(consoleScroll, "scroll_vertical", int(target), 0.35)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _showFeedback(message: String, color: Color, duration: float):
 	if _feedbackTween != null and _feedbackTween.is_valid():
@@ -723,6 +833,8 @@ func _restartCurrentExercise() -> void:
 	_updateLivesLabel()
 	outputLabel.text = ""
 	feedbackLabel.visible = false
+
+	consoleScroll.scroll_vertical = 0
 
 	dropZone.clear()
 	dropZone.setup(levelVars, [])
@@ -1006,6 +1118,7 @@ func _disableCommandList():
 # el diálogo se encargará de devolver el control al jugador al cerrarse.
 func _closeKeepPlayerFrozen():
 	isOpen = false
+	_resetShake()
 	_removeArrow()
 	panel.visible = false
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
@@ -1013,6 +1126,7 @@ func _closeKeepPlayerFrozen():
 
 func close():
 	isOpen = false
+	_resetShake()
 	_removeArrow()
 	panel.visible = false
 	if commandList.alternativeChosen.is_connected(_onAlternativeChosen):
