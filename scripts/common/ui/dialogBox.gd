@@ -18,30 +18,23 @@ var _restorePlayerOnClose: bool = false
 signal cinematicDialogFinished
 
 # ── Colores por hablante ──────────────────────────────────────────────────────
-# Cada hablante tiene un color propio: tiñe su nombre, el borde del panel y
-# un tinte suave del texto. Los pensamientos "(...)" siguen siendo azul claro.
-# Para agregar un hablante nuevo basta añadir una línea aquí; si no está, se
-# genera un color estable a partir de su nombre (siempre el mismo).
-const SPEAKER_COLORS := {
-	"Jugador":              Color(1.00, 0.85, 0.35),
-	"Panko":                Color(1.00, 0.60, 0.25),
-	"Monito":               Color(0.70, 0.55, 0.95),
-	"Alcalde Boris":        Color(0.95, 0.35, 0.35),
-	"Facundo":              Color(0.40, 0.90, 0.60),
-	"Yang":                 Color(0.95, 0.95, 0.95),
-	"Ying":                 Color(0.55, 0.55, 0.60),
-	"Bob":                  Color(0.35, 0.85, 0.85),
-	"Miette":               Color(1.00, 0.55, 0.80),
-	"Profesor Félix":       Color(0.60, 0.80, 0.30),
-	"Rosalinda":            Color(0.95, 0.45, 0.65),
-	"Don Plateado":         Color(0.75, 0.80, 0.88),
-	"Heisencat":            Color(0.45, 0.95, 0.35),
-	"Grupo de Estudiantes": Color(1.00, 0.65, 0.30),
-	"Guardia":              Color(0.85, 0.30, 0.30),
-}
-# Separadores para hablantes simultáneos, p. ej. "Yang & Ying" o "Yang y Ying".
-# Cada nombre se pinta con su color y el texto lo dice "el grupo" (borde mixto).
-const MULTI_SEPARATORS := [" & ", "+", " y "]
+# TODOS los hablantes reciben un color automático calculado a partir de su
+# nombre: siempre es el mismo para el mismo nombre, así que no hace falta
+# registrar a cada NPC nuevo. Tiñe su nombre, el borde del panel y un tinte
+# suave del texto. Los pensamientos "(...)" siguen siendo azul claro.
+#
+# Si algún personaje necesita un color específico, agrégalo aquí y gana sobre
+# el automático:   "Nombre": Color(r, g, b),
+const SPEAKER_COLORS := {}
+
+# "Sal" del cálculo. Elegida para que los tonos de los personajes actuales
+# queden bien separados (≥14°). Si la cambias, TODOS los colores cambian.
+const COLOR_SALT := 158102
+
+# Separadores para hablantes simultáneos, p. ej. "Yang & Ying" o "Yang+Ying".
+# Cada nombre se pinta con su color. (" y " NO se usa, para que un nombre
+# normal con "y" no se parta por error.)
+const MULTI_SEPARATORS := [" & ", "+"]
 
 var speakerStyle: StyleBoxFlat
 
@@ -282,17 +275,18 @@ func _findSprite2D(node: Node) -> Sprite2D:
 			return result
 	return null
 
-# Color estable para hablantes que no están en SPEAKER_COLORS
+# Color estable derivado del nombre (hash propio y determinista)
 func _colorForSpeaker(speakerName: String) -> Color:
 	if SPEAKER_COLORS.has(speakerName):
 		return SPEAKER_COLORS[speakerName]
-	var h := float(abs(speakerName.hash()) % 360) / 360.0
-	return Color.from_hsv(h, 0.55, 1.0)
+	var h: int = COLOR_SALT
+	for i in speakerName.length():
+		h = (h * 31 + speakerName.unicode_at(i)) % 1000003
+	return Color.from_hsv(float(h % 360) / 360.0, 0.55, 1.0)
 
 # Separa "Yang & Ying" en ["Yang", "Ying"]. Un hablante normal devuelve [nombre].
 func _splitSpeakers(raw: String) -> Array:
-	# Si el nombre completo ya está registrado (p. ej. "Grupo de Estudiantes"),
-	# no lo partimos.
+	# Si el nombre completo tiene color propio, no lo partimos.
 	if SPEAKER_COLORS.has(raw):
 		return [raw]
 	for sep in MULTI_SEPARATORS:
