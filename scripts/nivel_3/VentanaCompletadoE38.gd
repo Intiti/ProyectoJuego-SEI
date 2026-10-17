@@ -1,0 +1,334 @@
+
+extends PanelContainer
+
+# ==========================================
+# MGTS - NIVEL 3 - EJERCICIO E3.8
+# PORTALES DE CONTENCION
+# VENTANA DE COMPLETADO
+# NPC: GATO CENTINELA
+# ==========================================
+
+# ==========================================
+# REFERENCIAS
+# ==========================================
+
+@onready var nombre_nivel: Label = get_node_or_null(
+	"ContenidoCompletado/Encabezado/NombreNivel"
+) as Label
+
+@onready var puntos_totales: Label = get_node_or_null(
+	"ContenidoCompletado/Encabezado/PuntosTotales"
+) as Label
+
+@onready var icono_trofeo: TextureRect = get_node_or_null(
+	"ContenidoCompletado/IconoTrofeo"
+) as TextureRect
+
+@onready var titulo_completado: Label = get_node_or_null(
+	"ContenidoCompletado/TituloCompletado"
+) as Label
+
+@onready var nombre_ejercicio: Label = get_node_or_null(
+	"ContenidoCompletado/NombreEjercicio"
+) as Label
+
+@onready var mensaje_exito: Label = get_node_or_null(
+	"ContenidoCompletado/MensajeExito"
+) as Label
+
+@onready var puntos_obtenidos: Label = get_node_or_null(
+	"ContenidoCompletado/PuntosObtenidos"
+) as Label
+
+@onready var errores_cometidos: Label = get_node_or_null(
+	"ContenidoCompletado/ErroresCometidos"
+) as Label
+
+@onready var boton_continuar: Button = get_node_or_null(
+	"ContenidoCompletado/BotonContinuar"
+) as Button
+
+@onready var puerta_seguridad: Node = get_node_or_null(
+	"../../PuertaSeguridad"
+)
+
+@onready var consola: Node = get_node_or_null(
+	"../../InteraccionConsola"
+)
+
+@onready var sistema_puntos: Node = get_node_or_null(
+	"/root/PuntajesNivel3"
+)
+
+
+# ==========================================
+# VARIABLES
+# ==========================================
+
+var ejercicio_completado: bool = false
+var puntos_ganados: int = 0
+var cantidad_errores: int = 0
+
+
+# ==========================================
+# INICIO
+# ==========================================
+
+func _ready() -> void:
+
+	hide()
+
+	if nombre_nivel != null:
+		nombre_nivel.text = "NIVEL 3"
+
+	if titulo_completado != null:
+		titulo_completado.text = "¡EJERCICIO COMPLETADO!"
+
+	if nombre_ejercicio != null:
+		nombre_ejercicio.text = (
+			"E3.8 - Los portales de contención"
+		)
+
+	if mensaje_exito != null:
+		mensaje_exito.text = (
+			"¡Excelente trabajo!\n"
+			+ "Has estabilizado los portales del laboratorio."
+		)
+
+	if puntos_obtenidos != null:
+		puntos_obtenidos.text = "Puntos obtenidos: 0"
+
+	if errores_cometidos != null:
+		errores_cometidos.text = "Errores cometidos: 0"
+
+	if boton_continuar != null:
+
+		boton_continuar.text = "Continuar"
+
+		if not boton_continuar.pressed.is_connected(
+			continuar_juego
+		):
+			boton_continuar.pressed.connect(
+				continuar_juego
+			)
+
+	else:
+		push_error("E3.8: falta BotonContinuar.")
+
+	actualizar_puntos_totales()
+
+	print("E3.8: ventana de completado preparada.")
+
+
+# ==========================================
+# MOSTRAR RESULTADOS
+# ==========================================
+
+func mostrar_completado(errores: int) -> void:
+
+	cantidad_errores = errores
+
+	# Registrar los puntos solo una vez
+	if not ejercicio_completado:
+
+		ejercicio_completado = true
+
+		puntos_ganados = calcular_puntos(errores)
+
+		if sistema_puntos != null:
+
+			if sistema_puntos.has_method(
+				"registrar_ejercicio"
+			):
+
+				sistema_puntos.call(
+					"registrar_ejercicio",
+					"E3.8",
+					puntos_ganados
+				)
+
+				print(
+					"E3.8: puntos registrados: ",
+					puntos_ganados
+				)
+
+			else:
+
+				push_warning(
+					"E3.8: falta registrar_ejercicio() "
+					+ "en PuntajesNivel3."
+				)
+
+		else:
+
+			push_warning(
+				"E3.8: no se encontró PuntajesNivel3."
+			)
+
+	# Mostrar los puntos obtenidos
+	if puntos_obtenidos != null:
+
+		puntos_obtenidos.text = (
+			"Puntos obtenidos: "
+			+ str(puntos_ganados)
+		)
+
+	# Mostrar los errores
+	if errores_cometidos != null:
+
+		errores_cometidos.text = (
+			"Errores cometidos: "
+			+ str(cantidad_errores)
+		)
+
+	# Mensaje de éxito
+	if mensaje_exito != null:
+
+		mensaje_exito.text = (
+			"¡Portales estabilizados!\n"
+			+ "El Gato Centinela confirma que "
+			+ "el sistema de contención es seguro."
+		)
+
+	actualizar_puntos_totales()
+
+	show()
+
+	print("E3.8: ejercicio completado.")
+	print("Puntos obtenidos: ", puntos_ganados)
+	print("Errores cometidos: ", cantidad_errores)
+
+
+# ==========================================
+# CALCULAR PUNTOS
+# ==========================================
+
+func calcular_puntos(errores: int) -> int:
+
+	if errores <= 1:
+		return 60
+
+	elif errores == 2:
+		return 45
+
+	else:
+		return 30
+
+
+# ==========================================
+# ACTUALIZAR PUNTOS TOTALES
+# ==========================================
+
+func actualizar_puntos_totales() -> void:
+
+	if puntos_totales == null:
+		return
+
+	if sistema_puntos == null:
+
+		puntos_totales.text = "Puntos totales: --"
+		return
+
+	var total: int = 0
+	var total_encontrado: bool = false
+
+	if sistema_puntos.has_method(
+		"obtener_total_nivel"
+	):
+
+		total = int(
+			sistema_puntos.call(
+				"obtener_total_nivel"
+			)
+		)
+
+		total_encontrado = true
+
+	elif sistema_puntos.has_method(
+		"obtener_puntos_totales"
+	):
+
+		total = int(
+			sistema_puntos.call(
+				"obtener_puntos_totales"
+			)
+		)
+
+		total_encontrado = true
+
+	else:
+
+		var valor: Variant = sistema_puntos.get(
+			"puntos_totales"
+		)
+
+		if valor != null:
+
+			total = int(valor)
+			total_encontrado = true
+
+	if total_encontrado:
+
+		puntos_totales.text = (
+			"Puntos totales: "
+			+ str(total)
+		)
+
+	else:
+
+		puntos_totales.text = "Puntos totales: --"
+
+
+# ==========================================
+# BOTON CONTINUAR
+# ==========================================
+
+func continuar_juego() -> void:
+
+	if not ejercicio_completado:
+		return
+
+	hide()
+
+	# Cerrar la ventana del ejercicio
+	if consola != null:
+
+		if consola.has_method(
+			"cerrar_ejercicio"
+		):
+
+			consola.call(
+				"cerrar_ejercicio"
+			)
+
+	# Desbloquear la puerta de seguridad
+	if puerta_seguridad != null:
+
+		if puerta_seguridad.has_method(
+			"desbloquear_puerta"
+		):
+
+			puerta_seguridad.call(
+				"desbloquear_puerta"
+			)
+
+			print(
+				"E3.8: puerta de seguridad desbloqueada."
+			)
+
+		else:
+
+			push_warning(
+				"E3.8: PuertaSeguridad no tiene "
+				+ "desbloquear_puerta()."
+			)
+
+	else:
+
+		push_warning(
+			"E3.8: no se encontró PuertaSeguridad."
+		)
+
+	print(
+		"E3.8: acceso hacia E3.9 habilitado."
+	)

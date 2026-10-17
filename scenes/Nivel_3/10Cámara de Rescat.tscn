@@ -1,0 +1,801 @@
+[gd_scene format=3 uid="uid://b1cv8h7uqi8e0"]
+
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/common/actors/Player.tscn" id="1_0trps"]
+[ext_resource type="Texture2D" uid="uid://be65w01un3stj" path="res://assets/nivel_3/fondos/c2779f06-8b19-4c05-bcbb-62538b5018c1.png" id="1_sbi6x"]
+[ext_resource type="Texture2D" uid="uid://diaxqk5s8k0fo" path="res://assets/nivel_3/personajes/397dd68b-ec4b-4128-9231-863574833acb-removebg-preview.png" id="2_jbm7o"]
+[ext_resource type="Script" uid="uid://egxakuiq7513" path="res://scripts/nivel_3/InteraccionGatoE310.gd" id="4_051yt"]
+[ext_resource type="Shader" uid="uid://bb58iyn3haxe4" path="res://scenes/Nivel_3/1Entrada del Laboratorio.gdshader" id="5_h7qha"]
+[ext_resource type="Texture2D" uid="uid://cfrdkcb4uevr2" path="res://assets/nivel_3/personajes/09919c97-0761-4ec0-abaf-848cac69190d.png" id="6_14oos"]
+[ext_resource type="Texture2D" uid="uid://dnlib3k1ko33d" path="res://assets/nivel_3/personajes/ecc1f74f-5705-4251-a57a-87ca7ff394c3-removebg-preview.png" id="7_h7qha"]
+[ext_resource type="Script" uid="uid://cpqg500at5f5o" path="res://scripts/nivel_3/InteraccionConsolaE310.gd" id="8_14oos"]
+[ext_resource type="Script" uid="uid://lud2hctjpddt" path="res://scripts/nivel_3/VentanaEjercicioE310.gd" id="9_h7qha"]
+[ext_resource type="Script" uid="uid://yh5fxn65g6au" path="res://scripts/nivel_3/VentanaCompletadoE310.gd" id="10_14oos"]
+[ext_resource type="Texture2D" uid="uid://df84ha80m6hvt" path="res://assets/nivel_3/personajes/84a69d9f-b777-4445-815c-f8ae76b5c1d0-removebg-preview.png" id="10_jfkdv"]
+[ext_resource type="Texture2D" uid="uid://5n4i2ipp7d17" path="res://assets/nivel_3/texture/916efaf3-ae1c-4116-ad1e-967078a8ab24.png" id="10_pt7rq"]
+[ext_resource type="Script" uid="uid://dxqi1uv3mag58" path="res://scripts/nivel_3/compartidos/PuertaSeguridad.gd" id="11_2pxqw"]
+[ext_resource type="Script" uid="uid://0ds17qytv7df" path="res://scripts/nivel_3/compartidos/SalidaLaboratorio.gd" id="12_rfspb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m5h37"]
+size = Vector2(2250, 42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n2byy"]
+size = Vector2(129, 799)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h4l8l"]
+size = Vector2(143, 791)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hik45"]
+radius = 122.06556
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qk1t5"]
+bg_color = Color(0.95686275, 0.9411765, 0.98039216, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.16078432, 0.14117648, 0.22745098, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+corner_detail = 10
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5f3dv"]
+shader = ExtResource("5_h7qha")
+shader_parameter/desenfoque = 1.5
+shader_parameter/oscuridad = 0.55
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nei20"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+bg_color = Color(0.047058824, 0.078431375, 0.1254902, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.6156863, 0.41960785, 0.85882354, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+corner_detail = 12
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_akx51"]
+size = Vector2(342.67188, 119.46875)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fbf3j"]
+bg_color = Color(0.95686275, 0.9411765, 0.98039216, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.16078432, 0.14117648, 0.22745098, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+corner_detail = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sjpuh"]
+bg_color = Color(0.0627451, 0.09411765, 0.15294118, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.5647059, 0.3882353, 0.8117647, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+corner_detail = 12
+expand_margin_left = 20.0
+expand_margin_top = 20.0
+expand_margin_right = 20.0
+expand_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ms6b2"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.0627451, 0.10980392, 0.19607843, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.23529412, 0.39607844, 0.6, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xdxp"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.0627451, 0.10980392, 0.19607843, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25882354, 0.5568628, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3dg80"]
+bg_color = Color(0.21960784, 0.36078432, 0.5372549, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ri65n"]
+bg_color = Color(0.4627451, 0.32156864, 0.6745098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a2m5p"]
+bg_color = Color(0.21960784, 0.36078432, 0.5372549, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sfdgv"]
+bg_color = Color(0.14509805, 0.49803922, 0.4627451, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ngtbv"]
+bg_color = Color(0.14509805, 0.49803922, 0.4627451, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mkpdt"]
+bg_color = Color(0.4627451, 0.32156864, 0.6745098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kmi5r"]
+bg_color = Color(0.6901961, 0.47058824, 0.21568628, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3n7x4"]
+bg_color = Color(0.54509807, 0.27450982, 0.3529412, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 6.0
+expand_margin_top = 2.0
+expand_margin_right = 6.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sckqt"]
+bg_color = Color(0.09803922, 0.15294118, 0.25882354, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25882354, 0.5568628, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+expand_margin_left = 10.0
+expand_margin_top = 10.0
+expand_margin_right = 10.0
+expand_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8g0g"]
+bg_color = Color(0.1882353, 0.23529412, 0.3764706, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6627451, 0.5411765, 0.9137255, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+corner_detail = 1
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qavbp"]
+bg_color = Color(0.5058824, 0.22352941, 0.8627451, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6627451, 0.5411765, 0.9137255, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frfek"]
+bg_color = Color(0.1882353, 0.23529412, 0.3764706, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6627451, 0.5411765, 0.9137255, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ubi57"]
+bg_color = Color(0.0627451, 0.09411765, 0.15294118, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.5803922, 0.38039216, 0.8235294, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+corner_detail = 18
+expand_margin_left = 28.0
+expand_margin_top = 28.0
+expand_margin_right = 28.0
+expand_margin_bottom = 28.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mtd0k"]
+bg_color = Color(0.4627451, 0.31764707, 0.6862745, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4vhrh"]
+size = Vector2(204.75, 282.6875)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_74g31"]
+size = Vector2(114.21875, 292.34375)
+
+[node name="10Cámara de Rescate" type="Node2D" unique_id=914637234]
+
+[node name="Fondo" type="Sprite2D" parent="." unique_id=663713908]
+position = Vector2(919.99994, 411.74963)
+scale = Vector2(1.1058612, 0.80411863)
+texture = ExtResource("1_sbi6x")
+offset = Vector2(0, -100)
+
+[node name="Lince cibernético" type="Sprite2D" parent="." unique_id=139346763]
+position = Vector2(1236, 423)
+scale = Vector2(0.37811652, 0.2983085)
+texture = ExtResource("2_jbm7o")
+
+[node name="Suelo" type="StaticBody2D" parent="." unique_id=798877823]
+position = Vector2(-957, 112)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Suelo" unique_id=697195871]
+position = Vector2(1903, 402)
+shape = SubResource("RectangleShape2D_m5h37")
+
+[node name="Paredes" type="StaticBody2D" parent="." unique_id=300444166]
+position = Vector2(-957, 112)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Paredes" unique_id=738205707]
+position = Vector2(907, 209)
+shape = SubResource("RectangleShape2D_n2byy")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Paredes" unique_id=1379980850]
+position = Vector2(2851, 186)
+shape = SubResource("RectangleShape2D_h4l8l")
+
+[node name="Player" parent="." unique_id=2022552071 instance=ExtResource("1_0trps")]
+position = Vector2(257, 458)
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1680397030]
+position = Vector2(0, 24)
+offset = Vector2(0, -180)
+limit_left = 2
+limit_top = 175
+limit_right = 1836
+limit_bottom = 742
+
+[node name="InteraccionGatoa2D" type="Area2D" parent="." unique_id=499384737]
+position = Vector2(-957, 112)
+script = ExtResource("4_051yt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteraccionGatoa2D" unique_id=32751945]
+position = Vector2(2189, 311)
+shape = SubResource("CircleShape2D_hik45")
+
+[node name="LetraE" type="Label" parent="InteraccionGatoa2D" unique_id=2115090234]
+offset_left = 2163.0
+offset_top = 168.0
+offset_right = 2205.0
+offset_bottom = 214.0
+theme_override_colors/font_color = Color(0.16078432, 0.14117648, 0.22745098, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_qk1t5")
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DialogoUI" type="CanvasLayer" parent="." unique_id=362769020]
+
+[node name="FondoDialogo" type="ColorRect" parent="DialogoUI" unique_id=696017875]
+material = SubResource("ShaderMaterial_5f3dv")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = -63.0
+offset_right = 1327.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RetratosDialogo" type="Control" parent="DialogoUI" unique_id=996295617]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -50.0
+offset_top = 371.0
+offset_right = 1466.0
+offset_bottom = 1035.0
+
+[node name="RetratoJugador" type="TextureRect" parent="DialogoUI/RetratosDialogo" unique_id=1280870413]
+layout_mode = 0
+offset_left = 138.0
+offset_top = -261.0
+offset_right = 601.0
+offset_bottom = 26.0
+size_flags_horizontal = 3
+texture = ExtResource("6_14oos")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RetratoNPC" type="TextureRect" parent="DialogoUI/RetratosDialogo" unique_id=394872650]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 0
+offset_left = 586.0
+offset_top = -238.0
+offset_right = 1059.0
+offset_bottom = 29.0
+size_flags_horizontal = 3
+texture = ExtResource("7_h7qha")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CajaDialogo" type="PanelContainer" parent="DialogoUI" unique_id=630522917]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 176.0
+offset_top = -258.0
+offset_right = -176.0
+offset_bottom = -138.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_nei20")
+
+[node name="ContenidoDialogo" type="VBoxContainer" parent="DialogoUI/CajaDialogo" unique_id=833396502]
+layout_mode = 2
+
+[node name="NombreGato" type="Label" parent="DialogoUI/CajaDialogo/ContenidoDialogo" unique_id=464147300]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8666667, 0.72156864, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Dr. Nébulo"
+
+[node name="TextoDialogo" type="Label" parent="DialogoUI/CajaDialogo/ContenidoDialogo" unique_id=2017107487]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "¡Atención! El sistema de enfriamiento del laboratorio está fallando."
+
+[node name="ContinuarLabel" type="Label" parent="DialogoUI/CajaDialogo/ContenidoDialogo" unique_id=1916873074]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68235296, 0.73333335, 0.8156863, 1)
+theme_override_font_sizes/font_size = 14
+text = "▼ E Continuar"
+horizontal_alignment = 2
+
+[node name="InteraccionConsola" type="Area2D" parent="." unique_id=535167363]
+script = ExtResource("8_14oos")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteraccionConsola" unique_id=240833833]
+position = Vector2(909, 405)
+shape = SubResource("RectangleShape2D_akx51")
+
+[node name="LetraE" type="Label" parent="InteraccionConsola" unique_id=1876438740]
+offset_left = 904.0
+offset_top = 307.0
+offset_right = 941.0
+offset_bottom = 338.0
+theme_override_colors/font_color = Color(0.16078432, 0.14117648, 0.22745098, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_fbf3j")
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IndicadorObjetivo" type="Label" parent="InteraccionConsola" unique_id=1530043501]
+offset_left = 919.0
+offset_top = 300.0
+offset_right = 950.0
+offset_bottom = 349.0
+theme_override_colors/font_color = Color(1, 0.84313726, 0, 1)
+theme_override_font_sizes/font_size = 48
+text = "!"
+
+[node name="EjercicioUI" type="CanvasLayer" parent="." unique_id=476044272]
+
+[node name="VentanaEjercicio" type="PanelContainer" parent="EjercicioUI" unique_id=1115289965]
+visible = false
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sjpuh")
+script = ExtResource("9_h7qha")
+
+[node name="ContenidoEjercicio" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio" unique_id=1539936516]
+layout_mode = 2
+theme_override_constants/separation = 11
+
+[node name="FilaTitulo" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=152480399]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="IconoGato" type="TextureRect" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo" unique_id=240688122]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+texture = ExtResource("10_jfkdv")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TituloEjercicio" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo" unique_id=1891700413]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8666667, 0.72156864, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "E3.2 – El núcleo de energía"
+
+[node name="FilaInstrucciones" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=257031894]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="InstruccionesEjercicio" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones" unique_id=1421774249]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+text = "La señal de Panko podría estar en los registros del núcleo. Ayuda al Gato de datos a recuperar la energía para continuar la búsqueda.
+Completa las instrucciones para sumar únicamente las lecturas positivas, hasta alcanzar 10 unidades de energía o realizar 4 lecturas."
+autowrap_mode = 3
+
+[node name="PanelPista" type="PanelContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones" unique_id=2041703962]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ms6b2")
+
+[node name="ContenidoPista" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones/PanelPista" unique_id=371527069]
+layout_mode = 2
+
+[node name="TituloPista" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones/PanelPista/ContenidoPista" unique_id=355459312]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7921569, 0.34117648, 1)
+text = "💡 Pista del Gato de datos"
+autowrap_mode = 3
+
+[node name="TextoPista" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones/PanelPista/ContenidoPista" unique_id=1366255101]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8156863, 0.8666667, 0.95686275, 1)
+text = "Recuerda que la consola debe detenerse cuando se agoten los intentos o cuando el código sea correcto."
+autowrap_mode = 3
+
+[node name="ColumnasEjercicio" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=83168017]
+custom_maximum_size = Vector2(-1, 500)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 25
+
+[node name="PanelBloques" type="PanelContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio" unique_id=297061829]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2xdxp")
+
+[node name="BloquesDisponibles" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques" unique_id=1552792808]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TituloBloques" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles" unique_id=2098256950]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8666667, 0.72156864, 1, 1)
+text = "BLOQUES DISPONIBLES"
+
+[node name="ListaBloques" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles" unique_id=160139062]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Bloque1" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=469016160]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_3dg80")
+text = "intentos = 0"
+
+[node name="Bloque2" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=522476707]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_ri65n")
+text = "while intentos < 3:"
+
+[node name="Bloque3" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=947379479]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_a2m5p")
+text = "codigo = input(\"Código: \")"
+
+[node name="Bloque4" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=877885175]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_sfdgv")
+text = "if codigo == \"MGTS\":"
+
+[node name="Bloque5" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=1968199873]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_ngtbv")
+text = "print(\"Acceso concedido\")"
+
+[node name="Bloque6" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=2082199376]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_mkpdt")
+text = "break"
+
+[node name="Bloque7" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=427597545]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_kmi5r")
+text = "intentos += 1"
+
+[node name="Bloque8" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=459516926]
+custom_minimum_size = Vector2(0, 23)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/h_separation = 6
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_3n7x4")
+text = "while intentos > 3:"
+
+[node name="AreaAlgoritmo" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio" unique_id=618796320]
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="TituloAlgoritmo" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo" unique_id=963391896]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22352941, 0.78431374, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "TU ALGORITMO"
+
+[node name="PanelAlgoritmo" type="PanelContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo" unique_id=191837379]
+custom_minimum_size = Vector2(0, 270)
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_sckqt")
+
+[node name="ListaAlgoritmo" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo" unique_id=1217613839]
+layout_mode = 2
+
+[node name="MensajeVacio" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=1558589384]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6666667, 0.70980394, 0.78431374, 1)
+theme_override_font_sizes/font_size = 15
+text = "Selecciona los bloques para construir tu algoritmo."
+autowrap_mode = 3
+
+[node name="BotonesEjercicio" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=1116270888]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="BotonLimpiar" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=1253138994]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_k8g0g")
+text = "Limpiar"
+
+[node name="BotonComprobar" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=909958840]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_qavbp")
+text = "▶ Comprobar"
+
+[node name="BotonCerrar" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=1119030883]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_frfek")
+text = "✕ Cerrar"
+
+[node name="MensajeResultado" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=2015435842]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CompletadoUI" type="CanvasLayer" parent="." unique_id=1563047410]
+
+[node name="VentanaCompletado" type="PanelContainer" parent="CompletadoUI" unique_id=2119733035]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -426.0
+offset_top = -184.0
+offset_right = 424.0
+offset_bottom = 196.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ubi57")
+script = ExtResource("10_14oos")
+
+[node name="ContenidoCompletado" type="VBoxContainer" parent="CompletadoUI/VentanaCompletado" unique_id=1490169976]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Encabezado" type="HBoxContainer" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1378214405]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="NombreNivel" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado/Encabezado" unique_id=650371660]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7764706, 0.6039216, 0.94509804, 1)
+text = "EJERCICIO 3 – EXPLORACION"
+
+[node name="PuntosTotales" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado/Encabezado" unique_id=1032879528]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96862745, 0.8352941, 0.5254902, 1)
+text = "★ PUNTOS TOTALES: 0"
+horizontal_alignment = 2
+
+[node name="IconoTrofeo" type="TextureRect" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1451801464]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("10_pt7rq")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TituloCompletado" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1330060940]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8784314, 0.70980394, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "¡MISIÓN COMPLETADA!"
+horizontal_alignment = 1
+
+[node name="NombreEjercicio" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1410433295]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "E3.3 – Los conductos de exploración"
+horizontal_alignment = 1
+
+[node name="MensajeExito" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1370393195]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4745098, 0.88235295, 0.7019608, 1)
+theme_override_font_sizes/font_size = 28
+text = "¡Excelente! El Dron Explorador ha encontrado una ruta segura."
+horizontal_alignment = 1
+
+[node name="PuntosObtenidos" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=601529796]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96862745, 0.8352941, 0.5254902, 1)
+theme_override_font_sizes/font_size = 22
+text = "★ PUNTOS GANADOS: +0"
+horizontal_alignment = 1
+
+[node name="ErroresCometidos" type="Label" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1570823873]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.70980394, 0.7882353, 0.9137255, 1)
+theme_override_font_sizes/font_size = 18
+text = "ERRORES COMETIDOS: 0"
+horizontal_alignment = 1
+
+[node name="BotonContinuar" type="Button" parent="CompletadoUI/VentanaCompletado/ContenidoCompletado" unique_id=1005466960]
+custom_minimum_size = Vector2(260, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/normal = SubResource("StyleBoxFlat_mtd0k")
+text = "CONTINUAR →"
+
+[node name="PuertaSeguridad" type="StaticBody2D" parent="." unique_id=290421295]
+script = ExtResource("11_2pxqw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PuertaSeguridad" unique_id=25926762]
+position = Vector2(1664, 358)
+shape = SubResource("RectangleShape2D_4vhrh")
+
+[node name="SalidaLaboratorio" type="Area2D" parent="." unique_id=2069979156]
+script = ExtResource("12_rfspb")
+siguiente_escena = "uid://8abpj5ilro5c"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SalidaLaboratorio" unique_id=1339825671]
+position = Vector2(1710, 358)
+shape = SubResource("RectangleShape2D_74g31")
+
+[node name="TransicionUI" type="CanvasLayer" parent="." unique_id=22591426]
+visible = false
+
+[node name="FondoNegro" type="ColorRect" parent="TransicionUI" unique_id=527336291]
+modulate = Color(0.6666667, 0.6666667, 0.6666667, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)

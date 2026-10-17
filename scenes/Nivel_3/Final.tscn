@@ -1,0 +1,365 @@
+[gd_scene format=3 uid="uid://8abpj5ilro5c"]
+
+[ext_resource type="Texture2D" uid="uid://bbq01a7r0vj68" path="res://assets/nivel_3/fondos/638f4616-cbcc-4a69-9ead-36727a6357e8.png" id="1_llebu"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/common/actors/Player.tscn" id="2_4hv55"]
+[ext_resource type="PackedScene" uid="uid://dr8xjey1n3pcw" path="res://scenes/common/actors/CAT.tscn" id="3_3op4d"]
+[ext_resource type="Script" uid="uid://k5upajksag3i" path="res://scripts/nivel_3/InteraccionPankoFinal.gd" id="4_uk3mv"]
+[ext_resource type="Shader" uid="uid://bb58iyn3haxe4" path="res://scenes/Nivel_3/1Entrada del Laboratorio.gdshader" id="5_xjle5"]
+[ext_resource type="Texture2D" uid="uid://cfrdkcb4uevr2" path="res://assets/nivel_3/personajes/09919c97-0761-4ec0-abaf-848cac69190d.png" id="6_fvejb"]
+[ext_resource type="Texture2D" uid="uid://vcw1bjxv0x3c" path="res://assets/nivel_3/personajes/a7da51a5-7e66-49bf-99d1-725bd62e4cdb-removebg-preview.png" id="7_3op4d"]
+[ext_resource type="Texture2D" uid="uid://be8cj2yurxbb8" path="res://assets/nivel_3/personajes/83613374-b897-4dfd-b645-4c2d9238ac85-removebg-preview.png" id="8_llebu"]
+[ext_resource type="Texture2D" uid="uid://48u06vj0xa20" path="res://assets/nivel_3/personajes/356d1856-1a95-4ab7-9dbc-7e406deeaf5a-removebg-preview.png" id="8_uk3mv"]
+[ext_resource type="Script" uid="uid://cegguk5jwb3dh" path="res://scripts/nivel_3/VentanaFinalMGTS.gd" id="9_qqmdy"]
+[ext_resource type="Script" uid="uid://cj473rrvcv5fl" path="res://scripts/nivel_3/InsigniasGanadas.gd" id="11_7bq26"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b78ip"]
+size = Vector2(2250, 42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kqwvl"]
+size = Vector2(129, 799)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_umfms"]
+size = Vector2(143, 791)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f7x6x"]
+size = Vector2(177.75, 139)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qqmdy"]
+bg_color = Color(0.95686275, 0.9411765, 0.98039216, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.16078432, 0.14117648, 0.22745098, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+corner_detail = 10
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7bq26"]
+shader = ExtResource("5_xjle5")
+shader_parameter/desenfoque = 1.5
+shader_parameter/oscuridad = 0.55
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pf8vn"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+bg_color = Color(0.047058824, 0.078431375, 0.1254902, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.6156863, 0.41960785, 0.85882354, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+corner_detail = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s3h4f"]
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+bg_color = Color(0.08235294, 0.101960786, 0.1882353, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.6627451, 0.45882353, 0.92156863, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_llebu"]
+bg_color = Color(0.28627452, 0.25490198, 0.42745098, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6627451, 0.45882353, 0.92156863, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mgvs7"]
+bg_color = Color(0.09019608, 0.42352942, 0.5019608, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.21176471, 0.8980392, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="Final" type="Node2D" unique_id=1480511302]
+
+[node name="Fondo" type="Sprite2D" parent="." unique_id=145137944]
+position = Vector2(912, 348)
+scale = Vector2(1.1058612, 0.7098831)
+texture = ExtResource("1_llebu")
+offset = Vector2(0, -100)
+
+[node name="Suelo" type="StaticBody2D" parent="." unique_id=35418207]
+position = Vector2(-957, 112)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Suelo" unique_id=1233759338]
+position = Vector2(1920, 350)
+shape = SubResource("RectangleShape2D_b78ip")
+
+[node name="Paredes" type="StaticBody2D" parent="." unique_id=1973039134]
+position = Vector2(-957, 112)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Paredes" unique_id=1751743092]
+position = Vector2(907, 209)
+shape = SubResource("RectangleShape2D_kqwvl")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Paredes" unique_id=1300640659]
+position = Vector2(2851, 186)
+shape = SubResource("RectangleShape2D_umfms")
+
+[node name="PANKO" parent="." unique_id=1466623536 instance=ExtResource("3_3op4d")]
+position = Vector2(919, 326)
+script = null
+
+[node name="Sprite2D2" type="Sprite2D" parent="PANKO" unique_id=701211788]
+
+[node name="Player" parent="." unique_id=2022552071 instance=ExtResource("2_4hv55")]
+position = Vector2(244, 407)
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=309635632]
+position = Vector2(0, 24)
+offset = Vector2(0, -180)
+limit_left = 2
+limit_top = 175
+limit_right = 1836
+limit_bottom = 742
+
+[node name="InteraccionGatoa2D" type="Area2D" parent="." unique_id=1673089403]
+position = Vector2(-957, 112)
+script = ExtResource("4_uk3mv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteraccionGatoa2D" unique_id=298529871]
+position = Vector2(1878, 259.5)
+shape = SubResource("RectangleShape2D_f7x6x")
+
+[node name="LetraE" type="Label" parent="InteraccionGatoa2D" unique_id=1064744585]
+offset_left = 1852.0
+offset_top = 120.0
+offset_right = 1894.0
+offset_bottom = 166.0
+theme_override_colors/font_color = Color(0.16078432, 0.14117648, 0.22745098, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_qqmdy")
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DialogoUI" type="CanvasLayer" parent="." unique_id=250718706]
+
+[node name="FondoDialogo" type="ColorRect" parent="DialogoUI" unique_id=1214632057]
+material = SubResource("ShaderMaterial_7bq26")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -104.0
+offset_right = 1001.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RetratosDialogo" type="Control" parent="DialogoUI" unique_id=1101901851]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -50.0
+offset_top = 371.0
+offset_right = 1466.0
+offset_bottom = 1035.0
+
+[node name="RetratoJugador" type="TextureRect" parent="DialogoUI/RetratosDialogo" unique_id=1578221385]
+layout_mode = 0
+offset_left = 138.0
+offset_top = -261.0
+offset_right = 601.0
+offset_bottom = 26.0
+size_flags_horizontal = 3
+texture = ExtResource("6_fvejb")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RetratoNPC" type="TextureRect" parent="DialogoUI/RetratosDialogo" unique_id=2102536989]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 0
+offset_left = 586.0
+offset_top = -238.0
+offset_right = 1059.0
+offset_bottom = 29.0
+size_flags_horizontal = 3
+texture = ExtResource("7_3op4d")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CajaDialogo" type="PanelContainer" parent="DialogoUI" unique_id=1413432375]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 176.0
+offset_top = -258.0
+offset_right = -176.0
+offset_bottom = -138.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_pf8vn")
+
+[node name="ContenidoDialogo" type="VBoxContainer" parent="DialogoUI/CajaDialogo" unique_id=1776465769]
+layout_mode = 2
+
+[node name="NombreGato" type="Label" parent="DialogoUI/CajaDialogo/ContenidoDialogo" unique_id=590931082]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8666667, 0.72156864, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "Gato guardián"
+
+[node name="TextoDialogo" type="Label" parent="DialogoUI/CajaDialogo/ContenidoDialogo" unique_id=1824231084]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "¡Alto! La entrada del laboratorio está bloqueada."
+
+[node name="ContinuarLabel" type="Label" parent="DialogoUI/CajaDialogo/ContenidoDialogo" unique_id=1904959062]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.68235296, 0.73333335, 0.8156863, 1)
+theme_override_font_sizes/font_size = 14
+text = "▼ E Continuar"
+horizontal_alignment = 2
+
+[node name="FinalJuegoUI" type="CanvasLayer" parent="." unique_id=2115779352]
+
+[node name="OscurecerFondo" type="ColorRect" parent="FinalJuegoUI" unique_id=1419452904]
+visible = false
+material = SubResource("ShaderMaterial_7bq26")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -104.0
+offset_right = 1001.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="AbrazoFinal" type="Control" parent="FinalJuegoUI" unique_id=539235021]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ImagenAbrazo" type="TextureRect" parent="FinalJuegoUI/AbrazoFinal" unique_id=844293700]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 121.0
+offset_right = 467.0
+offset_bottom = 548.0
+texture = ExtResource("8_llebu")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="VentanaFinal" type="PanelContainer" parent="FinalJuegoUI" unique_id=1553113269]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -76.0
+offset_top = -274.0
+offset_right = 574.0
+offset_bottom = 276.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_s3h4f")
+script = ExtResource("9_qqmdy")
+
+[node name="ContenidoFinal" type="VBoxContainer" parent="FinalJuegoUI/VentanaFinal" unique_id=83886397]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TituloFinal" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=132038128]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84313726, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "¡MISIÓN CUMPLIDA!"
+horizontal_alignment = 1
+
+[node name="IconoTrofeo" type="TextureRect" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=1812778280]
+custom_minimum_size = Vector2(90, 90)
+layout_mode = 2
+texture = ExtResource("8_uk3mv")
+expand_mode = 3
+stretch_mode = 5
+
+[node name="MensajeFinal" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=765073788]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.21176471, 0.8980392, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "¡HAS RESCATADO A PANKO!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="PuntosNivel1" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=624439971]
+layout_mode = 2
+text = "Nivel 1: 0 puntos"
+horizontal_alignment = 1
+
+[node name="PuntosNivel2" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=1264491064]
+layout_mode = 2
+text = "Nivel 2: 0 puntos"
+horizontal_alignment = 1
+
+[node name="PuntosNivel3" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=18868084]
+layout_mode = 2
+text = "Nivel 3: 0 puntos"
+horizontal_alignment = 1
+
+[node name="PuntosTotales" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=1997900505]
+layout_mode = 2
+text = "TOTAL: 0 puntos"
+horizontal_alignment = 1
+
+[node name="TituloInsignias" type="Label" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=941240169]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84313726, 0, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="InsigniasGanadas" type="GridContainer" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=1886504882]
+layout_mode = 2
+columns = 5
+script = ExtResource("11_7bq26")
+
+[node name="BotonesFinal" type="HBoxContainer" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal" unique_id=1431962462]
+layout_mode = 2
+alignment = 1
+
+[node name="BotonMenu" type="Button" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal/BotonesFinal" unique_id=1363203154]
+custom_minimum_size = Vector2(170, 45)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_llebu")
+text = "Volver al menú"
+
+[node name="BotonReiniciar" type="Button" parent="FinalJuegoUI/VentanaFinal/ContenidoFinal/BotonesFinal" unique_id=1276794736]
+custom_minimum_size = Vector2(170, 45)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_mgvs7")
+text = "Jugar de nuevo"

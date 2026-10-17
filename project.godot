@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Sistema-Educativo-Inteligente"
 run/main_scene="uid://mainmenu"
-config/features=PackedStringArray("4.6", "GL Compatibility")
+config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 GameData="*uid://bwor56u7fav5e"
 ManualUi="*uid://d0i7w0ptkwghb"
 DJManager="*uid://d4agv0rb58k1t"
+PuntajesNivel3="*uid://bmbae546kfywm"
 
 [display]
 
