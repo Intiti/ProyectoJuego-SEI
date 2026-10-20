@@ -64,16 +64,50 @@ func _build() -> void:
 	spacer.custom_minimum_size = Vector2(0, 6)
 	vbox.add_child(spacer)
 
+	var buttons := HBoxContainer.new()
+	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
+	buttons.add_theme_constant_override("separation", 16)
+	vbox.add_child(buttons)
+
 	var back := Button.new()
 	back.text = "VOLVER"
 	back.custom_minimum_size = Vector2(200, 52)
-	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back.add_theme_font_size_override("font_size", 24)
 	if _font != null:
 		back.add_theme_font_override("font", _font)
 	back.pressed.connect(_close)
-	vbox.add_child(back)
+	buttons.add_child(back)
+
+	var reset := Button.new()
+	reset.text = "REINICIAR INSIGNIAS"
+	reset.custom_minimum_size = Vector2(320, 52)
+	reset.add_theme_font_size_override("font_size", 24)
+	if _font != null:
+		reset.add_theme_font_override("font", _font)
+	reset.pressed.connect(_askReset)
+	buttons.add_child(reset)
 	back.grab_focus()
+
+func _askReset() -> void:
+	var dlg := ConfirmationDialog.new()
+	dlg.title = "Reiniciar insignias"
+	dlg.dialog_text = "¿Seguro que quieres reiniciar todas las insignias?\nSe perderán las que llevas conseguidas."
+	dlg.ok_button_text = "Reiniciar"
+	dlg.cancel_button_text = "Cancelar"
+	dlg.confirmed.connect(_onResetConfirmed)
+	dlg.canceled.connect(dlg.queue_free)
+	add_child(dlg)
+	dlg.popup_centered()
+
+func _onResetConfirmed() -> void:
+	Insignias.reset()
+	_rebuild.call_deferred()
+
+func _rebuild() -> void:
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	_build()
 
 func _makeRow(info: Dictionary) -> Control:
 	var unlocked: bool = Insignias.isUnlocked(info["id"])

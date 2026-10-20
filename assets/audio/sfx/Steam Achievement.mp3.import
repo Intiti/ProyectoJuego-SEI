@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://ccpbvlf18w3t"
+path="res://.godot/imported/Steam Achievement.mp3-56dc8e7b41ff07cf12a02cbeaa83f9d0.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/sfx/Steam Achievement.mp3"
+dest_files=["res://.godot/imported/Steam Achievement.mp3-56dc8e7b41ff07cf12a02cbeaa83f9d0.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

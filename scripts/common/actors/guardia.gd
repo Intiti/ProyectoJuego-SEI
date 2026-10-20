@@ -18,6 +18,7 @@ var _examMode: bool = false    # true cuando este NPC corre un examen
 var _examOutroLines: Array = []
 var _examPlayerScene: String = ""
 var _examNpcScene: String = ""
+var _examPickCount: int = 3
 
 func _ready():
 	add_to_group("npc")
@@ -132,12 +133,8 @@ func _initExam(parsed: Dictionary, dialogBox: Node) -> void:
 		else:
 			_examPool.append(baseDir + "/" + p)
 
-	# Elegir 'pick' ejercicios aleatoriamente sin repetición
-	var indices = range(_examPool.size())
-	indices.shuffle()
-	_examPicked = []
-	for i in range(min(pick, indices.size())):
-		_examPicked.append(_examPool[indices[i]])
+	_examPickCount = pick
+	_pickExercises()
 
 	_examIndex = 0
 	_examMode = true
@@ -163,11 +160,7 @@ func onExamPuzzleFinished() -> void:
 	_examIndex += 1
 
 	if _examIndex < _examPicked.size():
-		# Hay más ejercicios — cargar el siguiente directamente
-		var puzzle = get_tree().get_first_node_in_group("puzzle")
-		var nextPuzzleData = _loadPuzzleData(_examPicked[_examIndex])
-		if puzzle and nextPuzzleData:
-			puzzle.open(nextPuzzleData, self)
+		_openExamExercise()
 	else:
 		# Todos resueltos: mostrar outro del guardia
 		needsHelp = false
@@ -187,6 +180,32 @@ func onExamPuzzleFinished() -> void:
 			dialogBox.openDirect(_examOutroLines, _examPlayerScene, _examNpcScene, true, savedTexture)
 		_examOutroLines = []
 
+func startExam() -> void:
+	_examIndex = 0
+	_openExamExercise()
+
+func restartExam() -> void:
+	_pickExercises()
+	_examIndex = 0
+	_examMode = true
+	var puzzle = get_tree().get_first_node_in_group("puzzle")
+	if puzzle and puzzle.has_method("beginExamSession"):
+		puzzle.beginExamSession()
+	_openExamExercise()
+
+func _pickExercises() -> void:
+	var indices = range(_examPool.size())
+	indices.shuffle()
+	_examPicked = []
+	for i in range(min(_examPickCount, indices.size())):
+		_examPicked.append(_examPool[indices[i]])
+
+func _openExamExercise() -> void:
+	var puzzle = get_tree().get_first_node_in_group("puzzle")
+	var puzzleData = _loadPuzzleData(_examPicked[_examIndex])
+	if puzzle and not puzzleData.is_empty():
+		puzzle.open(puzzleData, self)
+
 func _loadPuzzleData(path: String) -> Dictionary:
 	var file = FileAccess.open(path, FileAccess.READ)
 	if not file:
@@ -200,5 +219,7 @@ func _loadPuzzleData(path: String) -> Dictionary:
 		puzzleData["npc_scene"] = _examNpcScene
 		puzzleData["player_scene"] = _examPlayerScene
 		puzzleData["exam_mode"] = true   # ← activa sistema de vidas en puzzleManager
+		puzzleData["exam_index"] = _examIndex
+		puzzleData["exam_total"] = _examPicked.size()
 		# Sin outro_lines: el examen usa onExamPuzzleFinished en su lugar
 	return puzzleData

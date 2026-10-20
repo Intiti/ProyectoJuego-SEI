@@ -53,6 +53,11 @@ var _examLives: int = 3          # vidas restantes durante la sesión de examen
 var _examSessionActive: bool = false
 var _livesBox: HBoxContainer = null   # "Vidas:" + 3 patitas dibujadas, en la UI
 var _paws: Array = []                  # los 3 PawIcon, en orden
+var _examCounter: Label = null
+var _examRetryPressed: bool = false
+var _examAccBase: int = 0
+var _examAccPen: int = 0
+var _examAccBonus: int = 0
 
 const PawIconScript = preload("res://scripts/common/ui/pawIcon.gd")
 
@@ -60,6 +65,7 @@ const EXAM_MAX_ERRORS: int = 3   # errores antes de mostrar EXAMEN FALLIDO
 
 const FONT_SIZE := 18
 const COMPLETION_DURATION := 3.5
+const EXAM_STEP_CELEBRATION := 1.8
 
 func _ready():
 	add_to_group("puzzle")
@@ -167,6 +173,12 @@ func _ready():
 	stepLabel.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cmdWrapper.add_child(stepLabel)
 
+	_examCounter = Label.new()
+	_examCounter.add_theme_font_size_override("font_size", FONT_SIZE + 2)
+	_examCounter.add_theme_color_override("font_color", Color(0.6, 0.85, 1.0))
+	_examCounter.visible = false
+	cmdWrapper.add_child(_examCounter)
+
 	# Label de vidas (solo visible en modo examen)
 	_livesBox = HBoxContainer.new()
 	_livesBox.add_theme_constant_override("separation", 6)
@@ -247,9 +259,12 @@ func open(data: Dictionary, npc: Node = null):
 	# Mostrar/actualizar label de vidas
 	if _examMode:
 		_livesBox.visible = true
+		_examCounter.visible = true
+		_examCounter.text = "Ejercicio %d/%d" % [int(data.get("exam_index", 0)) + 1, int(data.get("exam_total", 1))]
 		_updateLivesLabel()
 	else:
 		_livesBox.visible = false
+		_examCounter.visible = false
 
 	promptLabel.text = _colorizePrompt(levelPrompt)
 	outputLabel.text = ""
@@ -279,6 +294,9 @@ func beginExamSession() -> void:
 	# Inicia una nueva sesión de examen con 3 vidas.
 	_examSessionActive = true
 	_examLives = EXAM_MAX_ERRORS
+	_examAccBase = 0
+	_examAccPen = 0
+	_examAccBonus = 0
 	_updateLivesLabel()
 
 func endExamSession() -> void:
@@ -714,8 +732,7 @@ func _showExamFailed() -> void:
 	panel.move_to_front()
 	_disableCommandList()
 
-	var failContinuar: bool = false
-	var failRetry: bool = false
+	_examRetryPressed = false
 
 	# --- Contenedor de la pantalla de fallo (cubre todo el panel) ---
 	var overlay = ColorRect.new()
@@ -794,7 +811,7 @@ func _showExamFailed() -> void:
 	tablonVbox.add_child(sep1)
 
 	var lblMsg = Label.new()
-	lblMsg.text = "Cometiste 3 errores en este ejercicio.\nDebes intentarlo de nuevo."
+	lblMsg.text = "Te quedaste sin vidas en el ejercicio %d de %d.\nEl examen vuelve a empezar desde el primero." % [int(_currentData.get("exam_index", 0)) + 1, int(_currentData.get("exam_total", 1))]
 	lblMsg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lblMsg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lblMsg.add_theme_font_size_override("font_size", FONT_SIZE + 2)
@@ -811,12 +828,12 @@ func _showExamFailed() -> void:
 	btnRetry.custom_minimum_size = Vector2(260, 52)
 	btnRetry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	btnRetry.mouse_filter = Control.MOUSE_FILTER_STOP
-	btnRetry.pressed.connect(func(): failRetry = true)
+	btnRetry.pressed.connect(func(): _examRetryPressed = true)
 	tablonVbox.add_child(btnRetry)
 
 	# --- Loop de animación: letras parpadeando en rojo, borde ciclando ---
 	var startTime = Time.get_ticks_msec()
-	while not failRetry:
+	while not _examRetryPressed:
 		var elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
 
 		# Letras: pulso de brillo rojo
@@ -836,8 +853,13 @@ func _showExamFailed() -> void:
 
 	overlay.queue_free()
 
-	# Reiniciar el ejercicio actual desde cero (sin cerrar el puzzleManager)
-	_restartCurrentExercise()
+	var npc = _activeNpc
+	if is_instance_valid(npc) and npc.has_method("restartExam"):
+		_activeNpc = null
+		_closeKeepPlayerFrozen()
+		npc.restartExam()
+	else:
+		_restartCurrentExercise()
 
 # Reinicia el ejercicio actual: limpia slots, errores, vidas y vuelve a construir todo.
 func _restartCurrentExercise() -> void:
@@ -877,6 +899,11 @@ func _onSuccess():
 
 	var npc = _activeNpc
 	# NO limpiamos _activeNpc aquí todavía; lo necesitamos para onExamPuzzleFinished
+
+	if _examMode and is_instance_valid(npc) and npc.has_method("onExamPuzzleFinished"):
+		DJManager.playFanfare()
+		await _finishExamExercise(npc)
+		return
 
 	var puntaje = _calcularPuntaje()
 	GameData.gatopuntos += puntaje
@@ -937,7 +964,7 @@ func _calcularPuntaje() -> int:
 # Lanza la celebración de arcoíris + texto flotante y el tablón simultáneamente.
 # El tablón sube desde abajo junto con el texto "MIAUGORITMO COMPLETADO".
 # Retorna cuando el jugador presiona Continuar.
-func _playCompletionWithTablon(puntaje: int) -> void:
+func _playCompletionWithTablon(puntaje: int, summary: Dictionary = {}) -> void:
 	panel.move_to_front()
 	commandList.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -955,10 +982,26 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 	if GameData.rachaGlobal >= 3:
 		bonus = GameData.rachaGlobal * 5
 
-	var rainbowBlocks: Array = []
-	for slot in _slots:
-		if slot.has("block") and is_instance_valid(slot["block"]):
-			rainbowBlocks.append(slot["block"])
+	var rainbowBlocks: Array = _collectRainbowBlocks()
+
+	var titleText: String = "MIAUGORITMO COMPLETADO"
+	var baseText: String = "Puntaje base  (%d bloques × 20):  %d pts" % [rellenables, base]
+	var penText: String = ""
+	if penalizacion > 0:
+		var pct = "25%" if _errores == 2 else "50%"
+		penText = "Penalización  (%d errores, -%s):  -%d pts" % [_errores, pct, penalizacion]
+	var bonusText: String = ""
+	if bonus > 0:
+		bonusText = "Bonus racha  (racha de %d):  +%d pts" % [GameData.rachaGlobal, bonus]
+	if not summary.is_empty():
+		titleText = String(summary["title"])
+		baseText = "Puntaje base  (%d ejercicios):  %d pts" % [int(summary["count"]), int(summary["base"])]
+		penText = ""
+		if int(summary["pen"]) > 0:
+			penText = "Penalización por errores:  -%d pts" % int(summary["pen"])
+		bonusText = ""
+		if int(summary["bonus"]) > 0:
+			bonusText = "Bonus por rachas:  +%d pts" % int(summary["bonus"])
 
 	# --- Contenedor raíz de la celebración (cubre todo el panel) ---
 	var celebration = Control.new()
@@ -1011,7 +1054,7 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 	textContainer.custom_minimum_size = Vector2(0, 60)
 	tablonVbox.add_child(textContainer)
 
-	var message = "MIAUGORITMO COMPLETADO"
+	var message = titleText
 	var letters: Array = []
 	for i in message.length():
 		var letterSlot = Control.new()
@@ -1037,24 +1080,23 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 
 	# Puntaje base (siempre se muestra)
 	var lblBase = Label.new()
-	lblBase.text = "Puntaje base  (%d bloques × 20):  %d pts" % [rellenables, base]
+	lblBase.text = baseText
 	lblBase.add_theme_font_size_override("font_size", FONT_SIZE + 2)
 	lblBase.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	tablonVbox.add_child(lblBase)
 
 	# Penalización — solo si hubo errores
-	if penalizacion > 0:
-		var pct = "25%" if _errores == 2 else "50%"
+	if penText != "":
 		var lblPen = Label.new()
-		lblPen.text = "Penalización  (%d errores, -%s):  -%d pts" % [_errores, pct, penalizacion]
+		lblPen.text = penText
 		lblPen.add_theme_font_size_override("font_size", FONT_SIZE + 2)
 		lblPen.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
 		tablonVbox.add_child(lblPen)
 
 	# Bonus racha — solo si aplica
-	if bonus > 0:
+	if bonusText != "":
 		var lblBonus = Label.new()
-		lblBonus.text = "Bonus racha  (racha de %d):  +%d pts" % [GameData.rachaGlobal, bonus]
+		lblBonus.text = bonusText
 		lblBonus.add_theme_font_size_override("font_size", FONT_SIZE + 2)
 		lblBonus.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 		tablonVbox.add_child(lblBonus)
@@ -1087,28 +1129,7 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 		var elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
 		var hueBase = fmod(elapsed * 0.22, 1.0)
 
-		for i in rainbowBlocks.size():
-			var block = rainbowBlocks[i]
-			if not is_instance_valid(block):
-				continue
-			var hue = fmod(hueBase + float(i) / max(1.0, float(rainbowBlocks.size())) * 0.75, 1.0)
-			var color = Color.from_hsv(hue, 0.78, 0.92)
-			var style = StyleBoxFlat.new()
-			style.bg_color = color
-			style.border_color = Color.from_hsv(fmod(hue + 0.12, 1.0), 0.45, 1.0)
-			style.border_width_left = 2
-			style.border_width_right = 2
-			style.border_width_top = 2
-			style.border_width_bottom = 2
-			style.corner_radius_top_left = 6
-			style.corner_radius_top_right = 6
-			style.corner_radius_bottom_left = 6
-			style.corner_radius_bottom_right = 6
-			style.content_margin_left = 10
-			style.content_margin_right = 10
-			style.content_margin_top = 6
-			style.content_margin_bottom = 6
-			block.add_theme_stylebox_override("panel", style)
+		_applyRainbow(rainbowBlocks, hueBase)
 
 		for i in letters.size():
 			var letter: Label = letters[i]
@@ -1121,6 +1142,132 @@ func _playCompletionWithTablon(puntaje: int) -> void:
 		tablonStyle.border_color = Color.from_hsv(fmod(hueBase * 1.5, 1.0), 0.65, 1.0)
 		tablon.add_theme_stylebox_override("panel", tablonStyle)
 
+		await get_tree().process_frame
+
+	celebration.queue_free()
+
+func _scoreBreakdown() -> Dictionary:
+	var rellenables := 0
+	for st in _steps:
+		if not st.get("fixed", false):
+			rellenables += 1
+	var base := rellenables * 20
+	var penalizacion := 0
+	if _errores == 2:
+		penalizacion = int(base * 0.25)
+	elif _errores >= 3:
+		penalizacion = int(base * 0.50)
+	var bonus := 0
+	if GameData.rachaGlobal >= 3:
+		bonus = GameData.rachaGlobal * 5
+	return {"base": base, "pen": penalizacion, "bonus": bonus}
+
+func _collectRainbowBlocks() -> Array:
+	var blocks: Array = []
+	for slot in _slots:
+		if slot.has("block") and is_instance_valid(slot["block"]):
+			blocks.append(slot["block"])
+	return blocks
+
+func _applyRainbow(blocks: Array, hueBase: float) -> void:
+	for i in blocks.size():
+		var block = blocks[i]
+		if not is_instance_valid(block):
+			continue
+		var hue = fmod(hueBase + float(i) / max(1.0, float(blocks.size())) * 0.75, 1.0)
+		var color = Color.from_hsv(hue, 0.78, 0.92)
+		var style = StyleBoxFlat.new()
+		style.bg_color = color
+		style.border_color = Color.from_hsv(fmod(hue + 0.12, 1.0), 0.45, 1.0)
+		style.border_width_left = 2
+		style.border_width_right = 2
+		style.border_width_top = 2
+		style.border_width_bottom = 2
+		style.corner_radius_top_left = 6
+		style.corner_radius_top_right = 6
+		style.corner_radius_bottom_left = 6
+		style.corner_radius_bottom_right = 6
+		style.content_margin_left = 10
+		style.content_margin_right = 10
+		style.content_margin_top = 6
+		style.content_margin_bottom = 6
+		block.add_theme_stylebox_override("panel", style)
+
+func _finishExamExercise(npc: Node) -> void:
+	var parts: Dictionary = _scoreBreakdown()
+	_examAccBase += int(parts["base"])
+	_examAccPen += int(parts["pen"])
+	_examAccBonus += int(parts["bonus"])
+
+	var index: int = int(_currentData.get("exam_index", 0))
+	var total: int = int(_currentData.get("exam_total", 1))
+
+	if index + 1 < total:
+		await _playExamStepCelebration(index + 1, total)
+	else:
+		var examScore: int = maxi(0, _examAccBase - _examAccPen + _examAccBonus)
+		GameData.gatopuntos += examScore
+		await _playCompletionWithTablon(examScore, {
+			"title": "EXAMEN COMPLETADO",
+			"count": total,
+			"base": _examAccBase,
+			"pen": _examAccPen,
+			"bonus": _examAccBonus,
+		})
+
+	_celebrating = false
+	_activeNpc = null
+	_closeKeepPlayerFrozen()
+	npc.onExamPuzzleFinished()
+
+func _playExamStepCelebration(done: int, total: int) -> void:
+	panel.move_to_front()
+	commandList.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var rainbowBlocks: Array = _collectRainbowBlocks()
+
+	var celebration := CenterContainer.new()
+	celebration.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	celebration.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.add_child(celebration)
+
+	var pill := PanelContainer.new()
+	var pillStyle := StyleBoxFlat.new()
+	pillStyle.bg_color = Color(0.04, 0.04, 0.07, 0.95)
+	pillStyle.border_color = Color(0.55, 0.30, 0.85, 1.0)
+	pillStyle.set_border_width_all(3)
+	pillStyle.set_corner_radius_all(12)
+	pillStyle.content_margin_left = 28
+	pillStyle.content_margin_right = 28
+	pillStyle.content_margin_top = 16
+	pillStyle.content_margin_bottom = 16
+	pill.add_theme_stylebox_override("panel", pillStyle)
+	celebration.add_child(pill)
+
+	var label := Label.new()
+	label.text = "¡Ejercicio %d de %d completado!" % [done, total]
+	label.add_theme_font_size_override("font_size", FONT_SIZE + 10)
+	label.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 1.0))
+	label.add_theme_constant_override("outline_size", 4)
+	pill.add_child(label)
+
+	pill.modulate.a = 0.0
+	await get_tree().process_frame
+	pill.pivot_offset = pill.size * 0.5
+	pill.scale = Vector2(0.6, 0.6)
+	var popTween := pill.create_tween().set_parallel(true)
+	popTween.tween_property(pill, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	popTween.tween_property(pill, "modulate:a", 1.0, 0.2)
+
+	var startTime := Time.get_ticks_msec()
+	var elapsed := 0.0
+	while elapsed < EXAM_STEP_CELEBRATION:
+		elapsed = float(Time.get_ticks_msec() - startTime) / 1000.0
+		var hueBase := fmod(elapsed * 0.22, 1.0)
+		_applyRainbow(rainbowBlocks, hueBase)
+		var tint := Color.from_hsv(fmod(hueBase * 1.5, 1.0), 0.72, 1.0)
+		label.add_theme_color_override("font_color", tint)
+		pillStyle.border_color = tint
+		pill.add_theme_stylebox_override("panel", pillStyle)
 		await get_tree().process_frame
 
 	celebration.queue_free()

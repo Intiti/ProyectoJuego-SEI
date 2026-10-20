@@ -43,6 +43,7 @@ const SFX_PATHS: Dictionary = {
 	"error": "res://assets/audio/sfx/wrong.mp3",
 	"correct": "res://assets/audio/sfx/correct.mp3",
 	"streak": "res://assets/audio/sfx/5-correct-answers.mp3",
+	"logro": "res://assets/audio/sfx/Steam Achievement.mp3",
 }
 
 const SFX_START_OFFSET: Dictionary = {
@@ -50,12 +51,14 @@ const SFX_START_OFFSET: Dictionary = {
 	"error": 0.4,
 	"correct": 0.25,
 	"streak": 0.64,
+	"logro": 0.0,
 }
 const SFX_EXTENSIONS: Array = ["ogg", "wav", "mp3"]
 const SFX_VOLUME_DB: Dictionary = {
 	"fanfare": -4.0,
 	"error": -6.0,
 	"correct": -8.0,
+	"logro": -4,
 }
 const SFX_POOL_SIZE := 8
 
@@ -241,7 +244,9 @@ func playError() -> void:
 func playCorrect() -> void:
 	playSfx("correct", SFX_VOLUME_DB["correct"])
 
-
+func playInsignia() -> void:
+	playSfx("logro", SFX_VOLUME_DB["logro"])
+	
 func playStreak(streak: int) -> void:
 	var step: int = clampi(streak - STREAK_START, 0, STREAK_PITCH_SEMITONES.size() - 1)
 	var pitch: float = pow(2.0, float(STREAK_PITCH_SEMITONES[step]) / 12.0)

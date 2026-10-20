@@ -93,6 +93,11 @@ func unlock(id: String) -> void:
 	if not _showing:
 		_processQueue()
 
+func reset() -> void:
+	_desbloqueadas.clear()
+	_queue.clear()
+	_save()
+
 # ── Condiciones (Nivel 1) ─────────────────────────────────────────────────────
 
 func _onProblemsChanged() -> void:
@@ -127,8 +132,8 @@ func _showToast(info: Dictionary) -> void:
 	var targetX: float = viewW - toast.size.x - TOAST_MARGIN
 	toast.position = Vector2(viewW + 20.0, TOAST_MARGIN)
 	toast.modulate.a = 1.0
-	if DJManager.has_method("playCorrect"):
-		DJManager.playCorrect()
+	if DJManager.has_method("playInsignia"):
+		DJManager.playInsignia()
 
 	var tin := create_tween()
 	tin.tween_property(toast, "position:x", targetX, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

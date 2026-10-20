@@ -96,3 +96,6 @@ func playCorrect() -> void:
 
 func playStreak(streak: int) -> void:
 	audio_original.playStreak(streak)
+
+func playInsignia() -> void:
+	audio_original.playInsignia()
