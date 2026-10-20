@@ -23,12 +23,17 @@ ManualUi="*uid://d0i7w0ptkwghb"
 DJManager="*uid://d4agv0rb58k1t"
 PuntajesNivel2="*res://scripts/nivel_2/compartidos/PuntajesNivel2.gd"
 PuntajesNivel3="*res://scripts/common/compat/ProgresoCompatible.gd"
+Talo="*uid://bpmdn8oc34pg7"
 
 [display]
 
 window/size/mode=2
 window/size/borderless=true
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/talo/plugin.cfg")
 
 [gui]
 
