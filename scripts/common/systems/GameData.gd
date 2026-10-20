@@ -41,5 +41,10 @@ func firstProblemSolved() -> bool:
 func isSolved(dialogFile: String) -> bool:
 	return solvedDialogs.get(dialogFile, false)
 
-# Racha global entre puzzles
-var rachaGlobal: int = 0
+# Racha global entre puzzles (aciertos seguidos sin fallar).
+# Emite rachaChanged cada vez que cambia (lo usa el sistema de insignias).
+signal rachaChanged(newValue: int)
+var rachaGlobal: int = 0:
+	set(value):
+		rachaGlobal = value
+		rachaChanged.emit(value)

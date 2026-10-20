@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameData="*uid://bwor56u7fav5e"
+Insignias="*res://scripts/common/systems/Insignias.gd"
 ManualUi="*uid://d0i7w0ptkwghb"
 DJManager="*uid://d4agv0rb58k1t"
 PuntajesNivel3="*res://scripts/common/compat/ProgresoCompatible.gd"

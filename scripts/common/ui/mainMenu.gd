@@ -1,8 +1,10 @@
 extends Control
 
 const DevPanelScript := preload("res://scripts/common/ui/devPanel.gd")
+const InsigniasScreenScript := preload("res://scripts/common/ui/insigniasScreen.gd")
 
 @onready var playButton = $VBoxContainer/PlayButton
+@onready var badgesButton = $VBoxContainer/BadgesButton
 @onready var namePanel = $VBoxContainer/NamePanel
 @onready var nameInput = $VBoxContainer/NamePanel/NameInput
 @onready var errorLabel = $VBoxContainer/NamePanel/ErrorLabel
@@ -31,6 +33,7 @@ func _on_play_button_pressed() -> void:
 	fadeOut.tween_property(playButton, "modulate:a", 0.0, 0.15)
 	await fadeOut.finished
 	playButton.visible = false
+	badgesButton.visible = false
 	namePanel.modulate.a = 0.0
 	namePanel.visible = true
 	nameInput.grab_focus()
@@ -42,6 +45,11 @@ func _on_play_button_pressed() -> void:
 	fadeIn.tween_property(namePanel, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	confirmButton.replayAppear(0.12)
 	busy = false
+
+func _on_badges_button_pressed() -> void:
+	if busy:
+		return
+	add_child(InsigniasScreenScript.new())
 
 func _on_confirm_button_pressed() -> void:
 	if busy:
