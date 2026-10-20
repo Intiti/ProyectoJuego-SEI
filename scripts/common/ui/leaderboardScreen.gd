@@ -5,7 +5,7 @@ const FONT_PATH := "res://assets/fonts/MotionControl-Bold.otf"
 const MAX_ROWS := 10
 const COL_POS := 70.0
 const COL_SCORE := 150.0
-const COL_STREAK := 130.0
+const COL_STREAK := 190.0
 const COLOR_HEADER := Color(1.0, 0.90, 0.55)
 const COLOR_SOFT := Color(0.82, 0.78, 1.0)
 const COLOR_ROW := Color(1, 1, 1, 0.08)
@@ -43,7 +43,7 @@ func _build() -> void:
 	add_child(center)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(760, 0)
+	panel.custom_minimum_size = Vector2(800, 0)
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.20, 0.16, 0.42, 1)
 	sb.border_color = Color(0.80, 0.75, 1.00, 1)
@@ -62,7 +62,7 @@ func _build() -> void:
 
 	vbox.add_child(_label("RANKING", 40, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
 	vbox.add_child(_label("NIVEL 1", 20, COLOR_HEADER, HORIZONTAL_ALIGNMENT_CENTER))
-	vbox.add_child(_makeRow("#", "Nombre", "Puntaje", "Racha", COLOR_HEADER, 18, false, false))
+	vbox.add_child(_makeRow("#", "Nombre", "Puntaje", "Mayor racha", COLOR_HEADER, 18, false, false))
 
 	_rowsBox = VBoxContainer.new()
 	_rowsBox.add_theme_constant_override("separation", 6)
@@ -99,7 +99,7 @@ func _load() -> void:
 		_showStatus("Aún no hay puntajes. ¡Sé el primero!")
 		return
 	for row in rows:
-		var rank: int = row["position"]
+		var rank: int = row["rank"]
 		var color: Color = COLOR_TOP[rank - 1] if rank <= 3 else Color.WHITE
 		_rowsBox.add_child(_makeRow(
 			str(rank),

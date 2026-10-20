@@ -4,6 +4,7 @@ const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
 const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
 const FaderScript = preload("res://scripts/common/ui/sceneFader.gd")
 const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
+const ResumenScript = preload("res://scripts/common/ui/resumenNivel1.gd")
 
 # Texto de la flecha del borde izquierdo (de vuelta a Villa1)
 const EXIT_LEFT_LABEL := ""
@@ -38,6 +39,17 @@ func _ready():
 	_buildExitMarker()
 	_buildRightExitMarker()
 	GameData.problemsChanged.connect(_onProblemsChanged)
+	call_deferred("_connectResumen")
+
+func _connectResumen() -> void:
+	var dialogBox = get_tree().get_first_node_in_group("dialog_box")
+	if dialogBox:
+		dialogBox.cinematicDialogFinished.connect(_onCinematicDialogFinished)
+
+func _onCinematicDialogFinished() -> void:
+	if GameData.nivel1Terminado and not GameData.nivel1ResumenMostrado:
+		GameData.nivel1ResumenMostrado = true
+		add_child(ResumenScript.new())
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")

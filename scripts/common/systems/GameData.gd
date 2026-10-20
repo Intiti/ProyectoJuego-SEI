@@ -27,20 +27,40 @@ signal problemsChanged
 const LeaderboardScript = preload("res://scripts/common/systems/LeaderboardNivel1.gd")
 const GUARDIA_FILE := "res://dialogs/nivel_1/npc_guardia_villa2.json"
 
+signal nivel1Submitted
+
 var rachaMaxNivel1: int = 0
 var nivel1Terminado: bool = false
+var nivel1Resumen: Dictionary = {}
+var nivel1SubmitDone: bool = false
+var nivel1SubmitOk: bool = false
+var nivel1ResumenMostrado: bool = false
 
 func markSolved(dialogFile: String) -> void:
 	solvedDialogs[dialogFile] = true
 	problemsChanged.emit()
 	if dialogFile == GUARDIA_FILE and not nivel1Terminado:
 		nivel1Terminado = true
-		LeaderboardScript.submitFinalScore(gatopuntos, rachaMaxNivel1, playerName)
+		nivel1Resumen = {
+			"score": gatopuntos,
+			"racha": rachaMaxNivel1,
+			"problemas": solvedProblemsCount(),
+		}
+		_submitNivel1()
+
+func _submitNivel1() -> void:
+	nivel1SubmitOk = await LeaderboardScript.submitFinalScore(nivel1Resumen["score"], nivel1Resumen["racha"], playerName)
+	nivel1SubmitDone = true
+	nivel1Submitted.emit()
 
 func resetRun() -> void:
 	solvedDialogs.clear()
 	alcaldePuzzleSolved = false
 	nivel1Terminado = false
+	nivel1Resumen = {}
+	nivel1SubmitDone = false
+	nivel1SubmitOk = false
+	nivel1ResumenMostrado = false
 	rachaMaxNivel1 = 0
 	rachaGlobal = 0
 	gatopuntos = 0
