@@ -38,6 +38,37 @@ var _inactivePlayer: AudioStreamPlayer # el que va a entrar
 
 var _fadeTween: Tween = null
 
+const SFX_PATHS: Dictionary = {
+	"fanfare": "res://assets/audio/sfx/completed-lesson.mp3",
+	"error": "res://assets/audio/sfx/wrong.mp3",
+	"correct": "res://assets/audio/sfx/correct.mp3",
+	"streak": "res://assets/audio/sfx/5-correct-answers.mp3",
+}
+
+const SFX_START_OFFSET: Dictionary = {
+	"fanfare": 0.14,
+	"error": 0.4,
+	"correct": 0.25,
+	"streak": 0.64,
+}
+const SFX_EXTENSIONS: Array = ["ogg", "wav", "mp3"]
+const SFX_VOLUME_DB: Dictionary = {
+	"fanfare": -4.0,
+	"error": -6.0,
+	"correct": -8.0,
+}
+const SFX_POOL_SIZE := 8
+
+const STREAK_START := 3
+const STREAK_PITCH_SEMITONES: Array = [0, 2, 4, 5, 7, 9, 11, 12]
+const STREAK_VOLUME_BASE := -10.0
+const STREAK_VOLUME_STEP := 1.0
+const STREAK_VOLUME_MAX := -3.0
+
+var _sfxPool: Array[AudioStreamPlayer] = []
+var _sfxCache: Dictionary = {}
+var _sfxNext: int = 0
+
 # ── Bleep de diálogo ──────────────────────────────────────────────────────────
 
 var _bleepPlayer: AudioStreamPlayer
@@ -59,6 +90,7 @@ func _ready() -> void:
 	if _bleepStream:
 		_bleepPlayer.stream = _bleepStream
 	_bleepPlayer.volume_db = -6.0
+	_buildSfxPool()
 
 
 func _makePlayer() -> AudioStreamPlayer:
@@ -151,3 +183,67 @@ func playDialogBleepPitched(basePitch: float) -> void:
 		return
 	_bleepPlayer.pitch_scale = basePitch + randf_range(-0.08, 0.08)
 	_bleepPlayer.play()
+
+
+func _buildSfxPool() -> void:
+	var busName: String = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
+	for i in SFX_POOL_SIZE:
+		var p := AudioStreamPlayer.new()
+		p.bus = busName
+		add_child(p)
+		_sfxPool.append(p)
+
+
+func _getSfx(key: String) -> AudioStream:
+	if _sfxCache.has(key):
+		return _sfxCache[key]
+	var stream: AudioStream = null
+	if SFX_PATHS.has(key):
+		var basePath: String = SFX_PATHS[key]
+		if ResourceLoader.exists(basePath):
+			stream = load(basePath)
+		else:
+			for ext in SFX_EXTENSIONS:
+				var path: String = "%s.%s" % [basePath, ext]
+				if ResourceLoader.exists(path):
+					stream = load(path)
+					break
+	_sfxCache[key] = stream
+	return stream
+
+func _freeSfxPlayer() -> AudioStreamPlayer:
+	for p in _sfxPool:
+		if not p.playing:
+			return p
+	var stolen: AudioStreamPlayer = _sfxPool[_sfxNext]
+	_sfxNext = (_sfxNext + 1) % _sfxPool.size()
+	return stolen
+
+
+func playSfx(key: String, volumeDb: float = 0.0, pitch: float = 1.0) -> void:
+	var stream: AudioStream = _getSfx(key)
+	if stream == null or _sfxPool.is_empty():
+		return
+	var player: AudioStreamPlayer = _freeSfxPlayer()
+	player.stream = stream
+	player.volume_db = volumeDb
+	player.pitch_scale = pitch
+	player.play(float(SFX_START_OFFSET.get(key, 0.0)))
+
+func playFanfare() -> void:
+	playSfx("fanfare", SFX_VOLUME_DB["fanfare"])
+
+
+func playError() -> void:
+	playSfx("error", SFX_VOLUME_DB["error"])
+
+
+func playCorrect() -> void:
+	playSfx("correct", SFX_VOLUME_DB["correct"])
+
+
+func playStreak(streak: int) -> void:
+	var step: int = clampi(streak - STREAK_START, 0, STREAK_PITCH_SEMITONES.size() - 1)
+	var pitch: float = pow(2.0, float(STREAK_PITCH_SEMITONES[step]) / 12.0)
+	var volume: float = minf(STREAK_VOLUME_BASE + STREAK_VOLUME_STEP * float(step), STREAK_VOLUME_MAX)
+	playSfx("streak", volume, pitch)
