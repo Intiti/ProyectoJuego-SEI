@@ -2,9 +2,11 @@ extends Control
 
 const DevPanelScript := preload("res://scripts/common/ui/devPanel.gd")
 const InsigniasScreenScript := preload("res://scripts/common/ui/insigniasScreen.gd")
+const LeaderboardScreenScript := preload("res://scripts/common/ui/leaderboardScreen.gd")
 
 @onready var playButton = $VBoxContainer/PlayButton
 @onready var badgesButton = $VBoxContainer/BadgesButton
+@onready var rankingButton = $VBoxContainer/RankingButton
 @onready var namePanel = $VBoxContainer/NamePanel
 @onready var nameInput = $VBoxContainer/NamePanel/NameInput
 @onready var errorLabel = $VBoxContainer/NamePanel/ErrorLabel
@@ -34,6 +36,7 @@ func _on_play_button_pressed() -> void:
 	await fadeOut.finished
 	playButton.visible = false
 	badgesButton.visible = false
+	rankingButton.visible = false
 	namePanel.modulate.a = 0.0
 	namePanel.visible = true
 	nameInput.grab_focus()
@@ -51,6 +54,11 @@ func _on_badges_button_pressed() -> void:
 		return
 	add_child(InsigniasScreenScript.new())
 
+func _on_ranking_button_pressed() -> void:
+	if busy:
+		return
+	add_child(LeaderboardScreenScript.new())
+
 func _on_confirm_button_pressed() -> void:
 	if busy:
 		return
@@ -61,6 +69,7 @@ func _on_confirm_button_pressed() -> void:
 		return
 	errorLabel.visible = false
 	busy = true
+	GameData.resetRun()
 	GameData.playerName = nombre
 	await get_tree().create_timer(0.3).timeout
 	get_tree().change_scene_to_file("res://scenes/nivel_0/Intro.tscn")

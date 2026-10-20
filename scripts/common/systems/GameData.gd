@@ -24,8 +24,26 @@ const FIRST_PROBLEM := "res://dialogs/nivel_1/npc_e11.json"   # el del alcalde
 
 signal problemsChanged
 
+const LeaderboardScript = preload("res://scripts/common/systems/LeaderboardNivel1.gd")
+const GUARDIA_FILE := "res://dialogs/nivel_1/npc_guardia_villa2.json"
+
+var rachaMaxNivel1: int = 0
+var nivel1Terminado: bool = false
+
 func markSolved(dialogFile: String) -> void:
 	solvedDialogs[dialogFile] = true
+	problemsChanged.emit()
+	if dialogFile == GUARDIA_FILE and not nivel1Terminado:
+		nivel1Terminado = true
+		LeaderboardScript.submitFinalScore(gatopuntos, rachaMaxNivel1, playerName)
+
+func resetRun() -> void:
+	solvedDialogs.clear()
+	alcaldePuzzleSolved = false
+	nivel1Terminado = false
+	rachaMaxNivel1 = 0
+	rachaGlobal = 0
+	gatopuntos = 0
 	problemsChanged.emit()
 
 func solvedProblemsCount() -> int:
@@ -47,4 +65,6 @@ signal rachaChanged(newValue: int)
 var rachaGlobal: int = 0:
 	set(value):
 		rachaGlobal = value
+		if not nivel1Terminado and value > rachaMaxNivel1:
+			rachaMaxNivel1 = value
 		rachaChanged.emit(value)

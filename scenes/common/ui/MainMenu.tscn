@@ -67,6 +67,15 @@ text = "INSIGNIAS"
 script = ExtResource("4_btn")
 appearDelay = 1.7
 
+[node name="RankingButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(220, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 28
+text = "RANKING"
+script = ExtResource("4_btn")
+appearDelay = 1.95
+
 [node name="NamePanel" type="VBoxContainer" parent="VBoxContainer" unique_id=1955981758]
 visible = false
 layout_mode = 2
@@ -105,4 +114,5 @@ script = ExtResource("4_btn")
 
 [connection signal="pressed" from="VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/BadgesButton" to="." method="_on_badges_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/RankingButton" to="." method="_on_ranking_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/NamePanel/ConfirmButton" to="." method="_on_confirm_button_pressed"]
