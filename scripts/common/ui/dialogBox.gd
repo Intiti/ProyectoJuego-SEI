@@ -416,8 +416,8 @@ func closeDialog():
 		_activeNpc = null
 		if puzzle:
 			puzzle.open(dataToOpen, npcRef)
-	elif is_instance_valid(_activeNpc) and _activeNpc.has_method("startExam"):
+	elif is_instance_valid(_activeNpc) and _activeNpc.has_method("onExamPuzzleFinished"):
 		# El guardia de examen maneja el lanzamiento del primer ejercicio
 		var npcRef = _activeNpc
 		_activeNpc = null
-		npcRef.startExam()
+		npcRef.onExamPuzzleFinished()
