@@ -169,7 +169,7 @@ func mostrar_completado(errores: int) -> void:
 		mensaje_exito.text = (
 			"¡Sistema de enfriamiento estabilizado!\n"
 			+ "La temperatura del laboratorio "
-			+ "ha descendido a 40 grados."
+			+ "ha descendido a un nivel seguro (18 °C)."
 		)
 
 	actualizar_puntos_totales()
@@ -186,15 +186,12 @@ func mostrar_completado(errores: int) -> void:
 # ==========================================
 
 func calcular_puntos(errores: int) -> int:
-
 	if errores <= 1:
-		return 60
-
+		return 240
 	elif errores == 2:
-		return 45
-
+		return 180
 	else:
-		return 30
+		return 120
 
 
 # ==========================================

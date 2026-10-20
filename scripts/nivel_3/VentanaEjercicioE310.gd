@@ -1,695 +1,98 @@
-
-extends PanelContainer
+extends "res://scripts/nivel_3/compartidos/VentanaEjercicioBaseNivel3.gd"
 
 # ==========================================
 # MGTS - NIVEL 3 - EJERCICIO E3.10
-# CAMARA DE RESCATE
-# EL PROTOCOLO DE RESCATE
-# NPC: LINCE CIBERNETICO
+# EL PROTOCOLO DE RESCATE (CÁMARA DE RESCATE)
 # ==========================================
 
-signal ejercicio_resuelto(errores: int)
-
-const CODIGO_EJERCICIO: String = "E3.10"
+const ID_EJERCICIO: String = "E3.10"
+const TITULO_EJERCICIO: String = "E3.10 – El protocolo de rescate"
+const OA_EJERCICIO: String = "OA2 / OA3: Ciclo while con bandera (not), contador (< 3) y condición or"
+const DESCRIPCION_EJERCICIO: String = (
+	"Rastrea la señal de Panko mientras aún no haya sido rescatado y los intentos fallidos sean "
+	+ "menores que 3. Si la señal es \"gatito\" o \"maullido\", cambia rescatado a True."
+)
 const TOTAL_ESPACIOS: int = 4
 const PUNTOS_POR_BLOQUE: int = 60
 
-# ==========================================
-# BLOQUES DE PYTHON
-# ==========================================
+const PLANTILLA_CODIGO: String = (
+	"rescatado = False\n"
+	+ "intentos = 0\n\n"
+	+ "[ Espacio 1 ]\n"
+	+ "    [ Espacio 2 ]\n"
+	+ "    [ Espacio 3 ]\n"
+	+ "        [ Espacio 4 ]\n"
+	+ "    else:\n"
+	+ "        intentos = intentos + 1"
+)
 
-const CODIGO_BLOQUES: Array[String] = [
-	"",
-	"while indice < len(zonas):",
-	"while indice > len(zonas):",
-	"    if zonas[indice] == \"rescate\":",
-	"    if zonas[indice] == \"segura\":",
-	"        print(\"Activar protocolo de rescate\")",
-	"        print(\"Cancelar rescate\")",
-	"    else:",
-	"    indice = indice - 1"
+const RESPUESTA_CORRECTA: Array[String] = [
+	"while not rescatado and intentos < 3:",
+	"senal = input(\"Señal: \")",
+	"if senal == \"gatito\" or senal == \"maullido\":",
+	"rescatado = True"
 ]
 
-const ORDEN_CORRECTO: Array[int] = [1, 3, 5, 7]
-
-
-# ==========================================
-# REFERENCIAS
-# ==========================================
-
-@onready var titulo: Label = get_node_or_null(
-	"ContenidoEjercicio/FilaTitulo/TituloEjercicio"
-) as Label
-
-@onready var instrucciones: Label = get_node_or_null(
-	"ContenidoEjercicio/FilaInstrucciones/InstruccionesEjercicio"
-) as Label
-
-@onready var panel_pista: PanelContainer = get_node_or_null(
-	"ContenidoEjercicio/FilaInstrucciones/PanelPista"
-) as PanelContainer
-
-@onready var texto_pista: Label = get_node_or_null(
-	"ContenidoEjercicio/FilaInstrucciones/PanelPista/ContenidoPista/TextoPista"
-) as Label
-
-@onready var lista_bloques: VBoxContainer = get_node_or_null(
-	"ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques"
-) as VBoxContainer
-
-@onready var lista_algoritmo: VBoxContainer = get_node_or_null(
-	"ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo"
-) as VBoxContainer
-
-@onready var mensaje_vacio: Label = get_node_or_null(
-	"ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/MensajeVacio"
-) as Label
-
-@onready var boton_limpiar: Button = get_node_or_null(
-	"ContenidoEjercicio/BotonesEjercicio/BotonLimpiar"
-) as Button
-
-@onready var boton_comprobar: Button = get_node_or_null(
-	"ContenidoEjercicio/BotonesEjercicio/BotonComprobar"
-) as Button
-
-@onready var boton_cerrar: Button = get_node_or_null(
-	"ContenidoEjercicio/BotonesEjercicio/BotonCerrar"
-) as Button
-
-@onready var mensaje_resultado: Label = get_node_or_null(
-	"ContenidoEjercicio/MensajeResultado"
-) as Label
-
-@onready var consola: Node = get_node_or_null(
-	"../../InteraccionConsola"
-)
-
-@onready var ventana_completado: Node = get_node_or_null(
-	"../../CompletadoUI/VentanaCompletado"
-)
-
-
-# ==========================================
-# VARIABLES
-# ==========================================
-
-var bloques_seleccionados: Array[int] = []
-var botones_bloques: Array[Button] = []
-
-var errores: int = 0
-var puntos_obtenidos: int = 0
-
-var ejercicio_terminado: bool = false
-var referencias_correctas: bool = false
-
-
-# ==========================================
-# INICIO
-# ==========================================
-
-func _ready() -> void:
-
-	hide()
-
-	referencias_correctas = comprobar_referencias()
-
-	if not referencias_correctas:
-		return
-
-	titulo.text = "E3.10 - El protocolo de rescate"
-
-	instrucciones.text = (
-		"¡MISIÓN FINAL DEL NIVEL 3!\n"
-		+ "El Lince Cibernético necesita tu ayuda para encontrar a Panko.\n"
-		+ "Revisa las zonas del laboratorio y activa el protocolo "
-		+ "cuando encuentres una zona de rescate.\n"
-		+ "Completa los 4 espacios del algoritmo en Python."
-	)
-
-	instrucciones.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
-	)
-
-	mensaje_resultado.text = ""
-
-	mensaje_resultado.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
-	)
-
-	# Reservar espacio para las pistas.
-	panel_pista.show()
-	panel_pista.modulate.a = 0.0
-
-	texto_pista.text = ""
-
-	texto_pista.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
-	)
-
-	# Preparar los 8 bloques disponibles.
-	for numero in range(1, CODIGO_BLOQUES.size()):
-
-		var boton: Button = lista_bloques.get_node_or_null(
-			"Bloque" + str(numero)
-		) as Button
-
-		if boton == null:
-
-			push_warning(
-				"E3.10: falta Bloque" + str(numero)
-			)
-			continue
-
-		botones_bloques.append(boton)
-
-		boton.text = CODIGO_BLOQUES[numero]
-		boton.disabled = false
-
-		boton.add_theme_font_size_override(
-			"font_size",
-			14
-		)
-
-		var accion: Callable = seleccionar_bloque.bind(
-			numero
-		)
-
-		if not boton.pressed.is_connected(accion):
-			boton.pressed.connect(accion)
-
-	# Botón Limpiar.
-	if not boton_limpiar.pressed.is_connected(
-		limpiar_algoritmo
-	):
-
-		boton_limpiar.pressed.connect(
-			limpiar_algoritmo
-		)
-
-	# Botón Comprobar.
-	if not boton_comprobar.pressed.is_connected(
-		comprobar_algoritmo
-	):
-
-		boton_comprobar.pressed.connect(
-			comprobar_algoritmo
-		)
-
-	# Botón Cerrar.
-	if not boton_cerrar.pressed.is_connected(
-		cerrar_ventana
-	):
-
-		boton_cerrar.pressed.connect(
-			cerrar_ventana
-		)
-
-	actualizar_algoritmo()
-
-	print("E3.10: ventana del ejercicio preparada.")
-
-
-# ==========================================
-# COMPROBAR REFERENCIAS
-# ==========================================
-
-func comprobar_referencias() -> bool:
-
-	var correcto: bool = true
-
-	var referencias: Dictionary = {
-		"TituloEjercicio": titulo,
-		"InstruccionesEjercicio": instrucciones,
-		"PanelPista": panel_pista,
-		"TextoPista": texto_pista,
-		"ListaBloques": lista_bloques,
-		"ListaAlgoritmo": lista_algoritmo,
-		"MensajeVacio": mensaje_vacio,
-		"BotonLimpiar": boton_limpiar,
-		"BotonComprobar": boton_comprobar,
-		"BotonCerrar": boton_cerrar,
-		"MensajeResultado": mensaje_resultado
-	}
-
-	for nombre in referencias:
-
-		if referencias[nombre] == null:
-
-			push_error(
-				"E3.10: falta el nodo " + nombre
-			)
-
-			correcto = false
-
-	if consola == null:
-		push_warning("E3.10: falta InteraccionConsola.")
-
-	if ventana_completado == null:
-		push_warning("E3.10: falta VentanaCompletado.")
-
-	return correcto
-
-
-# ==========================================
-# INICIAR EJERCICIO
-# ==========================================
-
-func iniciar_ejercicio() -> void:
-
-	if not referencias_correctas:
-		return
-
-	if ejercicio_terminado:
-		return
-
-	mensaje_resultado.text = ""
-
-	if errores == 0:
-		panel_pista.modulate.a = 0.0
-
-	actualizar_algoritmo()
-
-	print("E3.10: ejercicio iniciado.")
-
-
-# ==========================================
-# SELECCIONAR BLOQUE
-# ==========================================
-
-func seleccionar_bloque(numero: int) -> void:
-
-	if not referencias_correctas:
-		return
-
-	if ejercicio_terminado:
-		return
-
-	if bloques_seleccionados.has(numero):
-		return
-
-	if bloques_seleccionados.size() >= TOTAL_ESPACIOS:
-
-		mostrar_mensaje(
-			"Ya completaste los 4 espacios. "
-			+ "Presiona Comprobar o Limpiar.",
-			Color("#FFD477")
-		)
-
-		return
-
-	bloques_seleccionados.append(numero)
-
-	var boton: Button = lista_bloques.get_node_or_null(
-		"Bloque" + str(numero)
-	) as Button
-
-	if boton != null:
-		boton.disabled = true
-
-	mensaje_resultado.text = ""
-
-	actualizar_algoritmo()
-
-
-# ==========================================
-# ACTUALIZAR ALGORITMO
-# ==========================================
-
-func actualizar_algoritmo() -> void:
-
-	if not referencias_correctas:
-		return
-
-	# Eliminar las líneas dinámicas anteriores.
-	for hijo in lista_algoritmo.get_children():
-
-		if hijo == mensaje_vacio:
-			continue
-
-		lista_algoritmo.remove_child(hijo)
-		hijo.queue_free()
-
-	mensaje_vacio.hide()
-
-	# Zonas que deben revisarse durante el rescate.
-	agregar_linea('zonas = ["segura", "rescate", "segura"]')
-	agregar_linea("indice = 0")
-
-	# Espacio 1: recorrer todas las zonas.
-	agregar_espacio(0, 0)
-
-	# Espacio 2: detectar una zona de rescate.
-	agregar_espacio(1, 4)
-
-	# Espacio 3: activar el protocolo.
-	agregar_espacio(2, 8)
-
-	# Espacio 4: alternativa para zonas seguras.
-	agregar_espacio(3, 4)
-
-	# Líneas fijas finales.
-	agregar_linea('        print("Zona segura")')
-	agregar_linea("    indice = indice + 1")
-	agregar_linea('print("Protocolo de rescate completado")')
-
-# ==========================================
-# AGREGAR LINEA FIJA
-# ==========================================
-
-func agregar_linea(contenido: String) -> void:
-
-	var linea: Label = Label.new()
-
-	linea.text = contenido
-	linea.autowrap_mode = TextServer.AUTOWRAP_OFF
-
-	linea.add_theme_color_override(
-		"font_color",
-		Color("#DCE9FA")
-	)
-
-	linea.add_theme_font_size_override(
-		"font_size",
-		14
-	)
-
-	lista_algoritmo.add_child(linea)
-
-
-# ==========================================
-# AGREGAR ESPACIO
-# ==========================================
-
-func agregar_espacio(indice: int, sangria: int) -> void:
-
-	var panel: PanelContainer = PanelContainer.new()
-
-	var estilo: StyleBoxFlat = StyleBoxFlat.new()
-
-	estilo.bg_color = Color("#243453")
-	estilo.border_color = Color("#4CC9FF")
-
-	estilo.set_border_width_all(1)
-	estilo.set_corner_radius_all(6)
-	estilo.set_content_margin_all(8)
-
-	panel.add_theme_stylebox_override(
-		"panel",
-		estilo
-	)
-
-	var espacio: Label = Label.new()
-
-	espacio.autowrap_mode = TextServer.AUTOWRAP_OFF
-
-	if indice < bloques_seleccionados.size():
-
-		var numero: int = bloques_seleccionados[indice]
-
-		espacio.text = CODIGO_BLOQUES[numero]
-
-	else:
-
-		espacio.text = (
-			" ".repeat(sangria)
-			+ "[ Espacio "
-			+ str(indice + 1)
-			+ " ]"
-		)
-
-	espacio.add_theme_color_override(
-		"font_color",
-		Color("#DCC6FF")
-	)
-
-	espacio.add_theme_font_size_override(
-		"font_size",
-		14
-	)
-
-	panel.custom_minimum_size.y = 36
-
-	panel.add_child(espacio)
-	lista_algoritmo.add_child(panel)
-
-
-# ==========================================
-# LIMPIAR ALGORITMO
-# ==========================================
-
-func limpiar_algoritmo() -> void:
-
-	if not referencias_correctas:
-		return
-
-	if ejercicio_terminado:
-		return
-
-	bloques_seleccionados.clear()
-
-	for boton in botones_bloques:
-		boton.disabled = false
-
-	mensaje_resultado.text = ""
-
-	actualizar_algoritmo()
-
-	print("E3.10: algoritmo limpiado.")
-
-
-# ==========================================
-# COMPROBAR ALGORITMO
-# ==========================================
-
-func comprobar_algoritmo() -> void:
-
-	if not referencias_correctas:
-		return
-
-	if ejercicio_terminado:
-		return
-
-	# Los espacios incompletos no cuentan como error.
-	if bloques_seleccionados.size() != TOTAL_ESPACIOS:
-
-		mostrar_mensaje(
-			"Completa los 4 espacios antes de comprobar.",
-			Color("#FFD477")
-		)
-
-		return
-
-	# Respuesta correcta.
-	if bloques_seleccionados == ORDEN_CORRECTO:
-
-		completar_ejercicio()
-		return
-
-	# Respuesta incorrecta.
-	errores += 1
-
-	mostrar_pista()
-
-	mensaje_resultado.text = ""
-
-	print("E3.10: error número ", errores)
-
-
-# ==========================================
-# MOSTRAR PISTA
-# ==========================================
-
-func mostrar_pista() -> void:
-
-	var indice_error: int = -1
-
+const BLOQUES_DISPONIBLES: Array[String] = [
+	"while not rescatado and intentos < 3:",
+	"while rescatado or intentos < 3:",
+	"senal = input(\"Señal: \")",
+	"senal = \"gatito\"",
+	"if senal == \"gatito\" or senal == \"maullido\":",
+	"if senal == \"gatito\" and senal == \"maullido\":",
+	"rescatado = True",
+	"rescatado = False"
+]
+
+const TIPOS_ERROR: Dictionary = {
+	"while rescatado or intentos < 3:": "condicion_ciclo",
+	"senal = \"gatito\"": "lectura_entrada",
+	"if senal == \"gatito\" and senal == \"maullido\":": "operador_logico",
+	"rescatado = False": "bandera_rescate"
+}
+
+const MENSAJES_ERROR: Dictionary = {
+	"condicion_ciclo": "Debes repetir la búsqueda mientras NO se haya rescatado (not rescatado) Y queden intentos (< 3).",
+	"lectura_entrada": "Debes leer la señal del escáner con senal = input(\"Señal: \"), no fijar un texto constante.",
+	"operador_logico": "Una señal no puede ser \"gatito\" Y \"maullido\" al mismo tiempo; usa el operador 'or'.",
+	"bandera_rescate": "Al detectar una señal válida, debes cambiar rescatado = True para finalizar la búsqueda.",
+	"orden_incorrecto": "Verifica la posición del ciclo while, la lectura input(), el condicional if y la bandera rescatado = True."
+}
+
+const PISTAS: Dictionary = {
+	0: "El ciclo while continúa mientras 'not rescatado' y 'intentos < 3'.",
+	1: "Lee la señal recibida en la Cámara de Rescate con senal = input(\"Señal: \").",
+	2: "Acepta las señales \"gatito\" O \"maullido\" usando el operador or.",
+	3: "Activa la bandera rescatado = True al encontrar una señal válida."
+}
+
+
+func validar_algoritmo_y_casos() -> Dictionary:
 	for i in range(TOTAL_ESPACIOS):
+		if bloques_colocados[i] != RESPUESTA_CORRECTA[i]:
+			return {"correcto": false}
 
-		if bloques_seleccionados[i] != ORDEN_CORRECTO[i]:
+	var casos: Array = [
+		{"senales": ["ruido", "maullido"], "res_esp": true, "int_esp": 1},
+		{"senales": ["gatito"], "res_esp": true, "int_esp": 0},
+		{"senales": ["eco", "viento", "estatica"], "res_esp": false, "int_esp": 3}
+	]
+	for c in casos:
+		var senales: Array = c["senales"]
+		var rescatado: bool = false
+		var intentos: int = 0
+		var idx: int = 0
+		while not rescatado and intentos < 3:
+			var senal: String = str(senales[idx]) if idx < senales.size() else ""
+			idx += 1
+			if senal == "gatito" or senal == "maullido":
+				rescatado = true
+			else:
+				intentos = intentos + 1
+		if rescatado != bool(c["res_esp"]) or intentos != int(c["int_esp"]):
+			return {"correcto": false}
 
-			indice_error = i
-			break
-
-	match indice_error:
-		0:
-			texto_pista.text = (
-				"Debes revisar todas las zonas del laboratorio. "
-				+ "Usa while para recorrer la lista con el índice."
-			)
-		1:
-			texto_pista.text = (
-				"El rescate solo se activa si la zona es 'rescate'. "
-				+ "Comprueba la condición con if."
-			)
-		2:
-			texto_pista.text = (
-				"Cuando encuentres una zona de rescate, "
-				+ "debes mostrar 'Activar protocolo de rescate'."
-			)
-		3:
-			texto_pista.text = (
-				"Para una zona que no necesita rescate, "
-				+ "utiliza else."
-			)
-		_:
-			texto_pista.text = "Revisa el orden de las instrucciones."
-	panel_pista.modulate.a = 1.0
-
-
-# ==========================================
-# MOSTRAR MENSAJE
-# ==========================================
-
-func mostrar_mensaje(texto: String, color: Color) -> void:
-
-	mensaje_resultado.text = texto
-
-	mensaje_resultado.add_theme_color_override(
-		"font_color",
-		color
-	)
-
-
-# ==========================================
-# CALCULAR PUNTOS
-# ==========================================
-
-func calcular_puntos() -> int:
-
-	var puntos_base: int = (
-		TOTAL_ESPACIOS * PUNTOS_POR_BLOQUE
-	)
-
-	if errores >= 3:
-		return int(puntos_base * 0.50)
-
-	if errores == 2:
-		return int(puntos_base * 0.75)
-
-	return puntos_base
-
-
-# ==========================================
-# COMPLETAR EJERCICIO
-# ==========================================
-
-func completar_ejercicio() -> void:
-
-	if ejercicio_terminado:
-		return
-
-	ejercicio_terminado = true
-
-	puntos_obtenidos = calcular_puntos()
-
-	# Desactivar botones.
-	for boton in botones_bloques:
-		boton.disabled = true
-
-	boton_limpiar.disabled = true
-	boton_comprobar.disabled = true
-
-	mostrar_mensaje(
-		"¡Protocolo de rescate activado! "
-		+ "Las zonas fueron revisadas correctamente. "
-		+ "Ganaste "
-		+ str(puntos_obtenidos)
-		+ " puntos.",
-		Color("#80E6B7")
-	)
-
-	# Registrar puntuación E3.10.
-	var sistema_puntos: Node = get_node_or_null(
-		"/root/PuntajesNivel3"
-	)
-
-	if sistema_puntos != null:
-
-		if sistema_puntos.has_method(
-			"registrar_ejercicio"
-		):
-
-			sistema_puntos.call(
-				"registrar_ejercicio",
-				CODIGO_EJERCICIO,
-				puntos_obtenidos
-			)
-
-		else:
-
-			push_warning(
-				"E3.10: falta registrar_ejercicio()."
-			)
-
-	else:
-
-		push_warning(
-			"E3.10: no se encontró PuntajesNivel3."
-		)
-
-	# Avisar que el ejercicio fue resuelto.
-	ejercicio_resuelto.emit(errores)
-
-	# Desactivar consola.
-	if consola != null:
-
-		if consola.has_method("completar_ejercicio"):
-
-			consola.call(
-				"completar_ejercicio"
-			)
-
-	hide()
-
-	# Mostrar ventana de completado.
-	if ventana_completado != null:
-
-		if ventana_completado.has_method(
-			"mostrar_completado"
-		):
-
-			ventana_completado.call(
-				"mostrar_completado",
-				errores
-			)
-
-		else:
-
-			push_warning(
-				"E3.10: falta mostrar_completado()."
-			)
-
-	else:
-
-		push_warning(
-			"E3.10: falta VentanaCompletado."
-		)
-
-	print(
-		"E3.10 completado. Puntos: ",
-		puntos_obtenidos,
-		" | Errores: ",
-		errores
-	)
-
-
-# ==========================================
-# CERRAR VENTANA
-# ==========================================
-
-func cerrar_ventana() -> void:
-
-	if ejercicio_terminado:
-		return
-
-	if consola != null:
-
-		if consola.has_method("cerrar_ejercicio"):
-
-			consola.call("cerrar_ejercicio")
-			return
-
-	hide()
-
-	print("E3.10: ventana cerrada.")
+	return {
+		"correcto": true,
+		"resumen_casos": "✓ Señal 'maullido' o 'gatito' activa rescatado = True | ✓ Límite de 3 intentos"
+	}

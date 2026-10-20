@@ -1,0 +1,476 @@
+﻿[gd_scene format=3 ]
+
+[ext_resource type="Script" path="res://scripts/nivel_3/examen/Pregunta4.gd" id="1_kbjlg"]
+[ext_resource type="Texture2D" uid="uid://bcvjut6hbhytv" path="res://assets/nivel_3/texture/caef6b62-668b-4c01-9035-699dd2381ed8.png" id="2_rxfte"]
+[ext_resource type="Texture2D" uid="uid://be65w01un3stj" path="res://assets/nivel_3/fondos/c2779f06-8b19-4c05-bcbb-62538b5018c1.png" id="3_bgex"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ca6k3"]
+content_margin_left = 20.0
+content_margin_top = 16.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
+bg_color = Color(0.0627451, 0.09411765, 0.15294118, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.5647059, 0.3882353, 0.8117647, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+corner_detail = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kedii"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.0627451, 0.10980392, 0.19607843, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.7921569, 0.34117648, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_daxbq"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.0627451, 0.10980392, 0.19607843, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25882354, 0.5568628, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1vlad"]
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 10.0
+content_margin_bottom = 4.0
+bg_color = Color(0.21960784, 0.36078432, 0.5372549, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.45, 0.68, 0.95, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.14, 0.22, 0.36, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.38, 0.72, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cl5uj"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(0.08, 0.13, 0.22, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25882354, 0.5568628, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tuip5"]
+bg_color = Color(0.1882353, 0.23529412, 0.3764706, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6627451, 0.5411765, 0.9137255, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6nihx"]
+bg_color = Color(0.5058824, 0.22352941, 0.8627451, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.76, 0.64, 0.98, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_refuerzo"]
+bg_color = Color(0.12, 0.45, 0.38, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.88, 0.72, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="ExamenNivel3" type="Node2D" unique_id=741430589]
+
+[node name="Fondo" type="Sprite2D" parent="." unique_id=1846702876]
+position = Vector2(576, 324)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("3_bgex")
+
+[node name="OscurecerFondo" type="ColorRect" parent="." unique_id=1846702877]
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.03, 0.05, 0.1, 0.78)
+
+[node name="EjercicioUI" type="CanvasLayer" parent="." unique_id=1038417800]
+
+[node name="VentanaEjercicio" type="PanelContainer" parent="EjercicioUI" unique_id=349670837]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 18.0
+offset_right = -28.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ca6k3")
+script = ExtResource("1_kbjlg")
+
+[node name="ContenidoEjercicio" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio" unique_id=523121102]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FilaTitulo" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=68793443]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="IconoGato" type="TextureRect" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo" unique_id=184773839]
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+texture = ExtResource("2_rxfte")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TituloEjercicio" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo" unique_id=1632230421]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8666667, 0.72156864, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "EXAMEN FINAL NIVEL 3 – EVALUACIÓN INTEGRADORA "
+
+[node name="FilaEstadoExamen" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo" unique_id=2136171538]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="EstadoExamen" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo/FilaEstadoExamen" unique_id=1983332981]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.33, 0.94, 0.76, 1)
+theme_override_font_sizes/font_size = 15
+text = "Estado: EN EVALUACIÓN"
+
+[node name="ProgresoExamen" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo/FilaEstadoExamen" unique_id=1983332982]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.85, 0.45, 1)
+theme_override_font_sizes/font_size = 15
+text = "Pregunta 1 / 3"
+
+[node name="ContadorExamen" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo/FilaEstadoExamen" unique_id=621430323]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.65, 0.65, 1)
+theme_override_font_sizes/font_size = 15
+text = "Errores: 0 / 3 | Vidas: ♥♥♥"
+
+[node name="ContadorErrores" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaTitulo/FilaEstadoExamen" unique_id=621430324]
+visible = false
+layout_mode = 2
+text = "Errores: 0 / 3"
+
+[node name="FilaInstrucciones" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=1870657650]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InstruccionesEjercicio" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones" unique_id=1762414057]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "Instrucciones de la pregunta."
+autowrap_mode = 3
+
+[node name="PanelPista" type="PanelContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones" unique_id=1930823523]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kedii")
+
+[node name="ContenidoPista" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones/PanelPista" unique_id=1307408836]
+layout_mode = 2
+
+[node name="TituloPista" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones/PanelPista/ContenidoPista" unique_id=1686691819]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7921569, 0.34117648, 1)
+theme_override_font_sizes/font_size = 14
+text = "📘 Guía de Refuerzo Pedagógico"
+autowrap_mode = 3
+
+[node name="TextoPista" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/FilaInstrucciones/PanelPista/ContenidoPista" unique_id=579134295]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8156863, 0.8666667, 0.95686275, 1)
+theme_override_font_sizes/font_size = 14
+text = "Explicación de refuerzo."
+autowrap_mode = 3
+
+[node name="ColumnasEjercicio" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=1207375914]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="PanelBloques" type="PanelContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio" unique_id=1425782086]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_daxbq")
+
+[node name="BloquesDisponibles" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques" unique_id=1727938630]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="TituloBloques" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles" unique_id=3547430]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8666667, 0.72156864, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "BLOQUES SELECCIONABLES"
+
+[node name="ListaBloques" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles" unique_id=1556193402]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Bloque1" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=1663268019]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 1"
+
+[node name="Bloque2" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=846652384]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 2"
+
+[node name="Bloque3" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=620922067]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 3"
+
+[node name="Bloque4" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=257090952]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 4"
+
+[node name="Bloque5" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=644666162]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 5"
+
+[node name="Bloque6" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=439511363]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 6"
+
+[node name="Bloque7" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=1196394790]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 7"
+
+[node name="Bloque8" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques" unique_id=560991065]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_1vlad")
+text = "Bloque 8"
+
+[node name="AreaAlgoritmo" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio" unique_id=6838323]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.25
+theme_override_constants/separation = 6
+
+[node name="TituloAlgoritmo" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo" unique_id=1068497776]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22352941, 0.78431374, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "ALGORITMO EN PYTHON (Haz clic en un espacio para retirar su bloque)"
+
+[node name="PanelAlgoritmo" type="PanelContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo" unique_id=915174685]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_cl5uj")
+
+[node name="ListaAlgoritmo" type="VBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo" unique_id=1221863505]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MensajeVacio" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820895]
+visible = false
+layout_mode = 2
+text = "Selecciona los bloques para completar el algoritmo."
+
+[node name="Linea1" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820896]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "energia = 0"
+
+[node name="Linea2" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820897]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "ciclos = 0"
+
+[node name="FilaEspacio1" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820898]
+layout_mode = 2
+
+[node name="Espacio1" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio1" unique_id=204820899]
+custom_minimum_size = Vector2(360, 29)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_slot")
+text = "▸ Selecciona un bloque"
+
+[node name="FilaEspacio2" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820900]
+layout_mode = 2
+
+[node name="Sangria2" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio2" unique_id=204820901]
+layout_mode = 2
+text = "    "
+
+[node name="Espacio2" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio2" unique_id=204820902]
+custom_minimum_size = Vector2(340, 29)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_slot")
+text = "▸ Selecciona un bloque"
+
+[node name="FilaEspacio3" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820903]
+layout_mode = 2
+
+[node name="Sangria3" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio3" unique_id=204820904]
+layout_mode = 2
+text = "    "
+
+[node name="Espacio3" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio3" unique_id=204820905]
+custom_minimum_size = Vector2(340, 29)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_slot")
+text = "▸ Selecciona un bloque"
+
+[node name="FilaEspacio4" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820906]
+layout_mode = 2
+
+[node name="Sangria4" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio4" unique_id=204820907]
+layout_mode = 2
+text = "        "
+
+[node name="Espacio4" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/FilaEspacio4" unique_id=204820908]
+custom_minimum_size = Vector2(320, 29)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_slot")
+text = "▸ Selecciona un bloque"
+
+[node name="Linea7" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820909]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "    ciclos = ciclos + 1"
+
+[node name="Linea8" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820910]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "if energia >= 15:"
+
+[node name="Linea9" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820911]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "    print(\"Compuertas abiertas\")"
+
+[node name="Linea10" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo" unique_id=204820912]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "else: print(\"Energía insuficiente\")"
+
+[node name="MensajeResultado" type="Label" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=1604189279]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="BotonesEjercicio" type="HBoxContainer" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio" unique_id=877190079]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="BotonLimpiar" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=611216737]
+custom_minimum_size = Vector2(170, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_tuip5")
+text = "Reiniciar Bloques"
+
+[node name="BotonComprobar" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=616432974]
+custom_minimum_size = Vector2(210, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_6nihx")
+text = "▶ Validar Respuesta"
+
+[node name="BotonRefuerzo" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=616432975]
+visible = false
+custom_minimum_size = Vector2(220, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_refuerzo")
+text = "📘 Ejercicio de Refuerzo"
+
+[node name="BotonCerrar" type="Button" parent="EjercicioUI/VentanaEjercicio/ContenidoEjercicio/BotonesEjercicio" unique_id=370274658]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_tuip5")
+text = "Volver a Sala 10"
+

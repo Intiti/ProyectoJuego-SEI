@@ -458,12 +458,16 @@ func _onAlternativeChosen(block):
 			_rachaMax = _rachaActual
 		GameData.rachaGlobal += 1
 		if GameData.rachaGlobal >= 3:
+			DJManager.playStreak(GameData.rachaGlobal)
 			_showStreakPopup(GameData.rachaGlobal)
+		else:
+			DJManager.playCorrect()
 		_showCorrect()
 		_currentStep += 1
 		_loadCurrentStep()
 	else:
 		_errores += 1
+		DJManager.playError()
 		_rachaActual = 0
 		GameData.rachaGlobal = 0
 
@@ -878,6 +882,7 @@ func _onSuccess():
 	GameData.gatopuntos += puntaje
 
 	# Lanzar celebración y tablón simultáneamente; esperar a que el jugador presione continuar
+	DJManager.playFanfare()
 	await _playCompletionWithTablon(puntaje)
 
 	_celebrating = false

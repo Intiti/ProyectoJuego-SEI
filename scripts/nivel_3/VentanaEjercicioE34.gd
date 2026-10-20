@@ -1,646 +1,88 @@
-
-extends PanelContainer
+extends "res://scripts/nivel_3/compartidos/VentanaEjercicioBaseNivel3.gd"
 
 # ==========================================
-# MGTS - NIVEL 3 - E3.4
+# MGTS - NIVEL 3 - EJERCICIO E3.4
 # EL SISTEMA DE ENFRIAMIENTO
 # ==========================================
 
-signal ejercicio_resuelto(errores: int)
-
-const CODIGO_EJERCICIO: String = "E3.4"
-const PUNTOS_POR_BLOQUE: int = 60
+const ID_EJERCICIO: String = "E3.4"
+const TITULO_EJERCICIO: String = "E3.4 – El sistema de enfriamiento"
+const OA_EJERCICIO: String = "OA2 / OA3: Ciclo while con decremento y condición de caso límite"
+const DESCRIPCION_EJERCICIO: String = (
+	"La temperatura inicial del reactor es 30 °C. Redúcela en 3 °C por ciclo mientras sea "
+	+ "mayor que 20 °C y finalmente comprueba que haya quedado en 20 °C o menos."
+)
 const TOTAL_ESPACIOS: int = 4
+const PUNTOS_POR_BLOQUE: int = 60
 
-# ==========================================
-# BLOQUES DE PYTHON
-# ==========================================
+const PLANTILLA_CODIGO: String = (
+	"temp = 30\n\n"
+	+ "[ Espacio 1 ]\n"
+	+ "    [ Espacio 2 ]\n\n"
+	+ "[ Espacio 3 ]\n"
+	+ "    [ Espacio 4 ]"
+)
 
-const CODIGO_BLOQUES: Array[String] = [
-	"",
-	"temperatura = 30",
-	"temperatura = 20",
-	"while temperatura > 20:",
-	"while temperatura < 20:",
-	"    temperatura = temperatura - 3",
-	"    temperatura = temperatura + 3",
-	"    print(temperatura)",
-	"    print(\"Sistema estable\")"
+const RESPUESTA_CORRECTA: Array[String] = [
+	"while temp > 20:",
+	"temp = temp - 3",
+	"if temp <= 20:",
+	"print(\"Sistema estable\")"
 ]
 
-const ORDEN_CORRECTO: Array[int] = [1, 3, 5, 7]
-
-
-# ==========================================
-# REFERENCIAS
-# ==========================================
-
-@onready var titulo: Label = get_node_or_null(
-	"ContenidoEjercicio/FilaTitulo/TituloEjercicio"
-) as Label
-
-@onready var instrucciones: Label = get_node_or_null(
-	"ContenidoEjercicio/FilaInstrucciones/InstruccionesEjercicio"
-) as Label
-
-@onready var panel_pista: PanelContainer = get_node_or_null(
-	"ContenidoEjercicio/FilaInstrucciones/PanelPista"
-) as PanelContainer
-
-@onready var texto_pista: Label = get_node_or_null(
-	"ContenidoEjercicio/FilaInstrucciones/PanelPista/ContenidoPista/TextoPista"
-) as Label
-
-@onready var lista_bloques: VBoxContainer = get_node_or_null(
-	"ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/ListaBloques"
-) as VBoxContainer
-
-@onready var lista_algoritmo: VBoxContainer = get_node_or_null(
-	"ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo"
-) as VBoxContainer
-
-@onready var mensaje_vacio: Label = get_node_or_null(
-	"ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo/ListaAlgoritmo/MensajeVacio"
-) as Label
-
-@onready var boton_limpiar: Button = get_node_or_null(
-	"ContenidoEjercicio/BotonesEjercicio/BotonLimpiar"
-) as Button
-
-@onready var boton_comprobar: Button = get_node_or_null(
-	"ContenidoEjercicio/BotonesEjercicio/BotonComprobar"
-) as Button
-
-@onready var boton_cerrar: Button = get_node_or_null(
-	"ContenidoEjercicio/BotonesEjercicio/BotonCerrar"
-) as Button
-
-@onready var mensaje_resultado: Label = get_node_or_null(
-	"ContenidoEjercicio/MensajeResultado"
-) as Label
-
-@onready var consola: Node = get_node_or_null(
-	"../../InteraccionConsola"
-)
-
-@onready var ventana_completado: Node = get_node_or_null(
-	"../../CompletadoUI/VentanaCompletado"
-)
-
-
-# ==========================================
-# VARIABLES
-# ==========================================
-
-var bloques_seleccionados: Array[int] = []
-var botones_bloques: Array[Button] = []
-
-var errores: int = 0
-var ejercicio_terminado: bool = false
-var puntos_obtenidos: int = 0
-var referencias_correctas: bool = false
-
-
-# ==========================================
-# INICIO
-# ==========================================
-
-func _ready() -> void:
-
-	hide()
-
-	referencias_correctas = comprobar_referencias()
-
-	if not referencias_correctas:
-		push_error(
-			"E3.4: revisa los nodos de VentanaEjercicio."
-		)
-		return
-
-	titulo.text = "E3.4 - El sistema de enfriamiento"
-
-	instrucciones.text = (
-		"El Gato ingeniero necesita enfriar el laboratorio "
-		+ "para recuperar una posible señal de Panko.\n"
-		+ "La temperatura comienza en 30 grados y debe "
-		+ "bajar 3 grados por ciclo hasta llegar a 20 o menos.\n"
-		+ "Completa los 4 espacios del algoritmo."
-	)
-
-	instrucciones.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
-	)
-
-	mensaje_resultado.text = ""
-	mensaje_resultado.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
-	)
-
-	panel_pista.show()
-	panel_pista.modulate.a = 0.0
-
-	texto_pista.text = ""
-	texto_pista.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
-	)
-
-	# Preparar los ocho botones.
-	for numero in range(1, CODIGO_BLOQUES.size()):
-
-		var boton: Button = lista_bloques.get_node_or_null(
-			"Bloque" + str(numero)
-		) as Button
-
-		if boton == null:
-			push_warning(
-				"E3.4: falta Bloque" + str(numero)
-			)
-			continue
-
-		botones_bloques.append(boton)
-
-		boton.text = CODIGO_BLOQUES[numero]
-		boton.disabled = false
-
-		boton.add_theme_font_size_override(
-			"font_size", 14
-		)
-
-		var accion: Callable = seleccionar_bloque.bind(numero)
-
-		if not boton.pressed.is_connected(accion):
-			boton.pressed.connect(accion)
-
-	if not boton_limpiar.pressed.is_connected(
-		limpiar_algoritmo
-	):
-		boton_limpiar.pressed.connect(
-			limpiar_algoritmo
-		)
-
-	if not boton_comprobar.pressed.is_connected(
-		comprobar_algoritmo
-	):
-		boton_comprobar.pressed.connect(
-			comprobar_algoritmo
-		)
-
-	if not boton_cerrar.pressed.is_connected(
-		cerrar_ventana
-	):
-		boton_cerrar.pressed.connect(
-			cerrar_ventana
-		)
-
-	actualizar_algoritmo()
-
-	print("E3.4: ventana preparada correctamente.")
-
-
-# ==========================================
-# COMPROBAR REFERENCIAS
-# ==========================================
-
-func comprobar_referencias() -> bool:
-
-	var correcto: bool = true
-
-	var referencias: Dictionary = {
-		"TituloEjercicio": titulo,
-		"InstruccionesEjercicio": instrucciones,
-		"PanelPista": panel_pista,
-		"TextoPista": texto_pista,
-		"ListaBloques": lista_bloques,
-		"ListaAlgoritmo": lista_algoritmo,
-		"MensajeVacio": mensaje_vacio,
-		"BotonLimpiar": boton_limpiar,
-		"BotonComprobar": boton_comprobar,
-		"BotonCerrar": boton_cerrar,
-		"MensajeResultado": mensaje_resultado
-	}
-
-	for nombre in referencias:
-
-		if referencias[nombre] == null:
-			push_error(
-				"E3.4: no se encontró el nodo " + nombre
-			)
-			correcto = false
-
-	return correcto
-
-
-# ==========================================
-# INICIAR EJERCICIO
-# ==========================================
-
-func iniciar_ejercicio() -> void:
-
-	if not referencias_correctas:
-		return
-
-	if ejercicio_terminado:
-		return
-
-	mensaje_resultado.text = ""
-
-	if errores == 0:
-		panel_pista.modulate.a = 0.0
-
-	actualizar_algoritmo()
-
-	print("E3.4: ejercicio iniciado.")
-
-
-# ==========================================
-# SELECCIONAR BLOQUE
-# ==========================================
-
-func seleccionar_bloque(numero: int) -> void:
-
-	if not referencias_correctas or ejercicio_terminado:
-		return
-
-	if bloques_seleccionados.has(numero):
-		return
-
-	if bloques_seleccionados.size() >= TOTAL_ESPACIOS:
-
-		mostrar_mensaje(
-			"Ya completaste los 4 espacios. "
-			+ "Comprueba o limpia para cambiar.",
-			Color("#FFD477")
-		)
-		return
-
-	bloques_seleccionados.append(numero)
-
-	var boton: Button = lista_bloques.get_node_or_null(
-		"Bloque" + str(numero)
-	) as Button
-
-	if boton != null:
-		boton.disabled = true
-
-	mensaje_resultado.text = ""
-
-	actualizar_algoritmo()
-
-
-# ==========================================
-# MOSTRAR ALGORITMO
-# ==========================================
-
-func actualizar_algoritmo() -> void:
-
-	if not referencias_correctas:
-		return
-
-	for hijo in lista_algoritmo.get_children():
-
-		if hijo == mensaje_vacio:
-			continue
-
-		lista_algoritmo.remove_child(hijo)
-		hijo.queue_free()
-
-	mensaje_vacio.hide()
-
-	# Espacio 1: temperatura inicial.
-	agregar_espacio(0, 0)
-
-	# Espacio 2: condición del ciclo.
-	agregar_espacio(1, 0)
-
-	# Espacio 3: reducir temperatura.
-	agregar_espacio(2, 4)
-
-	# Espacio 4: mostrar temperatura.
-	agregar_espacio(3, 4)
-
-	# Mensaje al finalizar el ciclo.
-	agregar_linea('print("Sistema estable")')
-
-
-# ==========================================
-# AGREGAR LÍNEA FIJA
-# ==========================================
-
-func agregar_linea(contenido: String) -> void:
-
-	var linea: Label = Label.new()
-
-	linea.text = contenido
-	linea.autowrap_mode = TextServer.AUTOWRAP_OFF
-
-	linea.add_theme_color_override(
-		"font_color",
-		Color("#DCE9FA")
-	)
-
-	linea.add_theme_font_size_override(
-		"font_size", 14
-	)
-
-	lista_algoritmo.add_child(linea)
-
-
-# ==========================================
-# AGREGAR ESPACIO VISUAL
-# ==========================================
-
-func agregar_espacio(indice: int, sangria: int) -> void:
-
-	var panel: PanelContainer = PanelContainer.new()
-
-	var estilo: StyleBoxFlat = StyleBoxFlat.new()
-
-	estilo.bg_color = Color("#243453")
-	estilo.border_color = Color("#9D83EA")
-
-	estilo.set_border_width_all(1)
-	estilo.set_corner_radius_all(6)
-	estilo.set_content_margin_all(8)
-
-	panel.add_theme_stylebox_override(
-		"panel", estilo
-	)
-
-	var espacio: Label = Label.new()
-
-	espacio.autowrap_mode = TextServer.AUTOWRAP_OFF
-
-	if indice < bloques_seleccionados.size():
-
-		var numero: int = bloques_seleccionados[indice]
-
-		espacio.text = CODIGO_BLOQUES[numero]
-
-	else:
-
-		espacio.text = (
-			" ".repeat(sangria)
-			+ "[ Espacio "
-			+ str(indice + 1)
-			+ " ]"
-		)
-
-	espacio.add_theme_color_override(
-		"font_color",
-		Color("#DCC6FF")
-	)
-
-	espacio.add_theme_font_size_override(
-		"font_size", 14
-	)
-
-	panel.custom_minimum_size.y = 36
-
-	panel.add_child(espacio)
-	lista_algoritmo.add_child(panel)
-
-
-# ==========================================
-# LIMPIAR ALGORITMO
-# ==========================================
-
-func limpiar_algoritmo() -> void:
-
-	if not referencias_correctas or ejercicio_terminado:
-		return
-
-	bloques_seleccionados.clear()
-
-	for boton in botones_bloques:
-		boton.disabled = false
-
-	mensaje_resultado.text = ""
-
-	actualizar_algoritmo()
-
-	print("E3.4: algoritmo limpiado.")
-
-
-# ==========================================
-# COMPROBAR RESPUESTA
-# ==========================================
-
-func comprobar_algoritmo() -> void:
-
-	if not referencias_correctas or ejercicio_terminado:
-		return
-
-	if bloques_seleccionados.size() != TOTAL_ESPACIOS:
-
-		mostrar_mensaje(
-			"Completa los 4 espacios antes de comprobar.",
-			Color("#FFD477")
-		)
-
-		# No sumar errores por respuesta incompleta.
-		return
-
-	if bloques_seleccionados == ORDEN_CORRECTO:
-		completar_ejercicio()
-		return
-
-	errores += 1
-
-	mostrar_pista()
-
-	mensaje_resultado.text = ""
-
-	print("E3.4: error número ", errores)
-
-
-# ==========================================
-# MOSTRAR PISTA
-# ==========================================
-
-func mostrar_pista() -> void:
-
-	if not referencias_correctas:
-		return
-
-	var indice_error: int = -1
-
+const BLOQUES_DISPONIBLES: Array[String] = [
+	"while temp > 20:",
+	"while temp < 20:",
+	"temp = temp - 3",
+	"temp = temp + 3",
+	"if temp <= 20:",
+	"if temp > 30:",
+	"print(\"Sistema estable\")",
+	"temp = 30"
+]
+
+const TIPOS_ERROR: Dictionary = {
+	"while temp < 20:": "condicion_ciclo",
+	"temp = temp + 3": "actualizacion_variable",
+	"if temp > 30:": "condicion_final",
+	"temp = 30": "accion_final"
+}
+
+const MENSAJES_ERROR: Dictionary = {
+	"condicion_ciclo": "La temperatura inicia en 30, por lo que 'temp < 20' es falso desde el inicio y nunca enfriaría.",
+	"actualizacion_variable": "Sumar 3 grados aumenta el calor del reactor y provoca un ciclo infinito.",
+	"condicion_final": "El sistema es seguro cuando temp <= 20, no cuando supera 30.",
+	"accion_final": "Al estabilizar la temperatura debes mostrar print(\"Sistema estable\").",
+	"orden_incorrecto": "Revisa qué bloque corresponde al ciclo while y cuál al condicional if final."
+}
+
+const PISTAS: Dictionary = {
+	0: "El ciclo while debe ejecutarse mientras la temperatura supere los 20 grados (while temp > 20:).",
+	1: "En cada ciclo de enfriamiento disminuye la temperatura en 3 grados (temp = temp - 3).",
+	2: "Al terminar el ciclo, verifica el umbral seguro con if temp <= 20:.",
+	3: "Confirma la estabilización en pantalla con print(\"Sistema estable\")."
+}
+
+
+func validar_algoritmo_y_casos() -> Dictionary:
 	for i in range(TOTAL_ESPACIOS):
+		if bloques_colocados[i] != RESPUESTA_CORRECTA[i]:
+			return {"correcto": false}
 
-		if bloques_seleccionados[i] != ORDEN_CORRECTO[i]:
-			indice_error = i
-			break
+	var casos: Array = [
+		{"temp_ini": 30, "temp_fin": 18, "ciclos": 4},
+		{"temp_ini": 20, "temp_fin": 20, "ciclos": 0}
+	]
+	for c in casos:
+		var temp: int = int(c["temp_ini"])
+		var iteraciones: int = 0
+		while temp > 20 and iteraciones < 20:
+			temp = temp - 3
+			iteraciones += 1
+		if temp != int(c["temp_fin"]) or iteraciones != int(c["ciclos"]) or not (temp <= 20):
+			return {"correcto": false}
 
-	match indice_error:
-
-		0:
-			texto_pista.text = (
-				"La temperatura inicial del laboratorio "
-				+ "es de 30 grados."
-			)
-
-		1:
-			texto_pista.text = (
-				"El ciclo debe continuar mientras "
-				+ "la temperatura sea mayor que 20."
-			)
-
-		2:
-			texto_pista.text = (
-				"Cada ciclo debe disminuir "
-				+ "la temperatura en 3 grados."
-			)
-
-		3:
-			texto_pista.text = (
-				"Debes mostrar la temperatura "
-				+ "después de cada reducción."
-			)
-
-		_:
-			texto_pista.text = (
-				"Revisa las instrucciones "
-				+ "del algoritmo."
-			)
-
-	panel_pista.modulate.a = 1.0
-
-
-# ==========================================
-# MOSTRAR MENSAJES
-# ==========================================
-
-func mostrar_mensaje(texto: String, color: Color) -> void:
-
-	mensaje_resultado.text = texto
-
-	mensaje_resultado.add_theme_color_override(
-		"font_color",
-		color
-	)
-
-
-# ==========================================
-# CALCULAR PUNTOS
-# ==========================================
-
-func calcular_puntos() -> int:
-
-	var base: int = (
-		TOTAL_ESPACIOS * PUNTOS_POR_BLOQUE
-	)
-
-	if errores >= 3:
-		return int(base * 0.50)
-
-	if errores == 2:
-		return int(base * 0.75)
-
-	return base
-
-
-# ==========================================
-# COMPLETAR EJERCICIO
-# ==========================================
-
-func completar_ejercicio() -> void:
-
-	if ejercicio_terminado:
-		return
-
-	ejercicio_terminado = true
-
-	puntos_obtenidos = calcular_puntos()
-
-	for boton in botones_bloques:
-		boton.disabled = true
-
-	boton_limpiar.disabled = true
-	boton_comprobar.disabled = true
-
-	mostrar_mensaje(
-		"¡Sistema estabilizado! Ganaste "
-		+ str(puntos_obtenidos)
-		+ " puntos.",
-		Color("#80E6B7")
-	)
-
-	# Registrar puntos de E3.4.
-	var sistema_puntos: Node = get_node_or_null(
-		"/root/PuntajesNivel3"
-	)
-
-	if sistema_puntos != null:
-
-		if sistema_puntos.has_method(
-			"registrar_ejercicio"
-		):
-
-			sistema_puntos.call(
-				"registrar_ejercicio",
-				CODIGO_EJERCICIO,
-				puntos_obtenidos
-			)
-
-	else:
-		push_warning(
-			"E3.4: no se encontró PuntajesNivel3."
-		)
-
-	ejercicio_resuelto.emit(errores)
-
-	# Avisar a la consola.
-	if consola != null:
-
-		if consola.has_method("completar_ejercicio"):
-			consola.call("completar_ejercicio")
-
-	hide()
-
-	# Mostrar ventana de completado.
-	if ventana_completado != null:
-
-		if ventana_completado.has_method(
-			"mostrar_completado"
-		):
-
-			ventana_completado.call(
-				"mostrar_completado",
-				errores
-			)
-
-		else:
-			push_warning(
-				"E3.4: falta mostrar_completado()."
-			)
-
-	else:
-		push_warning(
-			"E3.4: falta VentanaCompletado."
-		)
-
-	print(
-		"E3.4 completado. Puntos: ",
-		puntos_obtenidos,
-		" | Errores: ",
-		errores
-	)
-
-
-# ==========================================
-# CERRAR VENTANA
-# ==========================================
-
-func cerrar_ventana() -> void:
-
-	if ejercicio_terminado:
-		return
-
-	if consola != null:
-
-		if consola.has_method("cerrar_ejercicio"):
-			consola.call("cerrar_ejercicio")
-			return
-
-	hide()
-
-	print("E3.4: ventana cerrada.")
+	return {
+		"correcto": true,
+		"resumen_casos": "✓ Enfriamiento de 30 °C a 18 °C en 4 ciclos | ✓ Umbral seguro <= 20 °C verificado"
+	}

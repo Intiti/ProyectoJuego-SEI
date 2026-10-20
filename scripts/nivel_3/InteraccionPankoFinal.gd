@@ -455,6 +455,14 @@ func rescatar_panko() -> void:
 
 	descongelar_jugador()
 
+	var sistema_puntos: Node = get_node_or_null("/root/PuntajesNivel3")
+	if sistema_puntos != null and sistema_puntos.has_method("registrar_rescate_panko"):
+		sistema_puntos.call("registrar_rescate_panko")
+
+	var dj: Node = get_node_or_null("/root/DJManager")
+	if dj != null and dj.has_method("play_sfx"):
+		dj.call("play_sfx", "rescate_panko")
+
 	panko_rescatado.emit()
 
 	print("================================")

@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://mainmenu"]
 
 [ext_resource type="Script" uid="uid://bwrx5eoa4b25w" path="res://scripts/common/ui/mainMenu.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/common/ui/menuBackground.gd" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/common/ui/catTitle.gd" id="3_title"]
+[ext_resource type="Script" path="res://scripts/common/ui/menuButton.gd" id="4_btn"]
 
 [node name="MainMenu" type="Control" unique_id=838839872]
 layout_mode = 3
@@ -11,14 +14,15 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="ColorRect" parent="." unique_id=673523911]
+[node name="Background" type="Control" parent="." unique_id=673523911]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.06, 0.12, 1)
+mouse_filter = 2
+script = ExtResource("2_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1940694356]
 layout_mode = 1
@@ -35,23 +39,24 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="Title" type="Label" parent="VBoxContainer" unique_id=1438689103]
+[node name="Title" type="Control" parent="VBoxContainer" unique_id=1438689103]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 52
-text = "MIAUGORITMOS"
-horizontal_alignment = 1
+mouse_filter = 2
+script = ExtResource("3_title")
 
 [node name="Spacer" type="Control" parent="VBoxContainer" unique_id=1059880069]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 
 [node name="PlayButton" type="Button" parent="VBoxContainer" unique_id=342892152]
-custom_minimum_size = Vector2(200, 55)
+custom_minimum_size = Vector2(220, 60)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 28
 text = "JUGAR"
+script = ExtResource("4_btn")
+appearDelay = 1.45
 
 [node name="NamePanel" type="VBoxContainer" parent="VBoxContainer" unique_id=1955981758]
 visible = false
@@ -82,11 +87,12 @@ theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
 [node name="ConfirmButton" type="Button" parent="VBoxContainer/NamePanel" unique_id=1086114070]
-custom_minimum_size = Vector2(200, 50)
+custom_minimum_size = Vector2(220, 55)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 24
 text = "CONFIRMAR"
+script = ExtResource("4_btn")
 
 [connection signal="pressed" from="VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/NamePanel/ConfirmButton" to="." method="_on_confirm_button_pressed"]

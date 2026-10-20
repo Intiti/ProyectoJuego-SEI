@@ -201,15 +201,12 @@ func mostrar_completado(errores: int) -> void:
 # ==========================================
 
 func calcular_puntos(errores: int) -> int:
-
 	if errores <= 1:
-		return 60
-
+		return 240
 	elif errores == 2:
-		return 45
-
+		return 180
 	else:
-		return 30
+		return 120
 
 
 # ==========================================

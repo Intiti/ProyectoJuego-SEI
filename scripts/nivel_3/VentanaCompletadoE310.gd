@@ -179,13 +179,15 @@ func mostrar_completado(errores: int) -> void:
 
 	# Mensaje final del ejercicio
 	if mensaje_exito != null:
-
 		mensaje_exito.text = (
 			"¡PROTOCOLO DE RESCATE ACTIVADO!\n"
-			+ "El Lince Cibernético confirma que "
-			+ "las zonas de rescate han sido identificadas.\n"
-			+ "¡Has completado los 10 ejercicios del Nivel 3!"
+			+ "El Lince Cibernético ha detectado la señal de Panko.\n"
+			+ "¡Cruza la puerta para superar la Evaluación Final y rescatarlo!"
 		)
+
+	var dj: Node = get_node_or_null("/root/DJManager")
+	if dj != null and dj.has_method("play_sfx"):
+		dj.call("play_sfx", "ejercicio_completado")
 
 	actualizar_puntos_totales()
 
@@ -201,15 +203,12 @@ func mostrar_completado(errores: int) -> void:
 # ==========================================
 
 func calcular_puntos(errores: int) -> int:
-
 	if errores <= 1:
-		return 60
-
+		return 240
 	elif errores == 2:
-		return 45
-
+		return 180
 	else:
-		return 30
+		return 120
 
 
 # ==========================================

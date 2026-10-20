@@ -189,15 +189,12 @@ func mostrar_completado(errores: int) -> void:
 # ==========================================
 
 func calcular_puntos(errores: int) -> int:
-
 	if errores <= 1:
-		return 60
-
+		return 240
 	elif errores == 2:
-		return 45
-
+		return 180
 	else:
-		return 30
+		return 120
 
 
 # ==========================================
@@ -205,28 +202,19 @@ func calcular_puntos(errores: int) -> int:
 # ==========================================
 
 func actualizar_puntos_totales() -> void:
-
 	if puntos_totales == null:
 		return
 
 	var total: int = 0
-
-	var sistema_puntos: Node = get_node_or_null(
-		"/root/PuntajesNivel3"
-	)
+	var sistema_puntos: Node = get_node_or_null("/root/PuntajesNivel3")
 
 	if sistema_puntos != null:
+		if sistema_puntos.has_method("obtener_puntos_totales"):
+			total = int(sistema_puntos.call("obtener_puntos_totales"))
+		elif sistema_puntos.get("puntos_totales") != null:
+			total = int(sistema_puntos.get("puntos_totales"))
 
-		if sistema_puntos.has_method("obtener_puntos"):
-
-			total = int(
-				 sistema_puntos.call("obtener_puntos", "E3.2")
-			)
-
-	puntos_totales.text = (
-		"Puntos totales: "
-		+ str(total)
-	)
+	puntos_totales.text = "Puntos totales: " + str(total)
 
 
 # ==========================================

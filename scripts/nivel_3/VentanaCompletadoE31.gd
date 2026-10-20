@@ -90,24 +90,26 @@ func mostrar_completado(errores: int) -> void:
 
 	errores_cometidos = errores
 
-	# Calcular puntos según errores
+	# Calcular puntos según errores (4 bloques * 60 pts = 240 base)
 	if errores <= 1:
-
-		puntos_ganados = 60
-
+		puntos_ganados = 240
 	elif errores == 2:
-
-		puntos_ganados = 45
-
+		puntos_ganados = 180
 	else:
+		puntos_ganados = 120
 
-		puntos_ganados = 30
+	var dj: Node = get_node_or_null("/root/DJManager")
+	if dj != null and dj.has_method("play_sfx"):
+		dj.call("play_sfx", "ejercicio_completado")
 
 	# Registrar puntos del ejercicio E3.1
-	PuntajesNivel3.registrar_ejercicio(
-		"E3.1",
-		puntos_ganados
-	)
+	var sistema_puntos: Node = get_node_or_null("/root/PuntajesNivel3")
+	var total_nivel: int = puntos_ganados
+	if sistema_puntos != null:
+		if sistema_puntos.has_method("registrar_ejercicio"):
+			sistema_puntos.call("registrar_ejercicio", "E3.1", puntos_ganados)
+		if sistema_puntos.has_method("obtener_puntos_totales"):
+			total_nivel = int(sistema_puntos.call("obtener_puntos_totales"))
 
 	# Mostrar puntos obtenidos
 	puntos_label.text = (
@@ -124,7 +126,7 @@ func mostrar_completado(errores: int) -> void:
 	# Mostrar puntos totales del Nivel 3
 	puntos_totales_label.text = (
 		"★ PUNTOS TOTALES: " +
-		str(PuntajesNivel3.puntos_totales)
+		str(total_nivel)
 	)
 
 	# Mostrar pantalla
@@ -135,7 +137,7 @@ func mostrar_completado(errores: int) -> void:
 	print("Errores cometidos: ", errores_cometidos)
 	print(
 		"Puntos totales Nivel 3: ",
-		PuntajesNivel3.puntos_totales
+		total_nivel
 	)
 
 

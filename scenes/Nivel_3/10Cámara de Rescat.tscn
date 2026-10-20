@@ -782,7 +782,7 @@ shape = SubResource("RectangleShape2D_4vhrh")
 
 [node name="SalidaLaboratorio" type="Area2D" parent="." unique_id=2069979156]
 script = ExtResource("12_rfspb")
-siguiente_escena = "uid://8abpj5ilro5c"
+siguiente_escena = "res://scenes/ExamenNivel3/ExamenPrincipal.tscn"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SalidaLaboratorio" unique_id=1339825671]
 position = Vector2(1710, 358)
