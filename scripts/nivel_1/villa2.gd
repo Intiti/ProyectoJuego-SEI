@@ -7,6 +7,9 @@ const ExitMarkerScript = preload("res://scripts/common/ui/exitMarker.gd")
 
 # Texto de la flecha del borde izquierdo (de vuelta a Villa1)
 const EXIT_LEFT_LABEL := ""
+const EXIT_RIGHT_LABEL := "Al Bosque Profundo"
+
+var _exitRightMarker = null
 
 const SPAWN_LEFT_X  := 80.0
 const SPAWN_RIGHT_X := 1070.0
@@ -29,9 +32,12 @@ func _ready():
 	_positionPlayer()
 	_fadeIn()
 	_buildExitTrigger()
+	_buildRightExitTrigger()
 	_showEscuelaPrompt()
 	add_child(ScoreHudScript.new())
 	_buildExitMarker()
+	_buildRightExitMarker()
+	GameData.problemsChanged.connect(_onProblemsChanged)
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
@@ -87,6 +93,42 @@ func _goToVilla1() -> void:
 	GameData.spawnSide = "right"
 
 	FaderScript.fadeOutAndChange(self, "res://scenes/nivel_1/Villa1.tscn", 0.8)
+
+# ─── Salida derecha hacia Nivel 2 (Bosque Profundo) ──────────────────────────
+
+func _buildRightExitMarker() -> void:
+	var canPass = GameData.isSolved("res://dialogs/nivel_1/npc_guardia_villa2.json")
+	_exitRightMarker = ExitMarkerScript.new()
+	_exitRightMarker.setup(ExitMarkerScript.Side.RIGHT, EXIT_RIGHT_LABEL, canPass)
+	add_child(_exitRightMarker)
+
+func _buildRightExitTrigger() -> void:
+	var exitArea = Area2D.new()
+	var shape = CollisionShape2D.new()
+	var rect = RectangleShape2D.new()
+	rect.size = Vector2(32, 400)
+	shape.shape = rect
+	exitArea.add_child(shape)
+	exitArea.position = Vector2(1136, 400)
+	add_child(exitArea)
+	exitArea.body_entered.connect(_on_right_exit_body_entered)
+
+func _on_right_exit_body_entered(body: Node) -> void:
+	if not body.is_in_group("player"):
+		return
+	if not GameData.isSolved("res://dialogs/nivel_1/npc_guardia_villa2.json"):
+		return
+	_goToBosque()
+
+func _goToBosque() -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		player.set_physics_process(false)
+	FaderScript.fadeOutAndChange(self, "res://scenes/nivel_2/1SenderoDeLasHuellas.tscn", 0.8)
+
+func _onProblemsChanged() -> void:
+	if is_instance_valid(_exitRightMarker) and GameData.isSolved("res://dialogs/nivel_1/npc_guardia_villa2.json"):
+		_exitRightMarker.setActive(true)
 
 # ─── Flecha de entrada ▼ (aparece al acercarse) ───────────────────────────────
 # Offset desde ESCUELA_POS hasta el punto donde apunta la flecha (la puerta).

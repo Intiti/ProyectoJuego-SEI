@@ -1,0 +1,47 @@
+{
+	"npc_name": "Rastreador Chikí",
+	"lines": [
+		{
+			"speaker": "Rastreador Chikí",
+			"text": "¡Shh! Pisa con cuidado sobre el musgo astral, viajero... Percibo una presencia cercana."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Has visto a mi gatito Panko por estos senderos ancestrales?"
+		},
+		{
+			"speaker": "Rastreador Chikí",
+			"text": "¡Por los bigotes del Gran Felino Cósmico! Sí, sus patitas dejaron rastros de maná brillante en el suelo. Mira aquí: ¡hay exactamente tres huellas luminosas!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Tres huellas? ¿Hacia dónde se dirigen?"
+		},
+		{
+			"speaker": "Rastreador Chikí",
+			"text": "Para sintonizar el rastro espiritual debemos registrar cada huella una por una. Necesitamos un miaugoritmo que use un contador y un ciclo 'while' para emitir 'Huellas encontradas' por cada rastro."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Entiendo. Un ciclo repetitivo que aumente el contador paso a paso hasta llegar a tres."
+		},
+		{
+			"speaker": "Rastreador Chikí",
+			"text": "¡Exacto! Acércate al Altar Rúnico que brilla frente a nosotros para canalizar el código del sendero."
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Rastreador Chikí",
+			"text": "¡El rastro resuena con luz dorada! Has registrado las tres huellas con perfección algorítmica."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡Puedo ver el sendero abriéndose entre las brumas hacia el Claro de las Bayas!"
+		},
+		{
+			"speaker": "Rastreador Chikí",
+			"text": "La barrera de ramas ancestrales se ha disuelto. ¡Avanza hacia la espesura mística!"
+		}
+	]
+}

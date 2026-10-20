@@ -1,0 +1,43 @@
+{
+	"npc_name": "Guardabosques Kaelen",
+	"lines": [
+		{
+			"speaker": "Guardabosques Kaelen",
+			"text": "¡Alto ahí, mortal! Nadie penetra el Umbral Sagrado del Bosque Profundo sin conocer la palabra arcana."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Señor Guardabosques, busco a Panko. Dicen que cruzó hacia el gran puente."
+		},
+		{
+			"speaker": "Guardabosques Kaelen",
+			"text": "El gatito pasó porque conocía el susurro del viento. Si deseas que las ramas se abran, debes susurrar la contraseña correcta: 'hoja'."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Y si no la sé de inmediato?"
+		},
+		{
+			"speaker": "Guardabosques Kaelen",
+			"text": "Repetiré la pregunta tantas veces como sea necesario con un ciclo 'while clave != \"hoja\":'. Solo cuando la clave coincida exactamente se desbloqueará el 'Acceso permitido'."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un bucle de lectura hasta acertar la palabra clave. ¡Vamos al altar a canalizar el encantamiento de paso!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Guardabosques Kaelen",
+			"text": "'¡Acceso permitido!' Las ramas ancestrales obedecen la palabra 'hoja' y se repliegan."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡El paso está libre! Puedo oír el rumor del abismo más adelante."
+		},
+		{
+			"speaker": "Guardabosques Kaelen",
+			"text": "Adelante, viajero. Frente a ti aguarda el Maestro Constructor en el Puente Ancestral."
+		}
+	]
+}

@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 const LEVEL1_SCENE := "res://scenes/nivel_1/Main.tscn"
+const LEVEL2_SCENE := "res://scenes/nivel_2/1SenderoDeLasHuellas.tscn"
 const LEVEL3_SCENE := "res://scenes/Nivel_3/1Entrada del Laboratorio.tscn"
 const MARGIN := 16.0
 
@@ -18,6 +19,7 @@ func _ready() -> void:
 	add_theme_constant_override("separation", 4)
 	_addTag()
 	_addButton("Omitir intro", _onSkipPressed)
+	_addButton("Saltar a nivel 2", _onLevel2Pressed)
 	_addButton("Saltar a nivel 3", _onLevel3Pressed)
 
 func _addTag() -> void:
@@ -56,6 +58,10 @@ func _makeStyle(color: Color) -> StyleBoxFlat:
 func _onSkipPressed() -> void:
 	GameData.playerName = "Player"
 	get_tree().change_scene_to_file(LEVEL1_SCENE)
+
+func _onLevel2Pressed() -> void:
+	GameData.playerName = "Player"
+	get_tree().change_scene_to_file(LEVEL2_SCENE)
 
 func _onLevel3Pressed() -> void:
 	GameData.playerName = "Player"

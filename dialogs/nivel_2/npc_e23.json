@@ -1,0 +1,43 @@
+{
+	"npc_name": "Guía Milo",
+	"lines": [
+		{
+			"speaker": "Guía Milo",
+			"text": "Saludos en la penumbra, peregrino. Delante se extiende la Ciénaga de las Nieblas Eternas."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Debo cruzarla para encontrar a Panko. ¿Tienes alguna forma de alumbrar el camino?"
+		},
+		{
+			"speaker": "Guía Milo",
+			"text": "Te prestaré mi Linterna de Energía Astral. Contiene 6 unidades de luz pura de fuego fatuo. Pero ten cuidado: cada paso por la bruma consume 2 unidades."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo controlo el consumo para no perderme en la oscuridad?"
+		},
+		{
+			"speaker": "Guía Milo",
+			"text": "Debes diseñar un programa que muestre la energía en cada paso mientras la linterna aún tenga carga (mayor que 0), reduciendo 2 unidades por ciclo hasta apagarse de forma segura."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un ciclo while con condición de parada y decremento de energía. ¡Lo programaré en el altar!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Guía Milo",
+			"text": "¡Espléndido! La linterna iluminó la senda con 6, 4 y 2 unidades antes de extinguirse sin sobrecargas."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡Hemos alcanzado el umbral custodiado de la espesura!"
+		},
+		{
+			"speaker": "Guía Milo",
+			"text": "Cuidado ahora, el Gran Guardabosques ancestral vigila la puerta hacia el cruce final."
+		}
+	]
+}

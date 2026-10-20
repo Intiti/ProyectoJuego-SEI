@@ -1,0 +1,47 @@
+{
+	"npc_name": "Druida Sylva",
+	"lines": [
+		{
+			"speaker": "Druida Sylva",
+			"text": "Bienvenido al Claro Sagrado, buscador de Panko. El bosque susurra sobre tu noble búsqueda."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Hola, Druida Sylva. ¿Panko pasó por este claro encantado?"
+		},
+		{
+			"speaker": "Druida Sylva",
+			"text": "Sí, correteó entre los arbustos de bayas de maná. Pero para abrir la niebla profunda que te llevará más lejos, necesito preparar una poción de visión espiritual."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo puedo ayudarte a recolectar las bayas?"
+		},
+		{
+			"speaker": "Druida Sylva",
+			"text": "Tengo 4 cestas ceremoniales: la primera guarda 1 baya, la segunda 2, la tercera 3 y la cuarta 4. Necesitamos un miaugoritmo con acumulador para sumar el total de bayas de las cuatro cestas."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un acumulador que conserve el total acumulado y le sume cada nueva cesta en cada vuelta del while."
+		},
+		{
+			"speaker": "Druida Sylva",
+			"text": "¡Así es! Canaliza la energía en el Altar de las Bayas para calcular el néctar total."
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Druida Sylva",
+			"text": "¡Magnífico! Exactamente 10 bayas de maná acumuladas. La poción emite un brillo celestial."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡La niebla del santuario se disipa! Gracias, Sylva."
+		},
+		{
+			"speaker": "Druida Sylva",
+			"text": "Sigue las luciérnagas hacia el Santuario de la Linterna Astral. ¡Que los espíritus del bosque guíen tus pasos!"
+		}
+	]
+}
