@@ -55,6 +55,9 @@ var _livesBox: HBoxContainer = null   # "Vidas:" + 3 patitas dibujadas, en la UI
 var _paws: Array = []                  # los 3 PawIcon, en orden
 var _examCounter: Label = null
 var _examRetryPressed: bool = false
+var _examDeclined: bool = false
+var _musicaExamenActiva: bool = false
+var _musicaPreviaExamen: String = ""
 var _examAccBase: int = 0
 var _examAccPen: int = 0
 var _examAccBonus: int = 0
@@ -219,6 +222,15 @@ func _ready():
 
 func _colorizePrompt(text: String) -> String:
 	var result = text
+	var quoteRegex = RegEx.new()
+	quoteRegex.compile("\"([^\"]+)\"")
+	result = quoteRegex.sub(result, "[color=#ffb86c]\"$1\"[/color]", true)
+	var typeRegex = RegEx.new()
+	typeRegex.compile("(enteros?|decimales)")
+	result = typeRegex.sub(result, "[color=#7eb8f7]$1[/color]", true)
+	var orderRegex = RegEx.new()
+	orderRegex.compile("(?i)\\b(primero|luego|después)\\b")
+	result = orderRegex.sub(result, "[color=#f9a8d4]$1[/color]", true)
 	result = result.replace("input()", "[color=#7eb8f7]input()[/color]")
 	result = result.replace("print", "[color=#7defa0]print[/color]")
 	result = result.replace("Si no", "[color=#c084fc]Si no[/color]")
@@ -258,6 +270,7 @@ func open(data: Dictionary, npc: Node = null):
 
 	# Mostrar/actualizar label de vidas
 	if _examMode:
+		_playExamMusic()
 		_livesBox.visible = true
 		_examCounter.visible = true
 		_examCounter.text = "Ejercicio %d/%d" % [int(data.get("exam_index", 0)) + 1, int(data.get("exam_total", 1))]
@@ -303,6 +316,32 @@ func endExamSession() -> void:
 	# Termina la sesión actual. El siguiente examen volverá a comenzar con 3 vidas.
 	_examSessionActive = false
 	_examLives = EXAM_MAX_ERRORS
+	_stopExamMusic()
+
+func _playExamMusic() -> void:
+	if _musicaExamenActiva:
+		return
+	_musicaExamenActiva = true
+	_musicaPreviaExamen = DJManager.currentTrack()
+	DJManager.playMusic("examen")
+
+func _stopExamMusic() -> void:
+	if not _musicaExamenActiva:
+		return
+	_musicaExamenActiva = false
+	if _musicaPreviaExamen != "":
+		DJManager.playMusic(_musicaPreviaExamen)
+	else:
+		DJManager.stopMusic()
+
+func _declineExam() -> void:
+	var npc = _activeNpc
+	_activeNpc = null
+	_celebrating = false
+	endExamSession()
+	close()
+	if is_instance_valid(npc) and npc.has_method("cancelExam"):
+		npc.cancelExam()
 
 func _updateLivesLabel():
 	# Patitas rosadas = vidas que quedan; grises = vidas perdidas
@@ -733,6 +772,7 @@ func _showExamFailed() -> void:
 	_disableCommandList()
 
 	_examRetryPressed = false
+	_examDeclined = false
 
 	# --- Contenedor de la pantalla de fallo (cubre todo el panel) ---
 	var overlay = ColorRect.new()
@@ -821,6 +861,11 @@ func _showExamFailed() -> void:
 	var sep2 = HSeparator.new()
 	tablonVbox.add_child(sep2)
 
+	var btnRow = HBoxContainer.new()
+	btnRow.alignment = BoxContainer.ALIGNMENT_CENTER
+	btnRow.add_theme_constant_override("separation", 16)
+	tablonVbox.add_child(btnRow)
+
 	# Botón Intentar de nuevo
 	var btnRetry = Button.new()
 	btnRetry.text = "Intentar de nuevo"
@@ -829,7 +874,18 @@ func _showExamFailed() -> void:
 	btnRetry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	btnRetry.mouse_filter = Control.MOUSE_FILTER_STOP
 	btnRetry.pressed.connect(func(): _examRetryPressed = true)
-	tablonVbox.add_child(btnRetry)
+	btnRow.add_child(btnRetry)
+
+	var btnNoRetry = Button.new()
+	btnNoRetry.text = "No reintentar"
+	btnNoRetry.add_theme_font_size_override("font_size", FONT_SIZE + 6)
+	btnNoRetry.custom_minimum_size = Vector2(220, 52)
+	btnNoRetry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	btnNoRetry.mouse_filter = Control.MOUSE_FILTER_STOP
+	btnNoRetry.pressed.connect(func():
+		_examDeclined = true
+		_examRetryPressed = true)
+	btnRow.add_child(btnNoRetry)
 
 	# --- Loop de animación: letras parpadeando en rojo, borde ciclando ---
 	var startTime = Time.get_ticks_msec()
@@ -852,6 +908,10 @@ func _showExamFailed() -> void:
 		await get_tree().process_frame
 
 	overlay.queue_free()
+
+	if _examDeclined:
+		_declineExam()
+		return
 
 	var npc = _activeNpc
 	if is_instance_valid(npc) and npc.has_method("restartExam"):

@@ -21,6 +21,7 @@ const MUSIC_TRACKS: Dictionary = {
 	"menu":  "res://assets/audio/music/Main.mp3",
 	"intro": "res://assets/audio/music/Intro.mp3",
 	"villa": "res://assets/audio/music/Villa_Miaulemana.mp3",
+	"examen": "res://assets/audio/music/Puzzle_Battle.mp3",
 }
 
 const FADE_DURATION := 1.2   # segundos de crossfade

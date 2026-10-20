@@ -1,259 +1,259 @@
 {
   "puzzle": {
-    "prompt": "Al finalizar una jornada, una persona sabe cuántos productos vendió y cuál era la cantidad que debía alcanzar como meta. Determina qué porcentaje de la meta consiguió y muestra ese resultado. Si alcanzó o superó el 100% de la meta, indica que la meta fue cumplida; de lo contrario, señala que no fue cumplida.",
-    "variables": {
-      "vendidos": 0,
-      "meta": 0,
-      "porcentaje": 0.0
-    },
-    "inputs": [
-      80,
-      100
-    ],
-    "expected_output": [
-      80.0,
+	"prompt": "Al finalizar una jornada, una persona sabe cuántos productos vendió y cuál era la cantidad que debía alcanzar como meta. Ambos son números enteros y se leen en ese orden: primero los vendidos y luego la meta. Determina qué porcentaje de la meta consiguió y muéstralo primero. Después, si alcanzó o superó el 100% de la meta, muestra exactamente \"Meta cumplida\"; de lo contrario, muestra exactamente \"Meta no cumplida\".",
+	"variables": {
+	  "vendidos": 0,
+	  "meta": 0,
+	  "porcentaje": 0.0
+	},
+	"inputs": [
+	  80,
+	  100
+	],
+	"expected_output": [
+	  80.0,
       "Meta no cumplida"
-    ],
-    "steps": [
-      {
-        "fixed": true,
-        "type": "input",
-        "text": "vendidos = int(input())",
-        "config": {
-          "var": "vendidos"
-        }
-      },
-      {
-        "fixed": false,
-        "type": "input",
-        "alternatives": [
-          {
-            "type": "input",
-            "text": "meta = int(input())",
-            "correct": true,
-            "config": {
-              "var": "meta"
-            }
-          },
-          {
-            "type": "input",
-            "text": "meta = float(input())",
-            "correct": false,
-            "config": {
-              "var": "meta"
-            }
-          },
-          {
-            "type": "input",
-            "text": "vendidos = int(input())",
-            "correct": false,
-            "config": {
-              "var": "vendidos"
-            }
-          },
-          {
-            "type": "assign",
-            "text": "meta = 0",
-            "correct": false,
-            "config": {
-              "var": "meta",
-              "assign_value": "0"
-            }
-          }
-        ]
-      },
-      {
-        "fixed": false,
-        "type": "expr",
-        "alternatives": [
-          {
-            "type": "expr",
-            "text": "porcentaje = vendidos * 100 / meta",
-            "correct": true,
-            "config": {
-              "var": "porcentaje",
-              "expr_a": "vendidos * 100",
-              "expr_op": "/",
-              "expr_b": "meta"
-            }
-          },
-          {
-            "type": "expr",
-            "text": "porcentaje = vendidos / meta",
-            "correct": false,
-            "config": {
-              "var": "porcentaje",
-              "expr_a": "vendidos",
-              "expr_op": "/",
-              "expr_b": "meta"
-            }
-          },
-          {
-            "type": "expr",
-            "text": "porcentaje = meta * 100 / vendidos",
-            "correct": false,
-            "config": {
-              "var": "porcentaje",
-              "expr_a": "meta * 100",
-              "expr_op": "/",
-              "expr_b": "vendidos"
-            }
-          },
-          {
-            "type": "assign",
-            "text": "porcentaje = 0",
-            "correct": false,
-            "config": {
-              "var": "porcentaje",
-              "assign_value": "0"
-            }
-          }
-        ]
-      },
-      {
-        "fixed": false,
-        "type": "print",
-        "alternatives": [
-          {
-            "type": "print",
-            "text": "print(porcentaje)",
-            "correct": true,
-            "config": {
-              "value": "porcentaje"
-            }
-          },
-          {
-            "type": "print",
-            "text": "print(vendidos)",
-            "correct": false,
-            "config": {
-              "value": "vendidos"
-            }
-          },
-          {
-            "type": "print",
-            "text": "print(meta)",
-            "correct": false,
-            "config": {
-              "value": "meta"
-            }
-          },
-          {
-            "type": "print",
-            "text": "print(\"porcentaje\")",
-            "correct": false,
-            "config": {
-              "value": "\"porcentaje\""
-            }
-          }
-        ]
-      },
-      {
-        "fixed": false,
-        "type": "if",
-        "alternatives": [
-          {
-            "type": "if",
-            "text": "if porcentaje >= 100:",
-            "correct": true,
-            "config": {
-              "var": "porcentaje",
-              "op": ">=",
-              "value": "100",
-              "value_is_var": false
-            }
-          },
-          {
-            "type": "if",
-            "text": "if porcentaje > 100:",
-            "correct": false,
-            "config": {
-              "var": "porcentaje",
-              "op": ">",
-              "value": "100",
-              "value_is_var": false
-            }
-          },
-          {
-            "type": "if",
-            "text": "if vendidos >= 100:",
-            "correct": false,
-            "config": {
-              "var": "vendidos",
-              "op": ">=",
-              "value": "100",
-              "value_is_var": false
-            }
-          },
-          {
-            "type": "if",
-            "text": "if porcentaje == 100:",
-            "correct": false,
-            "config": {
-              "var": "porcentaje",
-              "op": "==",
-              "value": "100",
-              "value_is_var": false
-            }
-          }
-        ]
-      },
-      {
-        "fixed": true,
-        "type": "print",
-        "indent": 1,
-        "text": "  print(\"Meta cumplida\")",
-        "config": {
-          "value": "\"Meta cumplida\""
-        }
-      },
-      {
-        "fixed": true,
-        "type": "else",
-        "text": "else:",
-        "config": {}
-      },
-      {
-        "fixed": false,
-        "type": "print",
-        "indent": 1,
-        "alternatives": [
-          {
-            "type": "print",
-            "text": "  print(\"Meta no cumplida\")",
-            "correct": true,
-            "config": {
-              "value": "\"Meta no cumplida\""
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(\"Meta cumplida\")",
-            "correct": false,
-            "config": {
-              "value": "\"Meta cumplida\""
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(porcentaje)",
-            "correct": false,
-            "config": {
-              "value": "porcentaje"
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(vendidos)",
-            "correct": false,
-            "config": {
-              "value": "vendidos"
-            }
-          }
-        ]
-      }
-    ],
-    "show_output": true,
-    "complete_on_steps": true
+	],
+	"steps": [
+	  {
+		"fixed": true,
+		"type": "input",
+		"text": "vendidos = int(input())",
+		"config": {
+		  "var": "vendidos"
+		}
+	  },
+	  {
+		"fixed": false,
+		"type": "input",
+		"alternatives": [
+		  {
+			"type": "input",
+			"text": "meta = int(input())",
+			"correct": true,
+			"config": {
+			  "var": "meta"
+			}
+		  },
+		  {
+			"type": "input",
+			"text": "meta = float(input())",
+			"correct": false,
+			"config": {
+			  "var": "meta"
+			}
+		  },
+		  {
+			"type": "input",
+			"text": "vendidos = int(input())",
+			"correct": false,
+			"config": {
+			  "var": "vendidos"
+			}
+		  },
+		  {
+			"type": "assign",
+			"text": "meta = 0",
+			"correct": false,
+			"config": {
+			  "var": "meta",
+			  "assign_value": "0"
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": false,
+		"type": "expr",
+		"alternatives": [
+		  {
+			"type": "expr",
+			"text": "porcentaje = vendidos * 100 / meta",
+			"correct": true,
+			"config": {
+			  "var": "porcentaje",
+			  "expr_a": "vendidos * 100",
+			  "expr_op": "/",
+			  "expr_b": "meta"
+			}
+		  },
+		  {
+			"type": "expr",
+			"text": "porcentaje = vendidos / meta",
+			"correct": false,
+			"config": {
+			  "var": "porcentaje",
+			  "expr_a": "vendidos",
+			  "expr_op": "/",
+			  "expr_b": "meta"
+			}
+		  },
+		  {
+			"type": "expr",
+			"text": "porcentaje = meta * 100 / vendidos",
+			"correct": false,
+			"config": {
+			  "var": "porcentaje",
+			  "expr_a": "meta * 100",
+			  "expr_op": "/",
+			  "expr_b": "vendidos"
+			}
+		  },
+		  {
+			"type": "assign",
+			"text": "porcentaje = 0",
+			"correct": false,
+			"config": {
+			  "var": "porcentaje",
+			  "assign_value": "0"
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": false,
+		"type": "print",
+		"alternatives": [
+		  {
+			"type": "print",
+			"text": "print(porcentaje)",
+			"correct": true,
+			"config": {
+			  "value": "porcentaje"
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "print(vendidos)",
+			"correct": false,
+			"config": {
+			  "value": "vendidos"
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "print(meta)",
+			"correct": false,
+			"config": {
+			  "value": "meta"
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "print(\"porcentaje\")",
+			"correct": false,
+			"config": {
+			  "value": "\"porcentaje\""
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": false,
+		"type": "if",
+		"alternatives": [
+		  {
+			"type": "if",
+			"text": "if porcentaje >= 100:",
+			"correct": true,
+			"config": {
+			  "var": "porcentaje",
+			  "op": ">=",
+			  "value": "100",
+			  "value_is_var": false
+			}
+		  },
+		  {
+			"type": "if",
+			"text": "if porcentaje > 100:",
+			"correct": false,
+			"config": {
+			  "var": "porcentaje",
+			  "op": ">",
+			  "value": "100",
+			  "value_is_var": false
+			}
+		  },
+		  {
+			"type": "if",
+			"text": "if vendidos >= 100:",
+			"correct": false,
+			"config": {
+			  "var": "vendidos",
+			  "op": ">=",
+			  "value": "100",
+			  "value_is_var": false
+			}
+		  },
+		  {
+			"type": "if",
+			"text": "if porcentaje == 100:",
+			"correct": false,
+			"config": {
+			  "var": "porcentaje",
+			  "op": "==",
+			  "value": "100",
+			  "value_is_var": false
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": true,
+		"type": "print",
+		"indent": 1,
+		"text": "  print(\"Meta cumplida\")",
+		"config": {
+		  "value": "\"Meta cumplida\""
+		}
+	  },
+	  {
+		"fixed": true,
+		"type": "else",
+		"text": "else:",
+		"config": {}
+	  },
+	  {
+		"fixed": false,
+		"type": "print",
+		"indent": 1,
+		"alternatives": [
+		  {
+			"type": "print",
+			"text": "  print(\"Meta no cumplida\")",
+			"correct": true,
+			"config": {
+			  "value": "\"Meta no cumplida\""
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(\"Meta cumplida\")",
+			"correct": false,
+			"config": {
+			  "value": "\"Meta cumplida\""
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(porcentaje)",
+			"correct": false,
+			"config": {
+			  "value": "porcentaje"
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(vendidos)",
+			"correct": false,
+			"config": {
+			  "value": "vendidos"
+			}
+		  }
+		]
+	  }
+	],
+	"show_output": true,
+	"complete_on_steps": true
   }
 }

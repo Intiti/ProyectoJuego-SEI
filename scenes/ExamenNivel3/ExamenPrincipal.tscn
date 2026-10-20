@@ -1,6 +1,6 @@
-﻿[gd_scene format=3 ]
+[gd_scene format=3 uid="uid://rykrr5rk71kj"]
 
-[ext_resource type="Script" path="res://scripts/nivel_3/examen/ExamenPrincipal.gd" id="1_kbjlg"]
+[ext_resource type="Script" uid="uid://der6rekp4wqno" path="res://scripts/nivel_3/examen/ExamenPrincipal.gd" id="1_kbjlg"]
 [ext_resource type="Texture2D" uid="uid://bcvjut6hbhytv" path="res://assets/nivel_3/texture/caef6b62-668b-4c01-9035-699dd2381ed8.png" id="2_rxfte"]
 [ext_resource type="Texture2D" uid="uid://be65w01un3stj" path="res://assets/nivel_3/fondos/c2779f06-8b19-4c05-bcbb-62538b5018c1.png" id="3_bgex"]
 
@@ -69,22 +69,6 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
-content_margin_left = 10.0
-content_margin_top = 3.0
-content_margin_right = 10.0
-content_margin_bottom = 3.0
-bg_color = Color(0.14, 0.22, 0.36, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.38, 0.72, 1, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cl5uj"]
 content_margin_left = 14.0
 content_margin_top = 10.0
@@ -100,6 +84,22 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
+content_margin_left = 10.0
+content_margin_top = 3.0
+content_margin_right = 10.0
+content_margin_bottom = 3.0
+bg_color = Color(0.14, 0.22, 0.36, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.38, 0.72, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tuip5"]
 bg_color = Color(0.1882353, 0.23529412, 0.3764706, 1)
@@ -473,4 +473,3 @@ custom_minimum_size = Vector2(180, 42)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_tuip5")
 text = "Volver a Sala 10"
-

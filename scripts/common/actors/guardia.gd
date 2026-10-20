@@ -193,6 +193,11 @@ func restartExam() -> void:
 		puzzle.beginExamSession()
 	_openExamExercise()
 
+func cancelExam() -> void:
+	_examMode = false
+	_examIndex = 0
+	_examPicked = []
+
 func _pickExercises() -> void:
 	var indices = range(_examPool.size())
 	indices.shuffle()

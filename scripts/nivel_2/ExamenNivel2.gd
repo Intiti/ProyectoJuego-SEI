@@ -266,6 +266,9 @@ var _arrowOverlay: Label = null
 var resuelto: bool = false
 var vidas_actuales: int = MAX_VIDAS
 var mostrando_fallo: bool = false
+var _reintentar_elegido: bool = true
+var _musica_previa: String = ""
+var _musica_examen_activa: bool = false
 
 var _celebrating: bool = false
 
@@ -348,6 +351,7 @@ func abrir_examen(altar_ref: Node2D = null) -> void:
 
 	panel.visible = true
 	visible = true
+	_iniciar_musica_examen()
 
 # ----------------------------------------------------------------
 # CIERRE
@@ -360,7 +364,30 @@ func cerrar_examen() -> void:
 		jugador.set_physics_process(true)
 		jugador.set_process_unhandled_input(true)
 		jugador.set_process_input(true)
+	_detener_musica_examen()
 	examen_cerrado.emit()
+
+func _iniciar_musica_examen() -> void:
+	if _musica_examen_activa:
+		return
+	var dj = get_node_or_null("/root/DJManager")
+	if dj == null:
+		return
+	_musica_examen_activa = true
+	_musica_previa = str(dj.currentTrack())
+	dj.playMusic("examen")
+
+func _detener_musica_examen() -> void:
+	if not _musica_examen_activa:
+		return
+	_musica_examen_activa = false
+	var dj = get_node_or_null("/root/DJManager")
+	if dj == null:
+		return
+	if _musica_previa != "":
+		dj.playMusic(_musica_previa)
+	else:
+		dj.stopMusic()
 
 # ----------------------------------------------------------------
 # VIDAS
@@ -847,6 +874,7 @@ func _on_examen_superado() -> void:
 	_celebrating = false
 	visible = false
 	panel.visible = false
+	_detener_musica_examen()
 	examen_aprobado.emit()
 	if altar_descuidado and altar_descuidado.has_method("iniciar_secuencia_teletransporte"):
 		altar_descuidado.iniciar_secuencia_teletransporte()
@@ -967,6 +995,7 @@ func _animar_completado(letters: Array, tablonStyle: StyleBoxFlat, tablon: Panel
 # ----------------------------------------------------------------
 func _mostrar_examen_fallido() -> void:
 	mostrando_fallo = true
+	_reintentar_elegido = true
 
 	var overlay = ColorRect.new()
 	overlay.name = "ExamFailedOverlay"
@@ -1044,14 +1073,32 @@ func _mostrar_examen_fallido() -> void:
 
 	tablonVbox.add_child(HSeparator.new())
 
+	var btnRow = HBoxContainer.new()
+	btnRow.alignment = BoxContainer.ALIGNMENT_CENTER
+	btnRow.add_theme_constant_override("separation", 16)
+	tablonVbox.add_child(btnRow)
+
 	var btnRetry = Button.new()
 	btnRetry.text = "Intentar de nuevo"
 	btnRetry.add_theme_font_size_override("font_size", FONT_SIZE + 5)
 	btnRetry.custom_minimum_size = Vector2(240, 50)
 	btnRetry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	btnRetry.mouse_filter = Control.MOUSE_FILTER_STOP
-	btnRetry.pressed.connect(func(): _retry_pressed.emit())
-	tablonVbox.add_child(btnRetry)
+	btnRetry.pressed.connect(func():
+		_reintentar_elegido = true
+		_retry_pressed.emit())
+	btnRow.add_child(btnRetry)
+
+	var btnNoRetry = Button.new()
+	btnNoRetry.text = "No reintentar"
+	btnNoRetry.add_theme_font_size_override("font_size", FONT_SIZE + 5)
+	btnNoRetry.custom_minimum_size = Vector2(220, 50)
+	btnNoRetry.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	btnNoRetry.mouse_filter = Control.MOUSE_FILTER_STOP
+	btnNoRetry.pressed.connect(func():
+		_reintentar_elegido = false
+		_retry_pressed.emit())
+	btnRow.add_child(btnNoRetry)
 	btnRetry.grab_focus()
 
 	# Lanzar la animación en una corutina independiente en paralelo
@@ -1061,7 +1108,11 @@ func _mostrar_examen_fallido() -> void:
 	await _retry_pressed
 
 	overlay.queue_free()
-	_reiniciar_ejercicio()
+	if _reintentar_elegido:
+		_reiniciar_ejercicio()
+	else:
+		mostrando_fallo = false
+		cerrar_examen()
 
 func _animar_fallido(letters: Array, tablonStyle: StyleBoxFlat, tablon: PanelContainer) -> void:
 	var startTime = Time.get_ticks_msec()
@@ -1126,6 +1177,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if mostrando_fallo:
 		if event.is_action_pressed("ui_accept") or (event is InputEventKey and event.pressed and event.keycode == KEY_ENTER and not event.echo):
 			get_viewport().set_input_as_handled()
+			_reintentar_elegido = true
+			_retry_pressed.emit()
+			return
+		if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE and not event.echo):
+			get_viewport().set_input_as_handled()
+			_reintentar_elegido = false
 			_retry_pressed.emit()
 			return
 	if event.is_action_pressed("ui_cancel") or \

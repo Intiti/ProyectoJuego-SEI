@@ -1,260 +1,260 @@
 {
   "puzzle": {
-    "prompt": "Durante un día se registran dos temperaturas: una al mediodía y otra durante la noche. Obtén el promedio de ambas mediciones y úsalo para describir el día. Si el promedio es de 20 grados o más, considera que fue un día cálido; si es menor que 20 grados, considera que fue un día frío.",
-    "variables": {
-      "temp_mediodia": 0.0,
-      "temp_noche": 0.0,
-      "suma_temp": 0.0,
-      "promedio": 0.0
-    },
-    "inputs": [
-      28.0,
-      16.0
-    ],
-    "expected_output": [
+	"prompt": "Durante un día se registran dos temperaturas con decimales: primero la del mediodía y luego la de la noche. Obtén el promedio de ambas mediciones y úsalo para describir el día. Si el promedio es de 20 grados o más, muestra exactamente \"Día cálido\"; si es menor que 20 grados, muestra exactamente \"Día frío\".",
+	"variables": {
+	  "temp_mediodia": 0.0,
+	  "temp_noche": 0.0,
+	  "suma_temp": 0.0,
+	  "promedio": 0.0
+	},
+	"inputs": [
+	  28.0,
+	  16.0
+	],
+	"expected_output": [
       "Día cálido"
-    ],
-    "steps": [
-      {
-        "fixed": true,
-        "type": "input",
-        "text": "temp_mediodia = float(input())",
-        "config": {
-          "var": "temp_mediodia"
-        }
-      },
-      {
-        "fixed": false,
-        "type": "input",
-        "alternatives": [
-          {
-            "type": "input",
-            "text": "temp_noche = float(input())",
-            "correct": true,
-            "config": {
-              "var": "temp_noche"
-            }
-          },
-          {
-            "type": "input",
-            "text": "temp_noche = int(input())",
-            "correct": false,
-            "config": {
-              "var": "temp_noche"
-            }
-          },
-          {
-            "type": "input",
-            "text": "temp_mediodia = float(input())",
-            "correct": false,
-            "config": {
-              "var": "temp_mediodia"
-            }
-          },
-          {
-            "type": "assign",
-            "text": "temp_noche = 0.0",
-            "correct": false,
-            "config": {
-              "var": "temp_noche",
-              "assign_value": "0.0"
-            }
-          }
-        ]
-      },
-      {
-        "fixed": false,
-        "type": "expr",
-        "alternatives": [
-          {
-            "type": "expr",
-            "text": "suma_temp = temp_mediodia + temp_noche",
-            "correct": true,
-            "config": {
-              "var": "suma_temp",
-              "expr_a": "temp_mediodia",
-              "expr_op": "+",
-              "expr_b": "temp_noche"
-            }
-          },
-          {
-            "type": "expr",
-            "text": "suma_temp = temp_mediodia - temp_noche",
-            "correct": false,
-            "config": {
-              "var": "suma_temp",
-              "expr_a": "temp_mediodia",
-              "expr_op": "-",
-              "expr_b": "temp_noche"
-            }
-          },
-          {
-            "type": "expr",
-            "text": "suma_temp = temp_mediodia * temp_noche",
-            "correct": false,
-            "config": {
-              "var": "suma_temp",
-              "expr_a": "temp_mediodia",
-              "expr_op": "*",
-              "expr_b": "temp_noche"
-            }
-          },
-          {
-            "type": "assign",
-            "text": "suma_temp = 0",
-            "correct": false,
-            "config": {
-              "var": "suma_temp",
-              "assign_value": "0"
-            }
-          }
-        ]
-      },
-      {
-        "fixed": false,
-        "type": "expr",
-        "alternatives": [
-          {
-            "type": "expr",
-            "text": "promedio = suma_temp / 2",
-            "correct": true,
-            "config": {
-              "var": "promedio",
-              "expr_a": "suma_temp",
-              "expr_op": "/",
-              "expr_b": "2"
-            }
-          },
-          {
-            "type": "expr",
-            "text": "promedio = temp_mediodia / 2",
-            "correct": false,
-            "config": {
-              "var": "promedio",
-              "expr_a": "temp_mediodia",
-              "expr_op": "/",
-              "expr_b": "2"
-            }
-          },
-          {
-            "type": "expr",
-            "text": "promedio = suma_temp * 2",
-            "correct": false,
-            "config": {
-              "var": "promedio",
-              "expr_a": "suma_temp",
-              "expr_op": "*",
-              "expr_b": "2"
-            }
-          },
-          {
-            "type": "assign",
-            "text": "promedio = 0",
-            "correct": false,
-            "config": {
-              "var": "promedio",
-              "assign_value": "0"
-            }
-          }
-        ]
-      },
-      {
-        "fixed": true,
-        "type": "if",
-        "text": "if promedio >= 20.0:",
-        "config": {
-          "var": "promedio",
-          "op": ">=",
-          "value": "20.0",
-          "value_is_var": false
-        }
-      },
-      {
-        "fixed": false,
-        "type": "print",
-        "indent": 1,
-        "alternatives": [
-          {
-            "type": "print",
-            "text": "  print(\"Día cálido\")",
-            "correct": true,
-            "config": {
-              "value": "\"Día cálido\""
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(\"Día frío\")",
-            "correct": false,
-            "config": {
-              "value": "\"Día frío\""
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(promedio)",
-            "correct": false,
-            "config": {
-              "value": "promedio"
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(\"día cálido\")",
-            "correct": false,
-            "config": {
-              "value": "\"día cálido\""
-            }
-          }
-        ]
-      },
-      {
-        "fixed": true,
-        "type": "else",
-        "text": "else:",
-        "config": {}
-      },
-      {
-        "fixed": false,
-        "type": "print",
-        "indent": 1,
-        "alternatives": [
-          {
-            "type": "print",
-            "text": "  print(\"Día frío\")",
-            "correct": true,
-            "config": {
-              "value": "\"Día frío\""
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(\"Día cálido\")",
-            "correct": false,
-            "config": {
-              "value": "\"Día cálido\""
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(promedio)",
-            "correct": false,
-            "config": {
-              "value": "promedio"
-            }
-          },
-          {
-            "type": "print",
-            "text": "  print(suma_temp)",
-            "correct": false,
-            "config": {
-              "value": "suma_temp"
-            }
-          }
-        ]
-      }
-    ],
-    "show_output": true,
-    "complete_on_steps": true
+	],
+	"steps": [
+	  {
+		"fixed": true,
+		"type": "input",
+		"text": "temp_mediodia = float(input())",
+		"config": {
+		  "var": "temp_mediodia"
+		}
+	  },
+	  {
+		"fixed": false,
+		"type": "input",
+		"alternatives": [
+		  {
+			"type": "input",
+			"text": "temp_noche = float(input())",
+			"correct": true,
+			"config": {
+			  "var": "temp_noche"
+			}
+		  },
+		  {
+			"type": "input",
+			"text": "temp_noche = int(input())",
+			"correct": false,
+			"config": {
+			  "var": "temp_noche"
+			}
+		  },
+		  {
+			"type": "input",
+			"text": "temp_mediodia = float(input())",
+			"correct": false,
+			"config": {
+			  "var": "temp_mediodia"
+			}
+		  },
+		  {
+			"type": "assign",
+			"text": "temp_noche = 0.0",
+			"correct": false,
+			"config": {
+			  "var": "temp_noche",
+			  "assign_value": "0.0"
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": false,
+		"type": "expr",
+		"alternatives": [
+		  {
+			"type": "expr",
+			"text": "suma_temp = temp_mediodia + temp_noche",
+			"correct": true,
+			"config": {
+			  "var": "suma_temp",
+			  "expr_a": "temp_mediodia",
+			  "expr_op": "+",
+			  "expr_b": "temp_noche"
+			}
+		  },
+		  {
+			"type": "expr",
+			"text": "suma_temp = temp_mediodia - temp_noche",
+			"correct": false,
+			"config": {
+			  "var": "suma_temp",
+			  "expr_a": "temp_mediodia",
+			  "expr_op": "-",
+			  "expr_b": "temp_noche"
+			}
+		  },
+		  {
+			"type": "expr",
+			"text": "suma_temp = temp_mediodia * temp_noche",
+			"correct": false,
+			"config": {
+			  "var": "suma_temp",
+			  "expr_a": "temp_mediodia",
+			  "expr_op": "*",
+			  "expr_b": "temp_noche"
+			}
+		  },
+		  {
+			"type": "assign",
+			"text": "suma_temp = 0",
+			"correct": false,
+			"config": {
+			  "var": "suma_temp",
+			  "assign_value": "0"
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": false,
+		"type": "expr",
+		"alternatives": [
+		  {
+			"type": "expr",
+			"text": "promedio = suma_temp / 2",
+			"correct": true,
+			"config": {
+			  "var": "promedio",
+			  "expr_a": "suma_temp",
+			  "expr_op": "/",
+			  "expr_b": "2"
+			}
+		  },
+		  {
+			"type": "expr",
+			"text": "promedio = temp_mediodia / 2",
+			"correct": false,
+			"config": {
+			  "var": "promedio",
+			  "expr_a": "temp_mediodia",
+			  "expr_op": "/",
+			  "expr_b": "2"
+			}
+		  },
+		  {
+			"type": "expr",
+			"text": "promedio = suma_temp * 2",
+			"correct": false,
+			"config": {
+			  "var": "promedio",
+			  "expr_a": "suma_temp",
+			  "expr_op": "*",
+			  "expr_b": "2"
+			}
+		  },
+		  {
+			"type": "assign",
+			"text": "promedio = 0",
+			"correct": false,
+			"config": {
+			  "var": "promedio",
+			  "assign_value": "0"
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": true,
+		"type": "if",
+		"text": "if promedio >= 20.0:",
+		"config": {
+		  "var": "promedio",
+		  "op": ">=",
+		  "value": "20.0",
+		  "value_is_var": false
+		}
+	  },
+	  {
+		"fixed": false,
+		"type": "print",
+		"indent": 1,
+		"alternatives": [
+		  {
+			"type": "print",
+			"text": "  print(\"Día cálido\")",
+			"correct": true,
+			"config": {
+			  "value": "\"Día cálido\""
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(\"Día frío\")",
+			"correct": false,
+			"config": {
+			  "value": "\"Día frío\""
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(promedio)",
+			"correct": false,
+			"config": {
+			  "value": "promedio"
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(\"día cálido\")",
+			"correct": false,
+			"config": {
+			  "value": "\"día cálido\""
+			}
+		  }
+		]
+	  },
+	  {
+		"fixed": true,
+		"type": "else",
+		"text": "else:",
+		"config": {}
+	  },
+	  {
+		"fixed": false,
+		"type": "print",
+		"indent": 1,
+		"alternatives": [
+		  {
+			"type": "print",
+			"text": "  print(\"Día frío\")",
+			"correct": true,
+			"config": {
+			  "value": "\"Día frío\""
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(\"Día cálido\")",
+			"correct": false,
+			"config": {
+			  "value": "\"Día cálido\""
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(promedio)",
+			"correct": false,
+			"config": {
+			  "value": "promedio"
+			}
+		  },
+		  {
+			"type": "print",
+			"text": "  print(suma_temp)",
+			"correct": false,
+			"config": {
+			  "value": "suma_temp"
+			}
+		  }
+		]
+	  }
+	],
+	"show_output": true,
+	"complete_on_steps": true
   }
 }

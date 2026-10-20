@@ -1,6 +1,6 @@
 {
   "puzzle": {
-	"prompt": "Un viaje de ida y vuelta se cobra según la distancia recorrida. Cada kilómetro del trayecto de ida cuesta 3 unidades y el regreso tiene un costo equivalente al doble de la ida. Con la distancia indicada, determina cuánto cuesta cada trayecto y muestra ambos valores. Si el costo del regreso supera las 60 unidades, indica que se trata de un viaje caro.",
+	"prompt": "Un viaje de ida y vuelta se cobra según la distancia recorrida. Se lee la distancia en kilómetros, como un número entero. Cada kilómetro del trayecto de ida cuesta 3 unidades y el regreso tiene un costo equivalente al doble de la ida. Muestra primero el costo de la ida y luego el costo de la vuelta. Si el costo de la vuelta supera las 60 unidades, muestra exactamente el mensaje \"Viaje caro\".",
 	"variables": {
 	  "kilometros": 0,
 	  "costo_ida": 0,
