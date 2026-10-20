@@ -1038,7 +1038,6 @@ func _actualizar_feedback_insignia() -> void:
 # Controles visuales del encabezado: reutilizan las acciones de los botones originales.
 var controles_superiores_ocultos: Array[Dictionary] = []
 var audio_encabezado: Button = null
-var manual_encabezado: Button = null
 
 func _configurar_encabezado_visual(contenido: VBoxContainer) -> void:
 	var fila := contenido.get_node_or_null("FilaTitulo") as HBoxContainer
@@ -1055,16 +1054,14 @@ func _configurar_encabezado_visual(contenido: VBoxContainer) -> void:
 		puntos_nivel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	audio_encabezado = Button.new()
 	audio_encabezado.name = "AudioEncabezado"
-	manual_encabezado = Button.new()
-	manual_encabezado.name = "ManualEncabezado"
-	for boton in [audio_encabezado, manual_encabezado]:
+	# El Manual conserva su botón original superior; no crear una copia local.
+	for boton in [audio_encabezado]:
 		boton.custom_minimum_size = Vector2(112, 36)
 		boton.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		boton.add_theme_font_size_override("font_size", 15)
 		boton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		fila.add_child(boton)
 	audio_encabezado.hide()
-	manual_encabezado.hide()
 	visibility_changed.connect(_sincronizar_encabezado_visual)
 	tree_exiting.connect(_restaurar_controles_superiores)
 
@@ -1088,10 +1085,7 @@ func _sincronizar_encabezado_visual() -> void:
 	var original_audio: Button = null
 	if barra != null:
 		original_audio = barra.find_child("BotonSilencio", true, false) as Button
-	var original_manual := get_node_or_null("/root/ManualUi/BotonManualFlotante") as Button
-	if original_manual == null:
-		original_manual = get_node_or_null("/root/PuntajesNivel3/ManualNivel3/BotonManualFlotante") as Button
-	for par in [[audio_encabezado, original_audio], [manual_encabezado, original_manual]]:
+	for par in [[audio_encabezado, original_audio]]:
 		var boton: Button = par[0]
 		var original: Button = par[1]
 		for conexion in boton.pressed.get_connections():
@@ -1108,7 +1102,7 @@ func _sincronizar_encabezado_visual() -> void:
 				original.pressed.emit()
 				boton.text = original.text
 		)
-	for control in [barra, original_manual]:
+	for control in [barra]:
 		if control != null:
 			controles_superiores_ocultos.append({"control": control, "visible": control.visible})
 			control.hide()
