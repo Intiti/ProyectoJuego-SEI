@@ -11,7 +11,7 @@ const OA_PREGUNTA: String = "OA2 / OA3: Ciclo while con acumulador, contador y c
 const TITULO_PREGUNTA: String = "Reserva de oxígeno subterráneo"
 const INSTRUCCIONES_PREGUNTA: String = (
 	"Mientras el oxígeno sea menor que 20 y los tanques revisados sean menores que 4, "
-	+ "suma la reserva al acumulador cuando sea positiva y no exista fuga, y avanza el contador de tanques."
+	+ "suma la reserva al acumulador cuando sea positiva y no exista fuga (por teclado, \"si\" indica fuga), y avanza el contador de tanques."
 )
 
 const PLANTILLA_CODIGO: String = (
@@ -19,7 +19,7 @@ const PLANTILLA_CODIGO: String = (
 	+ "tanques = 0\n\n"
 	+ "[ Espacio 1 ]\n"
 	+ "    reserva = int(input(\"Reserva: \"))\n"
-	+ "    fuga = False\n"
+	+ "    fuga = input(\"¿Fuga? (si/no): \") == \"si\"\n"
 	+ "    [ Espacio 2 ]\n"
 	+ "        [ Espacio 3 ]\n"
 	+ "    [ Espacio 4 ]\n\n"

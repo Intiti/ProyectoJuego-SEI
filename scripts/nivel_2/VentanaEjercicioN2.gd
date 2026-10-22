@@ -55,6 +55,14 @@ var errores: int = 0
 var resuelto: bool = false
 
 # Catálogo oficial de respaldo del Banco de Ejercicios Nivel 2 (OA3)
+# Enunciados reescritos para que se entiendan mejor (reemplazan al de la escena).
+const INSTRUCCIONES_CLARAS := {
+	"E2.5": "El constructor arma un puente de troncos. El puente soporta como máximo 20 unidades de peso y 5 troncos.\nLee el peso de cada tronco, acumúlalo y detente cuando el peso total llegue a 20 o ya se hayan colocado 5 troncos; luego muestra el peso total.",
+}
+# Huecos cuyo orden entre sí no importa (ambas líneas son independientes): E2.5 acepta
+# "peso_total = ..." y "piezas = ..." en cualquier orden.
+const ORDEN_LIBRE := {"E2.5": [[1, 2]]}
+
 const BANCO_DATOS_OFICIAL = {
 	"E2.1": {
 		"titulo": "E2.1 · El sendero de las huellas",
@@ -168,7 +176,7 @@ const BANCO_DATOS_OFICIAL = {
 		"titulo": "E2.5 · El puente de troncos",
 		"oa": "OA3: acumulador con condición compuesta",
 		"npc": "Constructor Bram",
-		"instrucciones": "El constructor arma un puente de troncos que soporta un peso total menor a 20 unidades y un máximo de menos de 5 troncos.\nDebes leer el peso de cada tronco, acumularlo y detenerte cuando el peso total llegue a 20 o se hayan colocado 5 troncos; luego muestra el peso total.",
+		"instrucciones": "El constructor arma un puente de troncos. El puente soporta como máximo 20 unidades de peso y 5 troncos.\nLee el peso de cada tronco, acumúlalo y detente cuando el peso total llegue a 20 o ya se hayan colocado 5 troncos; luego muestra el peso total.",
 		"plantilla": ["peso_total = 0", "piezas = 0", "[?]", "    peso = int(input())", "[?]", "[?]", "print(peso_total)"],
 		"correctas": ["while peso_total < 20 and piezas < 5:", "    peso_total = peso_total + peso", "    piezas = piezas + 1"],
 		"disponibles": ["while peso_total < 20 and piezas < 5:", "    peso_total = peso_total + peso", "    piezas = piezas + 1", "while peso_total < 20 or piezas < 5:", "    peso_total = peso", "    piezas = piezas - 1", "while peso_total >= 20 and piezas >= 5:"],
@@ -231,7 +239,7 @@ func _construir_interfaz() -> void:
 	label_titulo = ui["title_right"]
 	label_titulo.text = titulo_ejercicio
 	label_instrucciones = ui["prompt"]
-	Estilo.setPromptText(label_instrucciones, texto_instrucciones)
+	Estilo.setPromptText(label_instrucciones, INSTRUCCIONES_CLARAS.get(codigo_ejercicio, texto_instrucciones))
 	contenedor_bloques = ui["bank_box"]
 	contenedor_codigo = ui["code_box"]
 	label_estado = ui["step_label"]
@@ -248,10 +256,6 @@ func _construir_interfaz() -> void:
 	Estilo.styleActionButton(btn_limpiar, "Reiniciar", "neutral")
 	btn_limpiar.pressed.connect(limpiar_algoritmo)
 	fila.add_child(btn_limpiar)
-	var btn_pista := Button.new()
-	Estilo.styleActionButton(btn_pista, "Pista", "warn")
-	btn_pista.pressed.connect(_mostrar_pista_manual)
-	fila.add_child(btn_pista)
 	btn_comprobar = Button.new()
 	Estilo.styleActionButton(btn_comprobar, "Comprobar", "primary")
 	btn_comprobar.custom_minimum_size = Vector2(190, 48)
@@ -399,14 +403,24 @@ func _poblar_lista_banco_ejercicios() -> void:
 		contenedor_lista_banco.add_child(card)
 
 func abrir_reto() -> void:
+	# Un puzzle resuelto queda bloqueado: no vuelve a abrirse.
+	var pj_bloqueo = get_node_or_null("/root/PuntajesNivel2")
+	if pj_bloqueo and pj_bloqueo.ejercicio_completado(codigo_ejercicio):
+		visible = false
+		if jugador == null:
+			jugador = get_tree().get_first_node_in_group("player") as CharacterBody2D
+		if jugador:
+			jugador.set_physics_process(true)
+		return
 	if label_titulo == null:
 		_construir_interfaz()
 	_cargar_datos_respaldo_si_vacio()
 	_resolver_referencias()
-	Estilo.setPromptText(label_instrucciones, texto_instrucciones)
+	Estilo.setPromptText(label_instrucciones, INSTRUCCIONES_CLARAS.get(codigo_ejercicio, texto_instrucciones))
 	visible = true
 	resuelto = false
 	bloques_en_slots.clear()
+	_asegurar_slots()
 	_slots_erroneos.clear()
 	errores = 0
 	label_mensaje.text = ""
@@ -457,15 +471,25 @@ func _generar_banco_bloques() -> void:
 		contenedor_bloques.add_child(btn)
 		botones_banco.append(btn)
 
+# La lista de huecos siempre tiene un lugar por hueco ("" = vacío), así quitar un bloque deja
+# un hueco y los demás no se corren.
+func _asegurar_slots() -> void:
+	var total: int = respuestas_correctas.size()
+	while bloques_en_slots.size() < total:
+		bloques_en_slots.append("")
+	while bloques_en_slots.size() > total:
+		bloques_en_slots.pop_back()
+
 func _on_bloque_presionado(texto: String, btn: Button) -> void:
 	if resuelto:
 		return
-	var total_slots = respuestas_correctas.size()
-	if bloques_en_slots.size() >= total_slots:
+	_asegurar_slots()
+	var libre: int = bloques_en_slots.find("")
+	if libre == -1:
 		mostrar_mensaje("Todos los espacios están ocupados. Haz clic en 'Comprobar' o retira un bloque.", Color("#FFD477"))
 		return
 	
-	bloques_en_slots.append(texto)
+	bloques_en_slots[libre] = texto
 	_slots_erroneos.clear()
 	btn.disabled = true
 	_renderizar_codigo()
@@ -476,7 +500,9 @@ func _on_slot_presionado(indice: int) -> void:
 	if indice < 0 or indice >= bloques_en_slots.size():
 		return
 	var texto_removido = bloques_en_slots[indice]
-	bloques_en_slots.remove_at(indice)
+	if texto_removido == "":
+		return
+	bloques_en_slots[indice] = ""
 	_slots_erroneos.clear()
 	
 	for btn in botones_banco:
@@ -491,6 +517,7 @@ func _on_slot_gui_input(event: InputEvent, indice: int) -> void:
 		_on_slot_presionado(indice)
 
 func _renderizar_codigo() -> void:
+	_asegurar_slots()
 	for c in contenedor_codigo.get_children():
 		c.queue_free()
 	botones_slots.clear()
@@ -504,7 +531,7 @@ func _renderizar_codigo() -> void:
 			var nivel: int = Estilo.indentLevel(esperado)
 			var contenido: Control
 			var con_flecha: bool = false
-			if idx < bloques_en_slots.size():
+			if idx < bloques_en_slots.size() and bloques_en_slots[idx] != "":
 				# Bloque colocado: clic para retirarlo; rojo si Comprobar lo marcó incorrecto.
 				contenido = Estilo.makeCodeBlock(bloques_en_slots[idx], "wrong" if _slots_erroneos.has(idx) else "locked")
 				contenido.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -524,7 +551,11 @@ func _renderizar_codigo() -> void:
 			# Línea fija del programa (bloque bloqueado, como en el Nivel 1)
 			contenedor_codigo.add_child(Estilo.makeRow(Estilo.indentLevel(linea), Estilo.makeCodeBlock(linea, "locked")))
 	
-	var texto_estado: String = "Colocados %d de %d" % [bloques_en_slots.size(), respuestas_correctas.size()]
+	var colocados: int = 0
+	for b in bloques_en_slots:
+		if b != "":
+			colocados += 1
+	var texto_estado: String = "Colocados %d de %d" % [colocados, respuestas_correctas.size()]
 	var puntajes = get_node_or_null("/root/PuntajesNivel2")
 	if puntajes and puntajes.ejercicio_completado(codigo_ejercicio):
 		texto_estado += "  ·  ya completado (%d pts)" % puntajes.obtener_puntos(codigo_ejercicio)
@@ -534,6 +565,7 @@ func limpiar_algoritmo() -> void:
 	if resuelto:
 		return
 	bloques_en_slots.clear()
+	_asegurar_slots()
 	_slots_erroneos.clear()
 	for btn in botones_banco:
 		btn.disabled = false
@@ -541,11 +573,29 @@ func limpiar_algoritmo() -> void:
 	_renderizar_codigo()
 	label_mensaje.text = ""
 
+# Un hueco es correcto si tiene el bloque esperado o, en ejercicios con orden libre, si el grupo
+# de huecos contiene los mismos bloques (en cualquier orden).
+func _hueco_correcto(i: int) -> bool:
+	if bloques_en_slots[i] == respuestas_correctas[i]:
+		return true
+	for grupo in ORDEN_LIBRE.get(codigo_ejercicio, []):
+		if grupo.has(i):
+			var colocados: Array = []
+			var esperados: Array = []
+			for g in grupo:
+				colocados.append(bloques_en_slots[g])
+				esperados.append(respuestas_correctas[g])
+			colocados.sort()
+			esperados.sort()
+			return colocados == esperados
+	return false
+
 func comprobar_algoritmo() -> void:
 	if resuelto:
 		return
 	var total_slots = respuestas_correctas.size()
-	if bloques_en_slots.size() < total_slots:
+	_asegurar_slots()
+	if bloques_en_slots.has(""):
 		mostrar_mensaje("Aún faltan bloques por completar en el miaugoritmo.", Color("#FFB74D"))
 		return
 	
@@ -555,7 +605,7 @@ func comprobar_algoritmo() -> void:
 	_slots_erroneos.clear()
 	
 	for i in range(total_slots):
-		if bloques_en_slots[i] != respuestas_correctas[i]:
+		if not _hueco_correcto(i):
 			es_correcto = false
 			_slots_erroneos.append(i)
 			if slot_erroneo == -1:
@@ -612,16 +662,6 @@ func _on_completado_cerrado() -> void:
 	elif jugador:
 		jugador.set_physics_process(true)
 
-# Pista a pedido (igual que el botón Pista del Nivel 3): usa la lista de pistas del ejercicio.
-func _mostrar_pista_manual() -> void:
-	if resuelto:
-		return
-	var texto: String = "Revisa la condición de parada y la actualización de las variables."
-	if pistas.size() > 0:
-		texto = pistas[clampi(errores, 0, pistas.size() - 1)]
-	label_pista.text = "Pista: " + texto
-	panel_pista.visible = true
-
 func _manejar_error(distractor: String, slot_idx: int = -1) -> void:
 	errores += 1
 	# Un error reinicia la racha global y queda registrado (misma regla que el Nivel 1).
@@ -668,9 +708,6 @@ func mostrar_mensaje(texto: String, color: Color) -> void:
 	label_mensaje.text = texto
 	label_mensaje.add_theme_color_override("font_color", color)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
-		return
-	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE and not event.echo):
-		get_viewport().set_input_as_handled()
-		cerrar_reto()
+func _unhandled_input(_event: InputEvent) -> void:
+	# Sin atajo para cerrar: igual que en el Nivel 1, el puzzle se resuelve y listo.
+	pass

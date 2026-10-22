@@ -11,7 +11,8 @@ const CONTROLS := {
 		{ "key": "Espacio  o  W", "desc": "Saltar" },
 		{ "key": "E", "desc": "Hablar con un NPC o interactuar con un objeto (cuando aparece la tecla E sobre él)" },
 		{ "key": "E  (en un diálogo)", "desc": "Pasar al siguiente texto. Si el texto aún se está escribiendo, lo muestra completo" },
-		{ "key": "Clic izquierdo", "desc": "Elegir la línea de código correcta en los ejercicios" },
+		{ "key": "Clic izquierdo", "desc": "Elegir la línea de código correcta o colocar un bloque en su hueco; clic en un bloque colocado para quitarlo" },
+		{ "key": "Botón Comprobar", "desc": "En los ejercicios de armar el programa completo, revisa si quedó bien. Si hay error, los bloques incorrectos se marcan en rojo" },
 		{ "key": "Botón Manual", "desc": "Abrir / cerrar este manual (arriba a la derecha)" },
 		{ "key": "", "desc": "" },
 		{ "key": "Símbolo  !  rojo", "desc": "Un NPC o un objeto necesita tu ayuda. Acércate y aparecerá la tecla E" },
@@ -78,6 +79,24 @@ const BLOCKS := [
 		"color": Color(0.45, 0.15, 0.65, 1.0),
 		"desc": "Se ejecuta cuando ninguna condicion anterior (if ni elif) fue verdadera. Es el camino por defecto. Solo puede haber un else por bloque y siempre va al final.",
 		"example": "if turno == \"dia\":\n    print(\"El sol brilla\")\nelif turno == \"tarde\":\n    print(\"Atardecer\")\nelse:\n    print(\"Es de noche\")"
+	},
+	{
+		"name": "while",
+		"color": Color(0.78, 0.22, 0.52, 1.0),
+		"desc": "Repite un bloque de instrucciones mientras su condicion sea verdadera. Dentro del ciclo hay que actualizar la variable de control para que en algun momento la condicion deje de cumplirse; si no, el ciclo no termina nunca.",
+		"example": "intentos = 0\nwhile intentos < 3:\n    print(\"Intento\", intentos)\n    intentos = intentos + 1"
+	},
+	{
+		"name": "and / or / not",
+		"color": Color(0.65, 0.45, 0.08, 1.0),
+		"desc": "Operadores logicos que combinan o invierten condiciones:\n\n  and : verdadero solo si AMBAS condiciones se cumplen\n  or  : verdadero si AL MENOS UNA se cumple\n  not : invierte el valor (True pasa a False)\n\nEn un while, usa and para que el ciclo se detenga apenas una condicion de salida deje de cumplirse.",
+		"example": "while not rescatado and intentos < 3:\n    if senal == \"gatito\" or senal == \"maullido\":\n        rescatado = True"
+	},
+	{
+		"name": "Contadores",
+		"color": Color(0.20, 0.55, 0.60, 1.0),
+		"desc": "Variables que controlan el avance de un ciclo:\n\n  Contador   : avanza una cantidad fija (pasos = pasos + 1)\n  Acumulador : suma valores variables (total = total + dato)\n  Bandera    : True/False que cambia de estado (rescatado = True)\n\nInicializalos antes del ciclo y actualizalos dentro.",
+		"example": "total = 0\npasos = 0\nrescatado = False\nwhile pasos < 4:\n    total = total + 2\n    pasos = pasos + 1"
 	},
 	{
 		"name": "print",

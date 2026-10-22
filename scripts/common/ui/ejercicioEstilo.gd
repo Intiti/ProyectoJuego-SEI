@@ -249,6 +249,7 @@ static func _shakeOffsets(host: Control, target: Control, strength: float, durat
 const COLOR_INPUT  := Color(0.20, 0.45, 0.85, 1.0)
 const COLOR_IF     := Color(0.65, 0.45, 0.08, 1.0)
 const COLOR_ELSE   := Color(0.45, 0.15, 0.65, 1.0)
+const COLOR_WHILE  := Color(0.78, 0.22, 0.52, 1.0)   # ciclos (while / for): ya no comparten el color de if
 const COLOR_PRINT  := Color(0.12, 0.52, 0.30, 1.0)
 const COLOR_ASSIGN := Color(0.50, 0.20, 0.20, 1.0)
 const COLOR_EXPR   := Color(0.20, 0.55, 0.60, 1.0)
@@ -260,7 +261,9 @@ static func blockColor(text: String) -> Color:
 	var t: String = text.strip_edges()
 	if t.begins_with("else"):
 		return COLOR_ELSE
-	if t.begins_with("while") or t.begins_with("if") or t.begins_with("elif") or t.begins_with("for"):
+	if t.begins_with("while") or t.begins_with("for "):
+		return COLOR_WHILE
+	if t.begins_with("if") or t.begins_with("elif"):
 		return COLOR_IF
 	if t.contains("input("):
 		return COLOR_INPUT

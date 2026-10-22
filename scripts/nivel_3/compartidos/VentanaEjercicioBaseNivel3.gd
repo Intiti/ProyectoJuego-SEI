@@ -239,7 +239,7 @@ func _construir_pantalla_nivel1() -> void:
 	# Botones de acción en la fila inferior
 	etiqueta_paso = ui["step_label"]
 	var fila: HBoxContainer = ui["buttons"]
-	for par in [[boton_reiniciar, "Reiniciar", "neutral"], [boton_pista, "Pista", "warn"], [boton_ejecutar, "Comprobar", "primary"]]:
+	for par in [[boton_reiniciar, "Reiniciar", "neutral"], [boton_ejecutar, "Comprobar", "primary"]]:
 		var boton: Button = par[0]
 		if boton != null:
 			boton.reparent(fila)
@@ -258,6 +258,12 @@ func _finalizar_pantalla_nivel1() -> void:
 		_configurar_encabezado_visual(viejo)
 	# El nombre del ejercicio queda arriba a la izquierda.
 	titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Al mostrarse la ventana se vuelve a dibujar el código para dejar a la vista el hueco activo
+	# (con ejercicios largos, la consola abría arriba y el hueco quedaba cortado).
+	visibility_changed.connect(func() -> void:
+		if visible and not resuelto:
+			actualizar_codigo_mostrado()
+	)
 
 
 # Bloques del código en arcoíris, como al completar un ejercicio del Nivel 1.
@@ -517,6 +523,7 @@ func reiniciar_ejercicio() -> void:
 func reiniciar_espacios() -> void:
 	var total_esp: int = _obtener_total_espacios()
 	_slots_erroneos.clear()
+	panel_pista.hide()
 	bloques_colocados.clear()
 	for i in range(total_esp):
 		bloques_colocados.append("")
@@ -614,8 +621,8 @@ func quitar_bloque_colocado(posicion: int) -> void:
 		return
 
 	# Eliminar el bloque seleccionado y reorganizar los demás manteniendo su orden lógico
-	bloques_colocados.remove_at(posicion)
-	bloques_colocados.append("")
+	# Solo se vacía ese hueco: los demás bloques se quedan donde estaban.
+	bloques_colocados[posicion] = ""
 	_slots_erroneos.clear()
 
 	mensaje_resultado.text = "Bloque devuelto a las opciones disponibles."
@@ -666,7 +673,10 @@ func actualizar_codigo_mostrado() -> void:
 		etiqueta_paso.text = "Colocados %d de %d" % [colocados, total_esp]
 	var lineas: PackedStringArray = plantilla.split("\n")
 
-	for linea_raw in lineas:
+	var li: int = 0
+	while li < lineas.size():
+		var linea_raw: String = lineas[li]
+		li += 1
 		var sin_espacios: String = linea_raw.strip_edges()
 		if sin_espacios == "":
 			var espaciador := Control.new()
@@ -687,7 +697,17 @@ func actualizar_codigo_mostrado() -> void:
 		if indice_slot != -1:
 			_agregar_fila_espacio_visual(indice_slot, espacios_indent, indice_slot == primer_libre)
 		else:
-			_agregar_fila_codigo_fijo(sin_espacios, espacios_indent)
+			# Una lista o diccionario escrito en varias líneas se muestra como UN solo bloque
+			# (antes se partía en bloques sueltos con sangrías confusas).
+			var bloque_txt: String = sin_espacios
+			var abiertos: int = bloque_txt.count("[") + bloque_txt.count("{") - bloque_txt.count("]") - bloque_txt.count("}")
+			while abiertos > 0 and li < lineas.size():
+				var sig: String = lineas[li]
+				li += 1
+				var sangria_sig: int = sig.length() - sig.lstrip(" ").length()
+				bloque_txt += "\n" + sig.substr(mini(espacios_indent, sangria_sig)).rstrip(" ")
+				abiertos += sig.count("[") + sig.count("{") - sig.count("]") - sig.count("}")
+			_agregar_fila_codigo_fijo(bloque_txt, espacios_indent)
 
 
 func _detectar_indice_espacio(texto_limpio: String, total_esp: int) -> int:
@@ -840,7 +860,7 @@ func ejecutar_codigo() -> void:
 			if estado_insignia != null:
 				notas.append(estado_insignia.text)
 			if sistema_puntos != null and sistema_puntos.has_method("tiene_insignia_ejercicio"):
-				quiere_repetir = not bool(sistema_puntos.call("tiene_insignia_ejercicio", _obtener_id_ejercicio()))
+				quiere_repetir = false   # un puzzle resuelto queda bloqueado: sin repetir
 
 		var eleccion: String = await Estilo.playTablon(self, Estilo.collectBlocks(lista_algoritmo), {
 			"base": lineas["base"], "pen": lineas["pen"], "bonus": lineas["bonus"], "total": lineas["total"],
@@ -875,6 +895,7 @@ func ejecutar_codigo() -> void:
 	ultimo_tipo_error = detectar_tipo_error()
 	_registrar_intento_log(false, duracion_seg, ultimo_tipo_error, 0)
 	_marcar_huecos_incorrectos()
+	_mostrar_pista_en_error()
 
 	var mensajes_error: Dictionary = _obtener_mensajes_error()
 	var explicacion: String = _limpiar_etiquetas_tecnicas(
@@ -898,6 +919,15 @@ func _marcar_huecos_incorrectos() -> void:
 		if bloques_colocados[i] != str(resp[i]):
 			_slots_erroneos.append(i)
 	actualizar_codigo_mostrado()
+
+
+# La pista aparece solo cuando hay un error (sin botón de pista).
+func _mostrar_pista_en_error() -> void:
+	var pistas_dict: Dictionary = _obtener_pistas()
+	var idx_err: int = _obtener_primer_espacio_incorrecto()
+	if pistas_dict.has(idx_err):
+		texto_pista.text = "Pista: " + _limpiar_etiquetas_tecnicas(str(pistas_dict.get(idx_err, "")))
+		panel_pista.show()
 
 
 func validar_algoritmo_y_casos() -> Dictionary:

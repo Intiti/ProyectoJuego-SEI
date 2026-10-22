@@ -16,6 +16,7 @@ signal _continue_pressed
 
 const PawIconScript = preload("res://scripts/common/ui/pawIcon.gd")
 const MAX_VIDAS: int = 3
+const Estilo = preload("res://scripts/common/ui/ejercicioEstilo.gd")
 const FONT_SIZE := 18
 
 # ----------------------------------------------------------------
@@ -66,7 +67,7 @@ const BANCO_EXAMEN: Array = [
 					{"text": "if llamas > 8:", "correct": true},
 					{"text": "if llamas < 8:", "correct": false},
 					{"text": "while llamas > 8:", "correct": false},
-					{"text": "if llamas >= 10:", "correct": false}
+					{"text": "if llamas > 10:", "correct": false}
 				]
 			},
 			{
@@ -92,7 +93,7 @@ const BANCO_EXAMEN: Array = [
 				"alternatives": [
 					{"text": "print(llamas)", "correct": true},
 					{"text": "print(fogatas)", "correct": false},
-					{"text": "print(fogatas * 2)", "correct": false},
+					{"text": "print(llamas * 2)", "correct": false},
 					{"text": "print(\"llamas\")", "correct": false}
 				]
 			}
@@ -105,7 +106,7 @@ const BANCO_EXAMEN: Array = [
 		"instrucciones": "La druida recoge cristales de energía mientras tenga menos de 5 cristales Y más de 0 de energía.\nConstruye el algoritmo que acumula los cristales y determina su valor.",
 		"plantilla": [
 			"cristales = 0",
-			"energia = 10",
+			"energia = 12",
 			"[?]",
 			"[?]",
 			"[?]",
@@ -148,7 +149,7 @@ const BANCO_EXAMEN: Array = [
 					{"text": "if valor > 12:", "correct": true},
 					{"text": "if valor < 12:", "correct": false},
 					{"text": "while valor > 12:", "correct": false},
-					{"text": "if valor >= 20:", "correct": false}
+					{"text": "if valor == 12:", "correct": false}
 				]
 			},
 			{
@@ -175,7 +176,7 @@ const BANCO_EXAMEN: Array = [
 		"titulo": "EX·C · El vigía de la muralla",
 		"oa": "OA3: acumulador con entrada + condición compuesta",
 		"npc": "Constructor Fenris",
-		"instrucciones": "El constructor apila bloques en la muralla: máximo 18 unidades de peso Y menos de 5 piedras.\nDebes leer el peso de cada piedra y construir el algoritmo que controla el muro.",
+		"instrucciones": "El constructor apila piedras en la muralla mientras el peso del muro sea menor que 18 Y haya menos de 5 piedras.\nDebes leer el peso de cada piedra y construir el algoritmo que controla el muro.",
 		"plantilla": [
 			"peso_muro = 0",
 			"piedras = 0",
@@ -580,6 +581,21 @@ func _construir_slots() -> void:
 		row.add_theme_constant_override("separation", 6)
 		dropZone.add_child(row)
 
+		# Sangría real de cada línea (4 espacios = 1 nivel). Los huecos usan la sangría de su
+		# respuesta correcta; antes todos los huecos quedaban pegados al borde izquierdo.
+		var nivel_sangria: int = Estilo.indentLevel(linea)
+		if linea.begins_with("[?]"):
+			var correcta: String = ""
+			if step_idx < _steps.size():
+				for alt in _steps[step_idx]["alternatives"]:
+					if alt.get("correct", false):
+						correcta = String(alt["text"])
+			nivel_sangria = Estilo.indentLevel(correcta)
+		if nivel_sangria > 0:
+			var sangria := Control.new()
+			sangria.custom_minimum_size = Vector2(float(nivel_sangria) * Estilo.INDENT_PX, 0)
+			row.add_child(sangria)
+
 		if linea.begins_with("[?]"):
 			var emptySlot = _crear_slot_vacio()
 			row.add_child(emptySlot)
@@ -604,7 +620,7 @@ func _crear_bloque_fijo(texto: String) -> PanelContainer:
 	style.content_margin_bottom = 7
 	pc.add_theme_stylebox_override("panel", style)
 	var lbl = Label.new()
-	lbl.text = texto
+	lbl.text = texto.strip_edges()
 	lbl.add_theme_font_size_override("font_size", FONT_SIZE)
 	lbl.add_theme_color_override("font_color", Color(0.75, 0.88, 1.0))
 	pc.add_child(lbl)
@@ -648,7 +664,7 @@ func _crear_bloque_lleno(texto: String) -> PanelContainer:
 	style.content_margin_bottom = 7
 	pc.add_theme_stylebox_override("panel", style)
 	var lbl = Label.new()
-	lbl.text = texto
+	lbl.text = texto.strip_edges()
 	lbl.add_theme_font_size_override("font_size", FONT_SIZE)
 	lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.85))
 	pc.add_child(lbl)
@@ -745,7 +761,7 @@ func _mostrar_alternativas(alts: Array, hint: String) -> void:
 		pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 		var lbl = Label.new()
-		lbl.text = texto
+		lbl.text = texto.strip_edges()
 		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lbl.add_theme_font_size_override("font_size", FONT_SIZE)
 		lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))

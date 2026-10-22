@@ -16,7 +16,7 @@ const TOTAL_ESPACIOS: int = 4
 const PUNTOS_POR_BLOQUE: int = 60
 
 const PLANTILLA_CODIGO: String = (
-	"niveles = [20, 65, 30]\n"
+	"niveles = [20, 50, 30]\n"
 	+ "indice = 0\n"
 	+ "escudo_activo = False\n\n"
 	+ "[ Espacio 1 ]\n"
@@ -37,7 +37,7 @@ const BLOQUES_DISPONIBLES: Array[String] = [
 	"while indice < len(niveles):",
 	"while indice <= len(niveles):",
 	"if nivel >= 50:",
-	"if nivel < 50:",
+	"if nivel > 50:",
 	"escudo_activo = True",
 	"escudo_activo = False",
 	"indice = indice + 1",
@@ -46,7 +46,7 @@ const BLOQUES_DISPONIBLES: Array[String] = [
 
 const TIPOS_ERROR: Dictionary = {
 	"while indice <= len(niveles):": "condicion_ciclo",
-	"if nivel < 50:": "condicion_radiacion",
+	"if nivel > 50:": "condicion_radiacion",
 	"escudo_activo = False": "estado_escudo",
 	"indice = indice - 1": "avance_indice"
 }
@@ -73,6 +73,7 @@ func validar_algoritmo_y_casos() -> Dictionary:
 			return {"correcto": false}
 
 	var casos: Array = [
+		{"niveles": [20, 50, 30], "esp": true},
 		{"niveles": [20, 65, 30], "esp": true},
 		{"niveles": [10, 49, 35], "esp": false},
 		{"niveles": [50, 10, 15], "esp": true}

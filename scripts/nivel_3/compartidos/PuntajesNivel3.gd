@@ -167,6 +167,8 @@ func _ready() -> void:
 
 
 func _inicializar_manual_nivel3() -> void:
+	# Ya no hay un manual propio del Nivel 3: se usa el manual único (ManualUi) en todos los niveles.
+	return
 	if manual_nivel3 != null and is_instance_valid(manual_nivel3):
 		return
 	manual_nivel3 = ManualNivel3Script.new()
@@ -438,82 +440,16 @@ func establecer_id_jugador(nuevo_id: String) -> void:
 
 
 func mostrar_hud_identificacion_y_audio(escena_padre: Node) -> void:
-	if escena_padre == null or escena_padre.get_node_or_null("HUDNivel3MGTS") != null:
+	if escena_padre == null:
 		return
-
 	# Asegurar que el ID interno esté listo para los registros JSON sin mostrar controles en la UI
 	obtener_id_jugador()
-
-	var capa := CanvasLayer.new()
-	capa.name = "HUDNivel3MGTS"
-	capa.layer = 18
-
-	# Puntos y audio alineados a la izquierda del Manual superior, sin mostrar el ID.
-	var barra := PanelContainer.new()
-	barra.name = "BarraSuperiorMGTS"
-	barra.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	barra.offset_left = -440.0
-	barra.offset_top = 12.0
-	barra.offset_right = -140.0
-	barra.offset_bottom = 48.0
-
-	var estilo_barra := StyleBoxFlat.new()
-	estilo_barra.bg_color = Color(0.06, 0.09, 0.16, 0.90)
-	estilo_barra.border_color = Color("#36C8E8")
-	estilo_barra.set_border_width_all(2)
-	estilo_barra.set_corner_radius_all(8)
-	estilo_barra.content_margin_left = 8.0
-	estilo_barra.content_margin_right = 8.0
-	estilo_barra.content_margin_top = 4.0
-	estilo_barra.content_margin_bottom = 4.0
-	barra.add_theme_stylebox_override("panel", estilo_barra)
-
-	var fila := HBoxContainer.new()
-	fila.alignment = BoxContainer.ALIGNMENT_CENTER
-	fila.add_theme_constant_override("separation", 12)
-	barra.add_child(fila)
-
-	var etiqueta_puntos := Label.new()
-	etiqueta_puntos.name = "PuntosNivel3"
-	etiqueta_puntos.text = "Puntos: %d" % obtener_puntos_totales()
-	etiqueta_puntos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	etiqueta_puntos.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	etiqueta_puntos.add_theme_font_size_override("font_size", 14)
-	etiqueta_puntos.add_theme_color_override("font_color", Color("#FBBF24"))
-	fila.add_child(etiqueta_puntos)
-	var actualizar_puntos := func(total: int) -> void:
-		etiqueta_puntos.text = "Puntos: %d" % total
-	puntos_actualizados.connect(actualizar_puntos)
-	etiqueta_puntos.tree_exiting.connect(func() -> void:
-		if puntos_actualizados.is_connected(actualizar_puntos):
-			puntos_actualizados.disconnect(actualizar_puntos)
-	)
-
-	var btn_audio := Button.new()
-	btn_audio.name = "BotonSilencio"
-	var dj: Node = get_node_or_null("/root/DJManager")
-	var silenciado: bool = dj != null and dj.has_method("is_muted") and dj.call("is_muted")
-	btn_audio.text = "Audio: OFF" if silenciado else "Audio: ON"
-	btn_audio.custom_minimum_size = Vector2(96, 26)
-	btn_audio.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	btn_audio.add_theme_font_size_override("font_size", 14)
-	fila.add_child(btn_audio)
-
-	capa.add_child(barra)
-	escena_padre.add_child(capa)
-
-	# Mismo cuadro de puntaje que los niveles 1 y 2 (arriba a la izquierda).
+	# El audio ahora es un botón global (ManualUi) y los puntos están en el cuadro de puntaje:
+	# aquí solo se agrega ese cuadro, igual que en los niveles 1 y 2.
 	if escena_padre.get_node_or_null("ScoreHUD") == null:
 		var hud := ScoreHudScript.new()
 		hud.name = "ScoreHUD"
 		escena_padre.add_child(hud)
-
-	btn_audio.pressed.connect(func() -> void:
-		var dj_node: Node = get_node_or_null("/root/DJManager")
-		if dj_node != null and dj_node.has_method("toggle_mute"):
-			var ahora_mudo: bool = dj_node.call("toggle_mute")
-			btn_audio.text = "Audio: OFF" if ahora_mudo else "Audio: ON"
-	)
 
 
 # ==========================================

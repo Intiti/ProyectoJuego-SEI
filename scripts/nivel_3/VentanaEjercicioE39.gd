@@ -16,7 +16,7 @@ const TOTAL_ESPACIOS: int = 4
 const PUNTOS_POR_BLOQUE: int = 60
 
 const PLANTILLA_CODIGO: String = (
-	"senales = [\"ok\", \"perdida\", \"latencia\", \"ok\"]\n"
+	"senales = [\"ok\", \"perdida\", \"ok\", \"latencia\", \"ok\"]\n"
 	+ "indice = 0\n"
 	+ "danadas = 0\n"
 	+ "estables = 0\n\n"
@@ -75,7 +75,7 @@ func validar_algoritmo_y_casos() -> Dictionary:
 		if bloques_colocados[i] != RESPUESTA_CORRECTA[i]:
 			return {"correcto": false}
 
-	var senales: Array = ["ok", "perdida", "latencia", "ok"]
+	var senales: Array = ["ok", "perdida", "ok", "latencia", "ok"]
 	var indice: int = 0
 	var danadas: int = 0
 	var estables: int = 0
@@ -87,7 +87,7 @@ func validar_algoritmo_y_casos() -> Dictionary:
 			estables = estables + 1
 		indice = indice + 1
 
-	if danadas != 2 or estables != 2:
+	if danadas != 2 or estables != 3:
 		return {"correcto": false}
 
 	return {

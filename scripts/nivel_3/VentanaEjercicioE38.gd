@@ -18,8 +18,10 @@ const PUNTOS_POR_BLOQUE: int = 60
 const PLANTILLA_CODIGO: String = (
 	"portales = [\n"
 	+ "    {\"autorizado\": True, \"anomalia\": False},\n"
+	+ "    {\"autorizado\": True, \"anomalia\": False},\n"
 	+ "    {\"autorizado\": True, \"anomalia\": True},\n"
-	+ "    {\"autorizado\": False, \"anomalia\": False}\n"
+	+ "    {\"autorizado\": False, \"anomalia\": False},\n"
+	+ "    {\"autorizado\": False, \"anomalia\": True}\n"
 	+ "]\n"
 	+ "indice = 0\n"
 	+ "seguros = 0\n"
@@ -81,8 +83,10 @@ func validar_algoritmo_y_casos() -> Dictionary:
 
 	var portales: Array = [
 		{"autorizado": true, "anomalia": false},
+		{"autorizado": true, "anomalia": false},
 		{"autorizado": true, "anomalia": true},
-		{"autorizado": false, "anomalia": false}
+		{"autorizado": false, "anomalia": false},
+		{"autorizado": false, "anomalia": true}
 	]
 	var indice: int = 0
 	var seguros: int = 0
@@ -95,7 +99,7 @@ func validar_algoritmo_y_casos() -> Dictionary:
 			bloqueados = bloqueados + 1
 		indice = indice + 1
 
-	if seguros != 1 or bloqueados != 2:
+	if seguros != 2 or bloqueados != 3:
 		return {"correcto": false}
 
 	return {

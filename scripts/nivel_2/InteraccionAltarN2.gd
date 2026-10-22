@@ -97,6 +97,12 @@ func _resolver_referencias() -> void:
 	
 	print("AltarRunico: Ventana=%s, Jugador=%s" % [str(ventana_ejercicio), str(jugador)])
 
+func _ejercicio_completado() -> bool:
+	var pj = get_node_or_null("/root/PuntajesNivel2")
+	if pj == null or ventana_ejercicio == null:
+		return false
+	return pj.ejercicio_completado(String(ventana_ejercicio.get("codigo_ejercicio")))
+
 func activar_altar() -> void:
 	altar_activo = true
 	if jugador_cerca and letra_e:
@@ -110,6 +116,10 @@ func _process(_delta: float) -> void:
 	
 	if not altar_activo:
 		return
+	if _ejercicio_completado():
+		if letra_e:
+			letra_e.visible = false
+		return
 	
 	var dist = global_position.distance_to(jugador.global_position)
 	var cerca_ahora = dist < RADIO_DETECCION
@@ -120,7 +130,7 @@ func _process(_delta: float) -> void:
 			letra_e.visible = cerca_ahora
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not jugador_cerca or not altar_activo:
+	if not jugador_cerca or not altar_activo or _ejercicio_completado():
 		return
 	
 	var es_interaccion = event.is_action_pressed("interact") or \
@@ -131,6 +141,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		abrir_ejercicio()
 
 func abrir_ejercicio() -> void:
+	if _ejercicio_completado():
+		return
 	if ventana_ejercicio == null:
 		var root = get_parent()
 		if root:
