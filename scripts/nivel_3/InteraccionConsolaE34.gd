@@ -1,10 +1,12 @@
-
 extends Area2D
 
 # ==========================================
 # MGTS - NIVEL 3 - E3.4
-# CONSOLA DEL SISTEMA DE ENFRIAMIENTO
+# INTERACCION CON EL GATO INGENIERO
+# SISTEMA DE ENFRIAMIENTO
 # ==========================================
+
+signal iniciar_ejercicio
 
 # ==========================================
 # REFERENCIAS
@@ -18,17 +20,94 @@ extends Area2D
 	"LetraE"
 ) as Label
 
-@onready var indicador_objetivo: Label = get_node_or_null(
-	"IndicadorObjetivo"
+@onready var dialogo_ui: CanvasLayer = get_node_or_null(
+	"../DialogoUI"
+) as CanvasLayer
+
+@onready var fondo_dialogo: Control = get_node_or_null(
+	"../DialogoUI/FondoDialogo"
+) as Control
+
+@onready var caja_dialogo: Control = get_node_or_null(
+	"../DialogoUI/CajaDialogo"
+) as Control
+
+@onready var retrato_jugador: TextureRect = get_node_or_null(
+	"../DialogoUI/RetratosDialogo/RetratoJugador"
+) as TextureRect
+
+@onready var retrato_npc: TextureRect = get_node_or_null(
+	"../DialogoUI/RetratosDialogo/RetratoNPC"
+) as TextureRect
+
+@onready var nombre_gato: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/NombreGato"
 ) as Label
 
-@onready var gato_ingeniero: Area2D = get_node_or_null(
-	"../InteraccionGatoa2D"
-) as Area2D
+@onready var texto_dialogo: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/TextoDialogo"
+) as Label
 
-@onready var ventana_ejercicio: PanelContainer = get_node_or_null(
-	"../EjercicioUI/VentanaEjercicio"
-) as PanelContainer
+@onready var continuar_label: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/ContinuarLabel"
+) as Label
+
+
+# ==========================================
+# COLORES
+# ==========================================
+
+const COLOR_ILUMINADO: Color = Color(1, 1, 1, 1)
+const COLOR_OSCURO: Color = Color(0.3, 0.3, 0.3, 1)
+
+const COLOR_PROTAGONISTA: Color = Color("#A975EB")
+const COLOR_GATO_INGENIERO: Color = Color("#36C8E8")
+
+
+# ==========================================
+# CONVERSACION E3.4
+# true = Gato ingeniero
+# false = Protagonista
+# ==========================================
+
+const CONVERSACION: Array[Dictionary] = [
+	{
+		"gato": true,
+		"texto": "¡Cuidado! El sistema de enfriamiento está fallando y la temperatura es demasiado alta."
+	},
+	{
+		"gato": false,
+		"texto": "¡Hola! Vengo de los conductos de exploración. Estoy buscando a Panko. ¿Lo has visto?"
+	},
+	{
+		"gato": true,
+		"texto": "No lo he visto, pero mis sensores detectaron una pequeña señal cerca de aquí."
+	},
+	{
+		"gato": false,
+		"texto": "¡Podría ser Panko! ¿Podemos revisar esa señal?"
+	},
+	{
+		"gato": true,
+		"texto": "Sí, pero primero debemos enfriar el sistema. La temperatura está en 30 grados y necesitamos bajarla hasta 20 o menos."
+	},
+	{
+		"gato": false,
+		"texto": "¿Cómo podemos bajar la temperatura?"
+	},
+	{
+		"gato": true,
+		"texto": "El sistema puede reducir 3 grados por ciclo. Necesito que lo programes para que se detenga cuando la temperatura sea segura."
+	},
+	{
+		"gato": false,
+		"texto": "¡Entendido! Voy a ayudarte a estabilizar el sistema para seguir buscando a Panko."
+	},
+	{
+		"gato": true,
+		"texto": "¡Excelente! Activa la consola de enfriamiento y comencemos."
+	}
+]
 
 
 # ==========================================
@@ -36,14 +115,15 @@ extends Area2D
 # ==========================================
 
 var jugador_cerca: bool = false
-var consola_habilitada: bool = false
-var ejercicio_abierto: bool = false
-var ejercicio_completado: bool = false
+var dialogo_activo: bool = false
+var dialogo_terminado: bool = false
+
+var indice_dialogo: int = 0
 
 var fisica_jugador_activa: bool = true
-var input_jugador_activo: bool = true
-var unhandled_jugador_activo: bool = true
-var unhandled_key_jugador_activo: bool = true
+var referencias_correctas: bool = false
+
+var estilo_original: StyleBox = null
 
 
 # ==========================================
@@ -54,76 +134,85 @@ func _ready() -> void:
 
 	monitoring = true
 
-	# Ocultar indicadores al iniciar.
+	referencias_correctas = comprobar_referencias()
+
 	if letra_e != null:
 		letra_e.hide()
-	else:
-		push_error("E3.4: falta LetraE.")
 
-	if indicador_objetivo != null:
-		indicador_objetivo.hide()
-	else:
-		push_error("E3.4: falta IndicadorObjetivo.")
+	if dialogo_ui != null:
+		dialogo_ui.hide()
 
-	# Ocultar la ventana del ejercicio.
-	if ventana_ejercicio != null:
-		ventana_ejercicio.hide()
-	else:
+	if not referencias_correctas:
 		push_error(
-			"E3.4: no se encontró EjercicioUI/VentanaEjercicio."
+			"E3.4: revisa los nodos de InteraccionGatoa2D y DialogoUI."
+		)
+		return
+
+	# Guardar el estilo original del diálogo.
+	if caja_dialogo is PanelContainer or caja_dialogo is Panel:
+		estilo_original = caja_dialogo.get_theme_stylebox(
+			"panel"
 		)
 
-	if jugador == null:
-		push_error("E3.4: no se encontró Player.")
-
-	# Conectar la señal del Gato ingeniero.
-	if gato_ingeniero == null:
-
-		push_error(
-			"E3.4: no se encontró InteraccionGatoa2D."
-		)
-
-	else:
-
-		if gato_ingeniero.has_signal("iniciar_ejercicio"):
-
-			var conexion: Callable = Callable(
-				self,
-				"habilitar_consola"
-			)
-
-			if not gato_ingeniero.is_connected(
-				"iniciar_ejercicio",
-				conexion
-			):
-
-				gato_ingeniero.connect(
-					"iniciar_ejercicio",
-					conexion
-				)
-
-		else:
-
-			push_warning(
-				"E3.4: el Gato ingeniero no tiene la señal iniciar_ejercicio."
-			)
-
-		# Recuperar estado si el diálogo
-		# ya había terminado.
-		if gato_ingeniero.get("dialogo_terminado") == true:
-			consola_habilitada = true
-
-	# Detectar entrada del jugador.
+	# Conectar detección del jugador.
 	if not body_entered.is_connected(_cuando_entra):
 		body_entered.connect(_cuando_entra)
 
-	# Detectar salida del jugador.
 	if not body_exited.is_connected(_cuando_sale):
 		body_exited.connect(_cuando_sale)
 
-	actualizar_indicadores()
+	print("E3.4: Gato ingeniero preparado.")
 
-	print("E3.4: consola de enfriamiento preparada.")
+
+# ==========================================
+# COMPROBAR REFERENCIAS
+# ==========================================
+
+func comprobar_referencias() -> bool:
+
+	var correcto: bool = true
+
+	if jugador == null:
+		push_error("E3.4: falta Player.")
+		correcto = false
+
+	if letra_e == null:
+		push_error("E3.4: falta LetraE.")
+		correcto = false
+
+	if dialogo_ui == null:
+		push_error("E3.4: falta DialogoUI.")
+		correcto = false
+
+	if fondo_dialogo == null:
+		push_error("E3.4: falta FondoDialogo.")
+		correcto = false
+
+	if caja_dialogo == null:
+		push_error("E3.4: falta CajaDialogo.")
+		correcto = false
+
+	if retrato_jugador == null:
+		push_error("E3.4: falta RetratoJugador.")
+		correcto = false
+
+	if retrato_npc == null:
+		push_error("E3.4: falta RetratoNPC.")
+		correcto = false
+
+	if nombre_gato == null:
+		push_error("E3.4: falta NombreGato.")
+		correcto = false
+
+	if texto_dialogo == null:
+		push_error("E3.4: falta TextoDialogo.")
+		correcto = false
+
+	if continuar_label == null:
+		push_error("E3.4: falta ContinuarLabel.")
+		correcto = false
+
+	return correcto
 
 
 # ==========================================
@@ -133,72 +222,37 @@ func _ready() -> void:
 func _cuando_entra(cuerpo: Node2D) -> void:
 
 	if cuerpo == jugador:
-
 		jugador_cerca = true
-
-		actualizar_indicadores()
+		actualizar_letra_e()
 
 
 func _cuando_sale(cuerpo: Node2D) -> void:
 
 	if cuerpo == jugador:
-
 		jugador_cerca = false
-
-		actualizar_indicadores()
-
-
-# ==========================================
-# ACTUALIZAR INDICADORES
-# ==========================================
-
-func actualizar_indicadores() -> void:
-
-	var consola_pendiente: bool = (
-		consola_habilitada
-		and not ejercicio_abierto
-		and not ejercicio_completado
-	)
-
-	# Mostrar ! cuando el jugador está lejos.
-	if indicador_objetivo != null:
-
-		indicador_objetivo.visible = (
-			consola_pendiente
-			and not jugador_cerca
-		)
-
-	# Mostrar E cuando el jugador está cerca.
-	if letra_e != null:
-
-		letra_e.visible = (
-			consola_pendiente
-			and jugador_cerca
-		)
+		actualizar_letra_e()
 
 
-# ==========================================
-# HABILITAR CONSOLA
-# ==========================================
+func actualizar_letra_e() -> void:
 
-func habilitar_consola() -> void:
-
-	if ejercicio_completado:
+	if letra_e == null:
 		return
 
-	consola_habilitada = true
-
-	actualizar_indicadores()
-
-	print("E3.4: diálogo con el Gato ingeniero terminado.")
-	print("E3.4: consola de enfriamiento habilitada.")
+	letra_e.visible = (
+		jugador_cerca
+		and not dialogo_activo
+		and not dialogo_terminado
+	)
 
 
 # ==========================================
-# PRESIONAR TECLA E
+# TECLA E
 # ==========================================
 
 func _unhandled_key_input(event: InputEvent) -> void:
+
+	if not referencias_correctas:
+		return
 
 	if not event is InputEventKey:
 		return
@@ -209,115 +263,159 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.keycode != KEY_E:
 		return
 
-	if not jugador_cerca:
+	if dialogo_activo:
+
+		avanzar_dialogo()
+		get_viewport().set_input_as_handled()
 		return
 
-	if not consola_habilitada:
-		return
+	if jugador_cerca and not dialogo_terminado:
 
-	if ejercicio_abierto or ejercicio_completado:
-		return
-
-	# No abrir mientras el Gato ingeniero habla.
-	if gato_ingeniero != null:
-
-		if gato_ingeniero.get("dialogo_activo") == true:
-			return
-
-	abrir_ejercicio()
-
-	get_viewport().set_input_as_handled()
+		iniciar_dialogo()
+		get_viewport().set_input_as_handled()
 
 
 # ==========================================
-# ABRIR EJERCICIO
+# INICIAR DIALOGO
 # ==========================================
 
-func abrir_ejercicio() -> void:
+func iniciar_dialogo() -> void:
 
-	if ventana_ejercicio == null:
-
-		push_error(
-			"E3.4: falta la ventana del ejercicio."
-		)
+	if not referencias_correctas:
 		return
 
-	if ejercicio_completado:
+	if dialogo_activo or dialogo_terminado:
 		return
 
-	if ejercicio_abierto:
-		return
+	dialogo_activo = true
+	indice_dialogo = 0
 
-	if not consola_habilitada:
-		return
+	actualizar_letra_e()
 
-	ejercicio_abierto = true
-
-	actualizar_indicadores()
-
-	# Detener al protagonista.
 	congelar_jugador()
 
-	# Mostrar la ventana E3.4.
-	ventana_ejercicio.show()
+	dialogo_ui.show()
+	fondo_dialogo.show()
+	caja_dialogo.show()
 
-	# Preparar el ejercicio de enfriamiento.
-	if ventana_ejercicio.has_method("iniciar_ejercicio"):
+	# Ambos retratos visibles.
+	retrato_jugador.show()
+	retrato_npc.show()
 
-		ventana_ejercicio.call(
-			"iniciar_ejercicio"
-		)
+	nombre_gato.show()
+	texto_dialogo.show()
+	continuar_label.show()
 
-	print("E3.4: ventana de enfriamiento abierta.")
+	mostrar_dialogo()
+
+	print("E3.4: diálogo iniciado.")
 
 
 # ==========================================
-# CERRAR EJERCICIO
+# MOSTRAR DIALOGO
 # ==========================================
 
-func cerrar_ejercicio() -> void:
+func mostrar_dialogo() -> void:
 
-	if ejercicio_completado:
+	if not referencias_correctas:
 		return
 
-	ejercicio_abierto = false
-
-	if ventana_ejercicio != null:
-		ventana_ejercicio.hide()
-
-	# Devolver movimiento al protagonista.
-	descongelar_jugador()
-
-	# Restaurar ! o E según la distancia.
-	actualizar_indicadores()
-
-	print("E3.4: ventana de enfriamiento cerrada.")
-
-
-# ==========================================
-# COMPLETAR EJERCICIO
-# ==========================================
-
-func completar_ejercicio() -> void:
-
-	if ejercicio_completado:
+	if indice_dialogo >= CONVERSACION.size():
+		finalizar_dialogo()
 		return
 
-	ejercicio_completado = true
-	ejercicio_abierto = false
-	consola_habilitada = false
+	var intervencion: Dictionary = CONVERSACION[indice_dialogo]
 
-	if ventana_ejercicio != null:
-		ventana_ejercicio.hide()
+	var habla_gato: bool = intervencion["gato"]
 
-	# Ocultar definitivamente ! y E.
-	actualizar_indicadores()
+	texto_dialogo.text = intervencion["texto"]
 
-	# Devolver movimiento al protagonista.
-	descongelar_jugador()
+	texto_dialogo.autowrap_mode = (
+		TextServer.AUTOWRAP_WORD_SMART
+	)
 
-	print("E3.4: sistema de enfriamiento estabilizado.")
-	print("E3.4: consola desactivada.")
+	continuar_label.text = "Presiona E para continuar"
+
+	# Mantener ambos retratos visibles.
+	retrato_jugador.show()
+	retrato_npc.show()
+
+	if habla_gato:
+
+		nombre_gato.text = "GATO INGENIERO"
+
+		retrato_npc.modulate = COLOR_ILUMINADO
+		retrato_jugador.modulate = COLOR_OSCURO
+
+		aplicar_color_dialogo(COLOR_GATO_INGENIERO)
+
+	else:
+
+		nombre_gato.text = GameData.playerName.to_upper()   # nombre real del jugador
+
+		retrato_jugador.modulate = COLOR_ILUMINADO
+		retrato_npc.modulate = COLOR_OSCURO
+
+		aplicar_color_dialogo(COLOR_PROTAGONISTA)
+
+
+# ==========================================
+# CAMBIAR COLOR DEL DIALOGO
+# ==========================================
+
+func aplicar_color_dialogo(color_franja: Color) -> void:
+
+	# Cambiar el color del nombre.
+	nombre_gato.add_theme_color_override(
+		"font_color",
+		color_franja
+	)
+
+	# Cambiar el borde de la caja de diálogo.
+	if not (
+		caja_dialogo is Panel
+		or caja_dialogo is PanelContainer
+	):
+		return
+
+	var estilo: StyleBoxFlat
+
+	if estilo_original is StyleBoxFlat:
+
+		estilo = (
+			estilo_original as StyleBoxFlat
+		).duplicate() as StyleBoxFlat
+
+	else:
+
+		estilo = StyleBoxFlat.new()
+		estilo.bg_color = Color("#101827")
+		estilo.set_corner_radius_all(10)
+
+	estilo.border_color = color_franja
+	estilo.set_border_width_all(3)
+
+	caja_dialogo.add_theme_stylebox_override(
+		"panel",
+		estilo
+	)
+
+
+# ==========================================
+# AVANZAR DIALOGO
+# ==========================================
+
+func avanzar_dialogo() -> void:
+
+	if not dialogo_activo:
+		return
+
+	indice_dialogo += 1
+
+	if indice_dialogo >= CONVERSACION.size():
+		finalizar_dialogo()
+	else:
+		mostrar_dialogo()
 
 
 # ==========================================
@@ -329,28 +427,10 @@ func congelar_jugador() -> void:
 	if jugador == null:
 		return
 
-	fisica_jugador_activa = (
-		jugador.is_physics_processing()
-	)
-
-	input_jugador_activo = (
-		jugador.is_processing_input()
-	)
-
-	unhandled_jugador_activo = (
-		jugador.is_processing_unhandled_input()
-	)
-
-	unhandled_key_jugador_activo = (
-		jugador.is_processing_unhandled_key_input()
-	)
+	fisica_jugador_activa = jugador.is_physics_processing()
 
 	jugador.velocity = Vector2.ZERO
-
 	jugador.set_physics_process(false)
-	jugador.set_process_input(false)
-	jugador.set_process_unhandled_input(false)
-	jugador.set_process_unhandled_key_input(false)
 
 
 # ==========================================
@@ -359,21 +439,42 @@ func congelar_jugador() -> void:
 
 func descongelar_jugador() -> void:
 
-	if jugador == null:
+	if jugador != null:
+		jugador.set_physics_process(
+			fisica_jugador_activa
+		)
+
+
+# ==========================================
+# FINALIZAR DIALOGO
+# ==========================================
+
+func finalizar_dialogo() -> void:
+
+	if not dialogo_activo:
 		return
 
-	jugador.set_physics_process(
-		fisica_jugador_activa
-	)
+	dialogo_activo = false
+	dialogo_terminado = true
 
-	jugador.set_process_input(
-		input_jugador_activo
-	)
+	if dialogo_ui != null:
+		dialogo_ui.hide()
 
-	jugador.set_process_unhandled_input(
-		unhandled_jugador_activo
-	)
+	actualizar_letra_e()
 
-	jugador.set_process_unhandled_key_input(
-		unhandled_key_jugador_activo
-	)
+	# Restaurar iluminación.
+	if retrato_jugador != null:
+		retrato_jugador.modulate = COLOR_ILUMINADO
+
+	if retrato_npc != null:
+		retrato_npc.modulate = COLOR_ILUMINADO
+
+	descongelar_jugador()
+
+	# Habilitar consola E3.4.
+	# La consola mostrará ! cuando esté lejos
+	# y E cuando el jugador se acerque.
+	iniciar_ejercicio.emit()
+
+	print("E3.4: diálogo terminado.")
+	print("E3.4: consola de enfriamiento habilitada.")

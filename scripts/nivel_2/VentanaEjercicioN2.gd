@@ -567,9 +567,7 @@ func limpiar_algoritmo() -> void:
 	bloques_en_slots.clear()
 	_asegurar_slots()
 	_slots_erroneos.clear()
-	for btn in botones_banco:
-		btn.disabled = false
-		btn.modulate = Color.WHITE
+	_generar_banco_bloques()   # el banco se vuelve a mezclar al reiniciar, igual que en el Nivel 3
 	_renderizar_codigo()
 	label_mensaje.text = ""
 

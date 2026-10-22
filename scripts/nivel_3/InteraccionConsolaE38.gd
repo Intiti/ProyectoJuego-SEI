@@ -1,13 +1,12 @@
-
 extends Area2D
 
 # ==========================================
 # MGTS - NIVEL 3 - EJERCICIO E3.8
 # PORTALES DE CONTENCION
-# CONSOLA DEL SISTEMA DE CONTENCION
-# NPC: GATO CENTINELA
+# INTERACCION CON EL GATO CENTINELA
 # ==========================================
 
+signal iniciar_ejercicio
 
 # ==========================================
 # REFERENCIAS
@@ -21,17 +20,94 @@ extends Area2D
 	"LetraE"
 ) as Label
 
-@onready var indicador_objetivo: Label = get_node_or_null(
-	"IndicadorObjetivo"
+@onready var dialogo_ui: CanvasLayer = get_node_or_null(
+	"../DialogoUI"
+) as CanvasLayer
+
+@onready var fondo_dialogo: Control = get_node_or_null(
+	"../DialogoUI/FondoDialogo"
+) as Control
+
+@onready var caja_dialogo: Control = get_node_or_null(
+	"../DialogoUI/CajaDialogo"
+) as Control
+
+@onready var retrato_jugador: TextureRect = get_node_or_null(
+	"../DialogoUI/RetratosDialogo/RetratoJugador"
+) as TextureRect
+
+@onready var retrato_npc: TextureRect = get_node_or_null(
+	"../DialogoUI/RetratosDialogo/RetratoNPC"
+) as TextureRect
+
+@onready var nombre_gato: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/NombreGato"
 ) as Label
 
-@onready var gato_centinela: Area2D = get_node_or_null(
-	"../InteraccionGatoa2D"
-) as Area2D
+@onready var texto_dialogo: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/TextoDialogo"
+) as Label
 
-@onready var ventana_ejercicio: PanelContainer = get_node_or_null(
-	"../EjercicioUI/VentanaEjercicio"
-) as PanelContainer
+@onready var continuar_label: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/ContinuarLabel"
+) as Label
+
+
+# ==========================================
+# COLORES
+# ==========================================
+
+const COLOR_ILUMINADO: Color = Color(1, 1, 1, 1)
+const COLOR_OSCURO: Color = Color(0.3, 0.3, 0.3, 1)
+
+const COLOR_PROTAGONISTA: Color = Color("#A975EB")
+const COLOR_CENTINELA: Color = Color("#36C8E8")
+
+
+# ==========================================
+# HISTORIA E3.8
+# true = Gato Centinela
+# false = Protagonista
+# ==========================================
+
+const CONVERSACION: Array[Dictionary] = [
+	{
+		"centinela": true,
+		"texto": "¡Alto! Soy el Gato Centinela, guardián de los portales de contención. Nadie puede atravesarlos sin autorización."
+	},
+	{
+		"centinela": false,
+		"texto": "¡Hola! Acabo de cruzar los túneles de radiación. Estoy buscando a Panko, un gatito perdido. ¿Lo has visto?"
+	},
+	{
+		"centinela": true,
+		"texto": "Mis registros muestran que una pequeña criatura atravesó uno de estos portales hace poco."
+	},
+	{
+		"centinela": false,
+		"texto": "¡Podría ser Panko! ¿Sabes a dónde conduce ese portal?"
+	},
+	{
+		"centinela": true,
+		"texto": "Conduce al servidor central, pero el sistema de contención está fallando. Algunos portales se están activando sin autorización."
+	},
+	{
+		"centinela": false,
+		"texto": "¡Eso es peligroso! Tenemos que estabilizarlos antes de que algo salga mal."
+	},
+	{
+		"centinela": true,
+		"texto": "Necesitamos un algoritmo en Python que revise cada portal y permita el acceso únicamente cuando esté autorizado y no presente anomalías."
+	},
+	{
+		"centinela": false,
+		"texto": "¡Cuenta conmigo! Si Panko pasó por aquí, no puedo perder su rastro."
+	},
+	{
+		"centinela": true,
+		"texto": "Entonces debemos restaurar el sistema de contención. Solo así podremos descubrir qué ocurrió al otro lado."
+	}
+]
 
 
 # ==========================================
@@ -39,14 +115,19 @@ extends Area2D
 # ==========================================
 
 var jugador_cerca: bool = false
-var consola_habilitada: bool = false
-var ejercicio_abierto: bool = false
-var ejercicio_completado: bool = false
+var dialogo_activo: bool = false
+var dialogo_terminado: bool = false
+
+var indice_dialogo: int = 0
 
 var fisica_jugador_activa: bool = true
 var input_jugador_activo: bool = true
 var unhandled_jugador_activo: bool = true
 var unhandled_key_jugador_activo: bool = true
+
+var referencias_correctas: bool = false
+
+var estilo_original: StyleBox = null
 
 
 # ==========================================
@@ -57,105 +138,87 @@ func _ready() -> void:
 
 	monitoring = true
 
-	# Ocultar la letra E al iniciar.
-	if letra_e != null:
+	referencias_correctas = comprobar_referencias()
 
+	if letra_e != null:
 		letra_e.hide()
 
-	else:
+	if dialogo_ui != null:
+		dialogo_ui.hide()
 
+	if not referencias_correctas:
 		push_error(
-			"E3.8: falta LetraE en InteraccionConsola."
+			"E3.8: revisa los nodos de InteraccionGatoa2D y DialogoUI."
 		)
+		return
 
-	# Preparar indicador de objetivo.
-	if indicador_objetivo != null:
+	# Guardar el estilo original de la caja.
+	if caja_dialogo is PanelContainer or caja_dialogo is Panel:
 
-		indicador_objetivo.text = "!"
-
-		# Color azul cian del Gato Centinela.
-		indicador_objetivo.add_theme_color_override(
-			"font_color",
-			Color("#ffd700")
+		estilo_original = caja_dialogo.get_theme_stylebox(
+			"panel"
 		)
-
-		indicador_objetivo.hide()
-
-	else:
-
-		push_error(
-			"E3.8: falta IndicadorObjetivo."
-		)
-
-	# Ocultar ventana del ejercicio.
-	if ventana_ejercicio != null:
-
-		ventana_ejercicio.hide()
-
-	else:
-
-		push_error(
-			"E3.8: falta EjercicioUI/VentanaEjercicio."
-		)
-
-	if jugador == null:
-
-		push_error(
-			"E3.8: no se encontró Player."
-		)
-
-	# Conectar señal del Gato Centinela.
-	if gato_centinela == null:
-
-		push_error(
-			"E3.8: no se encontró InteraccionGatoa2D."
-		)
-
-	else:
-
-		if gato_centinela.has_signal("iniciar_ejercicio"):
-
-			var conexion: Callable = Callable(
-				self,
-				"habilitar_consola"
-			)
-
-			if not gato_centinela.is_connected(
-				"iniciar_ejercicio",
-				conexion
-			):
-
-				gato_centinela.connect(
-					"iniciar_ejercicio",
-					conexion
-				)
-
-		else:
-
-			push_warning(
-				"E3.8: el Gato Centinela no tiene "
-				+ "la señal iniciar_ejercicio."
-			)
-
-		# Recuperar el estado si el diálogo
-		# ya terminó anteriormente.
-		if gato_centinela.get("dialogo_terminado") == true:
-
-			consola_habilitada = true
 
 	# Detectar entrada del protagonista.
 	if not body_entered.is_connected(_cuando_entra):
-
 		body_entered.connect(_cuando_entra)
 
 	# Detectar salida del protagonista.
 	if not body_exited.is_connected(_cuando_sale):
-
 		body_exited.connect(_cuando_sale)
 
-	actualizar_indicadores()
+	print("E3.8: Gato Centinela preparado.")
 
-	print("E3.8: consola de contención preparada.")
+
+# ==========================================
+# COMPROBAR REFERENCIAS
+# ==========================================
+
+func comprobar_referencias() -> bool:
+
+	var correcto: bool = true
+
+	if jugador == null:
+		push_error("E3.8: falta Player.")
+		correcto = false
+
+	if letra_e == null:
+		push_error("E3.8: falta LetraE.")
+		correcto = false
+
+	if dialogo_ui == null:
+		push_error("E3.8: falta DialogoUI.")
+		correcto = false
+
+	if fondo_dialogo == null:
+		push_error("E3.8: falta FondoDialogo.")
+		correcto = false
+
+	if caja_dialogo == null:
+		push_error("E3.8: falta CajaDialogo.")
+		correcto = false
+
+	if retrato_jugador == null:
+		push_error("E3.8: falta RetratoJugador.")
+		correcto = false
+
+	if retrato_npc == null:
+		push_error("E3.8: falta RetratoNPC.")
+		correcto = false
+
+	if nombre_gato == null:
+		push_error("E3.8: falta NombreGato.")
+		correcto = false
+
+	if texto_dialogo == null:
+		push_error("E3.8: falta TextoDialogo.")
+		correcto = false
+
+	if continuar_label == null:
+		push_error("E3.8: falta ContinuarLabel.")
+		correcto = false
+
+	return correcto
 
 
 # ==========================================
@@ -168,7 +231,7 @@ func _cuando_entra(cuerpo: Node2D) -> void:
 
 		jugador_cerca = true
 
-		actualizar_indicadores()
+		actualizar_letra_e()
 
 
 func _cuando_sale(cuerpo: Node2D) -> void:
@@ -177,53 +240,23 @@ func _cuando_sale(cuerpo: Node2D) -> void:
 
 		jugador_cerca = false
 
-		actualizar_indicadores()
+		actualizar_letra_e()
 
 
 # ==========================================
-# ACTUALIZAR INDICADORES
+# MOSTRAR LETRA E
 # ==========================================
 
-func actualizar_indicadores() -> void:
+func actualizar_letra_e() -> void:
 
-	var consola_pendiente: bool = (
-		consola_habilitada
-		and not ejercicio_abierto
-		and not ejercicio_completado
-	)
-
-	# Mostrar ! cuando el jugador está lejos.
-	if indicador_objetivo != null:
-
-		indicador_objetivo.visible = (
-			consola_pendiente
-			and not jugador_cerca
-		)
-
-	# Mostrar E cuando el jugador está cerca.
-	if letra_e != null:
-
-		letra_e.visible = (
-			consola_pendiente
-			and jugador_cerca
-		)
-
-
-# ==========================================
-# HABILITAR CONSOLA
-# ==========================================
-
-func habilitar_consola() -> void:
-
-	if ejercicio_completado:
+	if letra_e == null:
 		return
 
-	consola_habilitada = true
-
-	actualizar_indicadores()
-
-	print("E3.8: diálogo con el Gato Centinela terminado.")
-	print("E3.8: consola de contención habilitada.")
+	letra_e.visible = (
+		jugador_cerca
+		and not dialogo_activo
+		and not dialogo_terminado
+	)
 
 
 # ==========================================
@@ -231,6 +264,9 @@ func habilitar_consola() -> void:
 # ==========================================
 
 func _unhandled_key_input(event: InputEvent) -> void:
+
+	if not referencias_correctas:
+		return
 
 	if not event is InputEventKey:
 		return
@@ -241,127 +277,177 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.keycode != KEY_E:
 		return
 
-	if not jugador_cerca:
+	# Continuar la conversación.
+	if dialogo_activo:
+
+		avanzar_dialogo()
+
+		get_viewport().set_input_as_handled()
+
 		return
 
-	if not consola_habilitada:
-		return
+	# Comenzar la conversación.
+	if jugador_cerca and not dialogo_terminado:
 
-	if ejercicio_abierto or ejercicio_completado:
-		return
+		iniciar_dialogo()
 
-	# No abrir mientras el Gato Centinela habla.
-	if gato_centinela != null:
-
-		if gato_centinela.get("dialogo_activo") == true:
-			return
-
-	abrir_ejercicio()
-
-	get_viewport().set_input_as_handled()
+		get_viewport().set_input_as_handled()
 
 
 # ==========================================
-# ABRIR EJERCICIO
+# INICIAR DIALOGO
 # ==========================================
 
-func abrir_ejercicio() -> void:
+func iniciar_dialogo() -> void:
 
-	if ventana_ejercicio == null:
-
-		push_error(
-			"E3.8: no se encontró VentanaEjercicio."
-		)
+	if not referencias_correctas:
 		return
 
-	if ejercicio_completado:
+	if dialogo_activo or dialogo_terminado:
 		return
 
-	if ejercicio_abierto:
-		return
+	dialogo_activo = true
 
-	if not consola_habilitada:
-		return
+	indice_dialogo = 0
 
-	# Evitar abrir durante la conversación.
-	if gato_centinela != null:
+	actualizar_letra_e()
 
-		if gato_centinela.get("dialogo_activo") == true:
-			return
-
-	ejercicio_abierto = true
-
-	actualizar_indicadores()
-
-	# Congelar al protagonista.
+	# Detener al protagonista.
 	congelar_jugador()
 
-	# Mostrar ventana E3.8.
-	ventana_ejercicio.show()
+	# Mostrar la interfaz.
+	dialogo_ui.show()
+	fondo_dialogo.show()
+	caja_dialogo.show()
 
-	# Preparar el ejercicio de contención.
-	if ventana_ejercicio.has_method("iniciar_ejercicio"):
+	# Mantener ambos retratos visibles.
+	retrato_jugador.show()
+	retrato_npc.show()
 
-		ventana_ejercicio.call(
-			"iniciar_ejercicio"
+	nombre_gato.show()
+	texto_dialogo.show()
+	continuar_label.show()
+
+	mostrar_dialogo()
+
+	print("E3.8: diálogo iniciado.")
+
+
+# ==========================================
+# MOSTRAR DIALOGO
+# ==========================================
+
+func mostrar_dialogo() -> void:
+
+	if not referencias_correctas:
+		return
+
+	if indice_dialogo >= CONVERSACION.size():
+
+		finalizar_dialogo()
+		return
+
+	var intervencion: Dictionary = CONVERSACION[indice_dialogo]
+
+	var habla_centinela: bool = intervencion["centinela"]
+
+	texto_dialogo.text = intervencion["texto"]
+
+	texto_dialogo.autowrap_mode = (
+		TextServer.AUTOWRAP_WORD_SMART
+	)
+
+	continuar_label.text = "Presiona E para continuar"
+
+	# Mostrar siempre ambos retratos.
+	retrato_jugador.show()
+	retrato_npc.show()
+
+	if habla_centinela:
+
+		# Habla el Gato Centinela.
+		nombre_gato.text = "GATO CENTINELA"
+
+		retrato_npc.modulate = COLOR_ILUMINADO
+		retrato_jugador.modulate = COLOR_OSCURO
+
+		aplicar_color_dialogo(COLOR_CENTINELA)
+
+	else:
+
+		# Habla el protagonista.
+		nombre_gato.text = GameData.playerName.to_upper()   # nombre real del jugador
+
+		retrato_jugador.modulate = COLOR_ILUMINADO
+		retrato_npc.modulate = COLOR_OSCURO
+
+		aplicar_color_dialogo(COLOR_PROTAGONISTA)
+
+
+# ==========================================
+# CAMBIAR COLOR DEL DIALOGO
+# ==========================================
+
+func aplicar_color_dialogo(color_franja: Color) -> void:
+
+	if nombre_gato != null:
+
+		nombre_gato.add_theme_color_override(
+			"font_color",
+			color_franja
 		)
 
-	print("E3.8: ventana del ejercicio abierta.")
-
-
-# ==========================================
-# CERRAR EJERCICIO
-# ==========================================
-
-func cerrar_ejercicio() -> void:
-
-	if ejercicio_completado:
+	if not (
+		caja_dialogo is Panel
+		or caja_dialogo is PanelContainer
+	):
 		return
 
-	if not ejercicio_abierto:
-		return
+	var estilo: StyleBoxFlat
 
-	ejercicio_abierto = false
+	if estilo_original is StyleBoxFlat:
 
-	if ventana_ejercicio != null:
+		estilo = (
+			estilo_original as StyleBoxFlat
+		).duplicate() as StyleBoxFlat
 
-		ventana_ejercicio.hide()
+	else:
 
-	# Devolver movimiento al protagonista.
-	descongelar_jugador()
+		estilo = StyleBoxFlat.new()
 
-	# Restaurar ! o E según la distancia.
-	actualizar_indicadores()
+		estilo.bg_color = Color("#101827")
 
-	print("E3.8: ventana del ejercicio cerrada.")
+		estilo.set_corner_radius_all(10)
+
+	# Cambiar el borde según quién habla.
+	estilo.border_color = color_franja
+
+	estilo.set_border_width_all(3)
+
+	caja_dialogo.add_theme_stylebox_override(
+		"panel",
+		estilo
+	)
 
 
 # ==========================================
-# COMPLETAR EJERCICIO
+# AVANZAR DIALOGO
 # ==========================================
 
-func completar_ejercicio() -> void:
+func avanzar_dialogo() -> void:
 
-	if ejercicio_completado:
+	if not dialogo_activo:
 		return
 
-	ejercicio_completado = true
-	ejercicio_abierto = false
-	consola_habilitada = false
+	indice_dialogo += 1
 
-	if ventana_ejercicio != null:
+	if indice_dialogo >= CONVERSACION.size():
 
-		ventana_ejercicio.hide()
+		finalizar_dialogo()
 
-	# Ocultar definitivamente ! y E.
-	actualizar_indicadores()
+	else:
 
-	# Devolver movimiento al protagonista.
-	descongelar_jugador()
-
-	print("E3.8: sistema de contención restaurado.")
-	print("E3.8: portales estabilizados.")
-	print("E3.8: consola desactivada.")
+		mostrar_dialogo()
 
 
 # ==========================================
@@ -421,3 +507,38 @@ func descongelar_jugador() -> void:
 	jugador.set_process_unhandled_key_input(
 		unhandled_key_jugador_activo
 	)
+
+
+# ==========================================
+# FINALIZAR DIALOGO
+# ==========================================
+
+func finalizar_dialogo() -> void:
+
+	if not dialogo_activo:
+		return
+
+	dialogo_activo = false
+	dialogo_terminado = true
+
+	# Ocultar la interfaz.
+	if dialogo_ui != null:
+		dialogo_ui.hide()
+
+	actualizar_letra_e()
+
+	# Restaurar iluminación.
+	if retrato_jugador != null:
+		retrato_jugador.modulate = COLOR_ILUMINADO
+
+	if retrato_npc != null:
+		retrato_npc.modulate = COLOR_ILUMINADO
+
+	# Restaurar movimiento.
+	descongelar_jugador()
+
+	# Habilitar la consola E3.8.
+	iniciar_ejercicio.emit()
+
+	print("E3.8: diálogo terminado.")
+	print("E3.8: consola de contención habilitada.")

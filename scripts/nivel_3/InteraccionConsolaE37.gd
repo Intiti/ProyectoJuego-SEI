@@ -1,12 +1,12 @@
-
 extends Area2D
 
 # ==========================================
 # MGTS - NIVEL 3 - EJERCICIO E3.7
 # TUNELES DE RADIACION
-# CONSOLA DEL ESCUDO DE RADIACION
-# NPC: ROBOT DE SEGURIDAD
+# INTERACCION CON ROBOT DE SEGURIDAD
 # ==========================================
+
+signal iniciar_ejercicio
 
 
 # ==========================================
@@ -21,32 +21,113 @@ extends Area2D
 	"LetraE"
 ) as Label
 
-@onready var indicador_objetivo: Label = get_node_or_null(
-	"IndicadorObjetivo"
+@onready var dialogo_ui: CanvasLayer = get_node_or_null(
+	"../DialogoUI"
+) as CanvasLayer
+
+@onready var fondo_dialogo: Control = get_node_or_null(
+	"../DialogoUI/FondoDialogo"
+) as Control
+
+@onready var caja_dialogo: Control = get_node_or_null(
+	"../DialogoUI/CajaDialogo"
+) as Control
+
+@onready var retrato_jugador: TextureRect = get_node_or_null(
+	"../DialogoUI/RetratosDialogo/RetratoJugador"
+) as TextureRect
+
+@onready var retrato_npc: TextureRect = get_node_or_null(
+	"../DialogoUI/RetratosDialogo/RetratoNPC"
+) as TextureRect
+
+@onready var nombre_gato: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/NombreGato"
 ) as Label
 
-@onready var robot_seguridad: Area2D = get_node_or_null(
-	"../InteraccionGatoa2D"
-) as Area2D
+@onready var texto_dialogo: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/TextoDialogo"
+) as Label
 
-@onready var ventana_ejercicio: PanelContainer = get_node_or_null(
-	"../EjercicioUI/VentanaEjercicio"
-) as PanelContainer
+@onready var continuar_label: Label = get_node_or_null(
+	"../DialogoUI/CajaDialogo/ContenidoDialogo/ContinuarLabel"
+) as Label
 
+
+# ==========================================
+# COLORES
+# ==========================================
+
+const COLOR_ILUMINADO: Color = Color(1, 1, 1, 1)
+const COLOR_OSCURO: Color = Color(0.3, 0.3, 0.3, 1)
+
+const COLOR_PROTAGONISTA: Color = Color("#A975EB")
+const COLOR_ROBOT: Color = Color("#A4FF36")
+
+
+# ==========================================
+# HISTORIA E3.7
+# true = Robot de Seguridad
+# false = Protagonista
+# ==========================================
+
+const CONVERSACION: Array[Dictionary] = [
+	{
+		"robot": true,
+		"texto": "¡ALTO! Acceso restringido. Se han detectado niveles peligrosos de radiación en estos túneles."
+	},
+	{
+		"robot": false,
+		"texto": "¡Espera! Estoy buscando a Panko. ¿Has visto pasar a un gatito por aquí?"
+	},
+	{
+		"robot": true,
+		"texto": "Analizando registros... Detecté una pequeña figura cruzando este sector hace poco."
+	},
+	{
+		"robot": false,
+		"texto": "¡Podría ser Panko! Necesito seguir su rastro. ¿Puedes dejarme pasar?"
+	},
+	{
+		"robot": true,
+		"texto": "NEGATIVO. El escudo de radiación está desactivado. Atravesar el túnel ahora sería demasiado peligroso."
+	},
+	{
+		"robot": false,
+		"texto": "Entonces tendremos que repararlo. ¿Qué necesita el sistema?"
+	},
+	{
+		"robot": true,
+		"texto": "Debes programar un algoritmo en Python que revise los niveles de radiación y active la protección cuando sea necesario."
+	},
+	{
+		"robot": false,
+		"texto": "¡Entendido! Activaré el escudo. No puedo perder la pista de Panko."
+	},
+	{
+		"robot": true,
+		"texto": "PROTOCOLO AUTORIZADO. "
+	}
+]
 
 # ==========================================
 # VARIABLES
 # ==========================================
 
 var jugador_cerca: bool = false
-var consola_habilitada: bool = false
-var ejercicio_abierto: bool = false
-var ejercicio_completado: bool = false
+var dialogo_activo: bool = false
+var dialogo_terminado: bool = false
+
+var indice_dialogo: int = 0
 
 var fisica_jugador_activa: bool = true
 var input_jugador_activo: bool = true
 var unhandled_jugador_activo: bool = true
 var unhandled_key_jugador_activo: bool = true
+
+var referencias_correctas: bool = false
+
+var estilo_original: StyleBox = null
 
 
 # ==========================================
@@ -57,93 +138,87 @@ func _ready() -> void:
 
 	monitoring = true
 
-	# Ocultar letra E al iniciar.
+	referencias_correctas = comprobar_referencias()
+
 	if letra_e != null:
 		letra_e.hide()
-	else:
-		push_error("E3.7: falta LetraE.")
 
-	# Ocultar indicador de objetivo.
-	if indicador_objetivo != null:
+	if dialogo_ui != null:
+		dialogo_ui.hide()
 
-		indicador_objetivo.text = "!"
-
-		indicador_objetivo.add_theme_color_override(
-			"font_color",
-			Color("#ffd700")
-		)
-
-		indicador_objetivo.hide()
-
-	else:
-		push_error("E3.7: falta IndicadorObjetivo.")
-
-	# Ocultar ventana del ejercicio.
-	if ventana_ejercicio != null:
-
-		ventana_ejercicio.hide()
-
-	else:
-
+	if not referencias_correctas:
 		push_error(
-			"E3.7: no se encontró EjercicioUI/VentanaEjercicio."
+			"E3.7: revisa los nodos de InteraccionGatoa2D y DialogoUI."
 		)
+		return
 
-	if jugador == null:
-		push_error("E3.7: no se encontró Player.")
+	# Guardar estilo original de la caja.
+	if caja_dialogo is PanelContainer or caja_dialogo is Panel:
 
-	# Conectar señal del Robot de Seguridad.
-	if robot_seguridad == null:
-
-		push_error(
-			"E3.7: no se encontró InteraccionGatoa2D."
+		estilo_original = caja_dialogo.get_theme_stylebox(
+			"panel"
 		)
-
-	else:
-
-		if robot_seguridad.has_signal("iniciar_ejercicio"):
-
-			var conexion: Callable = Callable(
-				self,
-				"habilitar_consola"
-			)
-
-			if not robot_seguridad.is_connected(
-				"iniciar_ejercicio",
-				conexion
-			):
-
-				robot_seguridad.connect(
-					"iniciar_ejercicio",
-					conexion
-				)
-
-		else:
-
-			push_warning(
-				"E3.7: el Robot de Seguridad no tiene "
-				+ "la señal iniciar_ejercicio."
-			)
-
-		# Recuperar estado si el diálogo
-		# ya había terminado.
-		if robot_seguridad.get("dialogo_terminado") == true:
-
-			consola_habilitada = true
 
 	# Detectar entrada del jugador.
 	if not body_entered.is_connected(_cuando_entra):
-
 		body_entered.connect(_cuando_entra)
 
 	# Detectar salida del jugador.
 	if not body_exited.is_connected(_cuando_sale):
-
 		body_exited.connect(_cuando_sale)
 
-	actualizar_indicadores()
+	print("E3.7: Robot de Seguridad preparado.")
 
-	print("E3.7: consola de radiación preparada.")
+
+# ==========================================
+# COMPROBAR REFERENCIAS
+# ==========================================
+
+func comprobar_referencias() -> bool:
+
+	var correcto: bool = true
+
+	if jugador == null:
+		push_error("E3.7: falta Player.")
+		correcto = false
+
+	if letra_e == null:
+		push_error("E3.7: falta LetraE.")
+		correcto = false
+
+	if dialogo_ui == null:
+		push_error("E3.7: falta DialogoUI.")
+		correcto = false
+
+	if fondo_dialogo == null:
+		push_error("E3.7: falta FondoDialogo.")
+		correcto = false
+
+	if caja_dialogo == null:
+		push_error("E3.7: falta CajaDialogo.")
+		correcto = false
+
+	if retrato_jugador == null:
+		push_error("E3.7: falta RetratoJugador.")
+		correcto = false
+
+	if retrato_npc == null:
+		push_error("E3.7: falta RetratoNPC.")
+		correcto = false
+
+	if nombre_gato == null:
+		push_error("E3.7: falta NombreGato.")
+		correcto = false
+
+	if texto_dialogo == null:
+		push_error("E3.7: falta TextoDialogo.")
+		correcto = false
+
+	if continuar_label == null:
+		push_error("E3.7: falta ContinuarLabel.")
+		correcto = false
+
+	return correcto
 
 
 # ==========================================
@@ -156,7 +231,7 @@ func _cuando_entra(cuerpo: Node2D) -> void:
 
 		jugador_cerca = true
 
-		actualizar_indicadores()
+		actualizar_letra_e()
 
 
 func _cuando_sale(cuerpo: Node2D) -> void:
@@ -165,53 +240,23 @@ func _cuando_sale(cuerpo: Node2D) -> void:
 
 		jugador_cerca = false
 
-		actualizar_indicadores()
+		actualizar_letra_e()
 
 
 # ==========================================
-# ACTUALIZAR INDICADORES
+# MOSTRAR LETRA E
 # ==========================================
 
-func actualizar_indicadores() -> void:
+func actualizar_letra_e() -> void:
 
-	var consola_pendiente: bool = (
-		consola_habilitada
-		and not ejercicio_abierto
-		and not ejercicio_completado
-	)
-
-	# Mostrar ! cuando el jugador está lejos.
-	if indicador_objetivo != null:
-
-		indicador_objetivo.visible = (
-			consola_pendiente
-			and not jugador_cerca
-		)
-
-	# Mostrar E cuando el jugador está cerca.
-	if letra_e != null:
-
-		letra_e.visible = (
-			consola_pendiente
-			and jugador_cerca
-		)
-
-
-# ==========================================
-# HABILITAR CONSOLA
-# ==========================================
-
-func habilitar_consola() -> void:
-
-	if ejercicio_completado:
+	if letra_e == null:
 		return
 
-	consola_habilitada = true
-
-	actualizar_indicadores()
-
-	print("E3.7: diálogo con el Robot de Seguridad terminado.")
-	print("E3.7: consola del escudo de radiación habilitada.")
+	letra_e.visible = (
+		jugador_cerca
+		and not dialogo_activo
+		and not dialogo_terminado
+	)
 
 
 # ==========================================
@@ -219,6 +264,9 @@ func habilitar_consola() -> void:
 # ==========================================
 
 func _unhandled_key_input(event: InputEvent) -> void:
+
+	if not referencias_correctas:
+		return
 
 	if not event is InputEventKey:
 		return
@@ -229,119 +277,176 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.keycode != KEY_E:
 		return
 
-	if not jugador_cerca:
+	# Continuar conversación.
+	if dialogo_activo:
+
+		avanzar_dialogo()
+
+		get_viewport().set_input_as_handled()
+
 		return
 
-	if not consola_habilitada:
-		return
+	# Comenzar conversación.
+	if jugador_cerca and not dialogo_terminado:
 
-	if ejercicio_abierto or ejercicio_completado:
-		return
+		iniciar_dialogo()
 
-	# No abrir mientras el robot habla.
-	if robot_seguridad != null:
-
-		if robot_seguridad.get("dialogo_activo") == true:
-			return
-
-	abrir_ejercicio()
-
-	get_viewport().set_input_as_handled()
+		get_viewport().set_input_as_handled()
 
 
 # ==========================================
-# ABRIR EJERCICIO
+# INICIAR DIALOGO
 # ==========================================
 
-func abrir_ejercicio() -> void:
+func iniciar_dialogo() -> void:
 
-	if ventana_ejercicio == null:
-
-		push_error(
-			"E3.7: falta la ventana del ejercicio."
-		)
+	if not referencias_correctas:
 		return
 
-	if ejercicio_completado:
+	if dialogo_activo or dialogo_terminado:
 		return
 
-	if ejercicio_abierto:
-		return
+	dialogo_activo = true
 
-	if not consola_habilitada:
-		return
+	indice_dialogo = 0
 
-	ejercicio_abierto = true
-
-	actualizar_indicadores()
+	actualizar_letra_e()
 
 	# Detener al protagonista.
 	congelar_jugador()
 
-	# Mostrar ventana E3.7.
-	ventana_ejercicio.show()
+	# Mostrar interfaz.
+	dialogo_ui.show()
+	fondo_dialogo.show()
+	caja_dialogo.show()
 
-	# Preparar el ejercicio de radiación.
-	if ventana_ejercicio.has_method("iniciar_ejercicio"):
+	# Ambos retratos visibles.
+	retrato_jugador.show()
+	retrato_npc.show()
 
-		ventana_ejercicio.call(
-			"iniciar_ejercicio"
+	nombre_gato.show()
+	texto_dialogo.show()
+	continuar_label.show()
+
+	mostrar_dialogo()
+
+	print("E3.7: diálogo iniciado.")
+
+
+# ==========================================
+# MOSTRAR DIALOGO
+# ==========================================
+
+func mostrar_dialogo() -> void:
+
+	if not referencias_correctas:
+		return
+
+	if indice_dialogo >= CONVERSACION.size():
+		finalizar_dialogo()
+		return
+
+	var intervencion: Dictionary = CONVERSACION[indice_dialogo]
+
+	var habla_robot: bool = intervencion["robot"]
+
+	texto_dialogo.text = intervencion["texto"]
+
+	texto_dialogo.autowrap_mode = (
+		TextServer.AUTOWRAP_WORD_SMART
+	)
+
+	continuar_label.text = "Presiona E para continuar"
+
+	# Mantener visibles ambos retratos.
+	retrato_jugador.show()
+	retrato_npc.show()
+
+	if habla_robot:
+
+		# Habla el Robot de Seguridad.
+		nombre_gato.text = "ROBOT DE SEGURIDAD"
+
+		retrato_npc.modulate = COLOR_ILUMINADO
+		retrato_jugador.modulate = COLOR_OSCURO
+
+		aplicar_color_dialogo(COLOR_ROBOT)
+
+	else:
+
+		# Habla el protagonista.
+		nombre_gato.text = GameData.playerName.to_upper()   # nombre real del jugador
+
+		retrato_jugador.modulate = COLOR_ILUMINADO
+		retrato_npc.modulate = COLOR_OSCURO
+
+		aplicar_color_dialogo(COLOR_PROTAGONISTA)
+
+
+# ==========================================
+# CAMBIAR COLOR DEL DIALOGO
+# ==========================================
+
+func aplicar_color_dialogo(color_franja: Color) -> void:
+
+	if nombre_gato != null:
+
+		nombre_gato.add_theme_color_override(
+			"font_color",
+			color_franja
 		)
 
-	print("E3.7: ventana del escudo de radiación abierta.")
-
-
-# ==========================================
-# CERRAR EJERCICIO
-# ==========================================
-
-func cerrar_ejercicio() -> void:
-
-	if ejercicio_completado:
+	if not (
+		caja_dialogo is Panel
+		or caja_dialogo is PanelContainer
+	):
 		return
 
-	if not ejercicio_abierto:
-		return
+	var estilo: StyleBoxFlat
 
-	ejercicio_abierto = false
+	if estilo_original is StyleBoxFlat:
 
-	if ventana_ejercicio != null:
-		ventana_ejercicio.hide()
+		estilo = (
+			estilo_original as StyleBoxFlat
+		).duplicate() as StyleBoxFlat
 
-	# Devolver movimiento al protagonista.
-	descongelar_jugador()
+	else:
 
-	# Restaurar ! o E según la distancia.
-	actualizar_indicadores()
+		estilo = StyleBoxFlat.new()
 
-	print("E3.7: ventana del ejercicio cerrada.")
+		estilo.bg_color = Color("#101827")
+
+		estilo.set_corner_radius_all(10)
+
+	# Cambiar borde según quién habla.
+	estilo.border_color = color_franja
+
+	estilo.set_border_width_all(3)
+
+	caja_dialogo.add_theme_stylebox_override(
+		"panel",
+		estilo
+	)
 
 
 # ==========================================
-# COMPLETAR EJERCICIO
+# AVANZAR DIALOGO
 # ==========================================
 
-func completar_ejercicio() -> void:
+func avanzar_dialogo() -> void:
 
-	if ejercicio_completado:
+	if not dialogo_activo:
 		return
 
-	ejercicio_completado = true
-	ejercicio_abierto = false
-	consola_habilitada = false
+	indice_dialogo += 1
 
-	if ventana_ejercicio != null:
-		ventana_ejercicio.hide()
+	if indice_dialogo >= CONVERSACION.size():
 
-	# Ocultar definitivamente ! y E.
-	actualizar_indicadores()
+		finalizar_dialogo()
 
-	# Devolver movimiento al protagonista.
-	descongelar_jugador()
+	else:
 
-	print("E3.7: escudo de radiación activado.")
-	print("E3.7: túneles protegidos.")
-	print("E3.7: consola desactivada.")
+		mostrar_dialogo()
 
 
 # ==========================================
@@ -401,3 +506,40 @@ func descongelar_jugador() -> void:
 	jugador.set_process_unhandled_key_input(
 		unhandled_key_jugador_activo
 	)
+
+
+# ==========================================
+# FINALIZAR DIALOGO
+# ==========================================
+
+func finalizar_dialogo() -> void:
+
+	if not dialogo_activo:
+		return
+
+	dialogo_activo = false
+	dialogo_terminado = true
+
+	# Ocultar interfaz.
+	if dialogo_ui != null:
+		dialogo_ui.hide()
+
+	actualizar_letra_e()
+
+	# Restaurar iluminación.
+	if retrato_jugador != null:
+		retrato_jugador.modulate = COLOR_ILUMINADO
+
+	if retrato_npc != null:
+		retrato_npc.modulate = COLOR_ILUMINADO
+
+	# Restaurar movimiento.
+	descongelar_jugador()
+
+	# Habilitar consola E3.7.
+	# La consola mostrará ! a distancia
+	# y E cuando el jugador se acerque.
+	iniciar_ejercicio.emit()
+
+	print("E3.7: diálogo terminado.")
+	print("E3.7: consola de radiación habilitada.")
