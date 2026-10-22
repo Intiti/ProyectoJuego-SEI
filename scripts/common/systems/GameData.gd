@@ -35,6 +35,10 @@ var nivel1Resumen: Dictionary = {}
 var nivel1SubmitDone: bool = false
 var nivel1SubmitOk: bool = false
 var nivel1ResumenMostrado: bool = false
+# Veces que se reinició el examen del Nivel 1 (0 = aprobado al primer intento)
+var nivel1ExamReinicios: int = 0
+# Ejercicios/exámenes de los niveles 2 y 3 resueltos sin ningún error: código -> true
+var perfectExercises: Dictionary = {}
 
 func markSolved(dialogFile: String) -> void:
 	solvedDialogs[dialogFile] = true
@@ -62,6 +66,8 @@ func resetRun() -> void:
 	nivel1SubmitDone = false
 	nivel1SubmitOk = false
 	nivel1ResumenMostrado = false
+	nivel1ExamReinicios = 0
+	perfectExercises.clear()
 	rachaMaxNivel1 = 0
 	rachaGlobal = 0
 	gatopuntos = 0
@@ -209,6 +215,8 @@ func completeExercise(level: int, code: String, blocks: int, errors: int) -> Dic
 	var r: Dictionary = scoreBreakdown(level, blocks, errors)
 	r["repeat"] = false
 	solvedExercises[code] = int(r["total"])
+	if errors == 0:
+		perfectExercises[code] = true
 	lastBreakdown = r.duplicate()
 	lastBreakdown["code"] = code
 	lastBreakdown["level"] = level
@@ -218,6 +226,14 @@ func completeExercise(level: int, code: String, blocks: int, errors: int) -> Dic
 		reportDebugged(code)
 	syncLevelSummaries()
 	return r
+
+func perfectCount(level: int) -> int:
+	var n: int = 0
+	var prefix: String = "E%d." % level
+	for k in perfectExercises.keys():
+		if String(k).begins_with(prefix):
+			n += 1
+	return n
 
 func solvedCount(level: int) -> int:
 	if level == 1:
@@ -245,6 +261,8 @@ func completeExam(level: int, code: String, blocks: int, errors: int) -> Diction
 	var r: Dictionary = scoreBreakdown(level, blocks, errors)
 	r["repeat"] = false
 	solvedExercises[code] = int(r["total"])
+	if errors == 0:
+		perfectExercises[code] = true
 	lastBreakdown = r.duplicate()
 	lastBreakdown["code"] = code
 	lastBreakdown["level"] = level

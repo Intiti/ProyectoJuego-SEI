@@ -76,7 +76,7 @@ func registrar_error(codigo: String, firma: String = "") -> void:
 	racha_actual = GameData.rachaGlobal
 
 func _verificar_insignia() -> void:
-	if not insignias.has(NOMBRE_INSIGNIA) and ejercicios_completados.size() >= 4:
+	if not insignias.has(NOMBRE_INSIGNIA) and ejercicios_completados.size() >= 8:
 		insignias.append(NOMBRE_INSIGNIA)
 		insignia_desbloqueada.emit(NOMBRE_INSIGNIA)
 		print("🏆 ¡INSIGNIA DESBLOQUEADA: %s!" % NOMBRE_INSIGNIA)

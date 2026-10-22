@@ -185,6 +185,7 @@ func startExam() -> void:
 	_openExamExercise()
 
 func restartExam() -> void:
+	GameData.nivel1ExamReinicios += 1
 	_pickExercises()
 	_examIndex = 0
 	_examMode = true

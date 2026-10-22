@@ -29,6 +29,19 @@ const ID_NIVEL_1 := "n1_nivel_completo"
 const ID_N2_CAZADOR := "n2_cazador_ciclos"
 const ID_N3_MAESTRO := "n3_maestro_nucleo"
 const ID_DEPURADOR := "depurador_persistente"
+const ID_N1_PANADERIA := "n1_panaderia"
+const ID_N1_ESCUELA := "n1_escuela"
+const ID_N1_EXAMEN_1ER := "n1_examen_primer_intento"
+const ID_RACHA_12 := "n1_racha_12"
+const ID_RACHA_25 := "n1_racha_25"
+const ID_N2_COMPLETO := "n2_nivel_completo"
+const ID_N2_IMPECABLE := "n2_examen_impecable"
+const ID_N3_COMPLETO := "n3_nivel_completo"
+const ID_N3_SIN_BUGS := "n3_sin_bugs"
+
+const MISIONES_PANADERIA := ["npc_e12", "npc_e15", "npc_e17"]
+const MISIONES_ESCUELA := ["npc_e16", "npc_e19", "npc_e20"]
+const RUTA_DIALOGOS_N1 := "res://dialogs/nivel_1/%s.json"
 
 const CATALOGO := [
 	{
@@ -37,19 +50,19 @@ const CATALOGO := [
 		"descripcion": "Completaste tu primer puzzle. ¡Todo gran gato empieza con un primer maullido!",
 	},
 	{
-		"id": ID_RACHA_5, "nivel": 1, "tier": PLATA, "face": 1,
+		"id": ID_RACHA_5, "nivel": 0, "tier": PLATA, "face": 1,
 		"nombre": "Insignia del Bigote Imparable",
 		"descripcion": "Lograste una racha de 5 aciertos seguidos sin equivocarte.",
 	},
 	{
 		"id": ID_NIVEL_1, "nivel": 1, "tier": ORO, "face": 2,
 		"nombre": "Insignia del Gato Héroe de la Villa",
-		"descripcion": "Completaste los 10 ejercicios del Nivel 1. ¡Villa Miaulemana te lo agradece!",
+		"descripcion": "Completaste los 10 ejercicios del Nivel 1.",
 	},
 	{
 		"id": ID_N2_CAZADOR, "nivel": 2, "tier": PLATA, "face": 1,
 		"nombre": "Insignia del Cazador de Ciclos",
-		"descripcion": "Resolviste al menos 4 de los 5 ejercicios del Bosque Profundo, con ciclos que terminan correctamente.",
+		"descripcion": "Resolviste al menos 8 de los 10 ejercicios del Bosque Profundo, con ciclos que terminan correctamente.",
 	},
 	{
 		"id": ID_N3_MAESTRO, "nivel": 3, "tier": ORO, "face": 2,
@@ -60,6 +73,51 @@ const CATALOGO := [
 		"id": ID_DEPURADOR, "nivel": 0, "tier": BRONCE, "face": 0,
 		"nombre": "Insignia del Depurador Persistente",
 		"descripcion": "Corregiste una solución tras recibir feedback y resolviste el ejercicio sin repetir el mismo error.",
+	},
+	{
+		"id": ID_N1_PANADERIA, "nivel": 1, "tier": PLATA, "face": 0,
+		"nombre": "Insignia del Maestro Panadero",
+		"descripcion": "Completaste todos lss problemas de la Panadería.",
+	},
+	{
+		"id": ID_N1_ESCUELA, "nivel": 1, "tier": PLATA, "face": 1,
+		"nombre": "Insignia del Gato Matrícula de Honor",
+		"descripcion": "Completaste todos lss problemas de la Escuela.",
+	},
+	{
+		"id": ID_N1_EXAMEN_1ER, "nivel": 1, "tier": PLATA, "face": 2,
+		"nombre": "Insignia del Examen Sin Rasguños",
+		"descripcion": "Superaste el examen del Nivel 1 en el primer intento, sin reiniciarlo.",
+	},
+	{
+		"id": ID_RACHA_12, "nivel": 0, "tier": PLATA, "face": 1,
+		"nombre": "Insignia de la Cola Veloz",
+		"descripcion": "Lograste una racha de 12 aciertos seguidos.",
+	},
+	{
+		"id": ID_RACHA_25, "nivel": 0, "tier": ORO, "face": 2,
+		"nombre": "Insignia del Gato Leyenda",
+		"descripcion": "Lograste una racha de 25 aciertos seguidos.",
+	},
+	{
+		"id": ID_N2_COMPLETO, "nivel": 2, "tier": ORO, "face": 2,
+		"nombre": "Insignia del Guardián del Bosque",
+		"descripcion": "Completaste los 10 ejercicios del Bosque Profundo y aprobaste su examen.",
+	},
+	{
+		"id": ID_N2_IMPECABLE, "nivel": 2, "tier": PLATA, "face": 0,
+		"nombre": "Insignia del Rastreador Impecable",
+		"descripcion": "Aprobaste el examen del Bosque Profundo sin cometer ningún error.",
+	},
+	{
+		"id": ID_N3_COMPLETO, "nivel": 3, "tier": ORO, "face": 1,
+		"nombre": "Insignia del Gato Ingeniero Jefe",
+		"descripcion": "Completaste los 10 ejercicios del Complejo Subterráneo y aprobaste el examen final.",
+	},
+	{
+		"id": ID_N3_SIN_BUGS, "nivel": 3, "tier": PLATA, "face": 0,
+		"nombre": "Insignia del Código Sin Bugs",
+		"descripcion": "Resolviste al menos 5 ejercicios del Complejo Subterráneo sin cometer ningún error.",
 	},
 ]
 
@@ -78,6 +136,7 @@ func _ready() -> void:
 	GameData.rachaChanged.connect(_onRachaChanged)
 	GameData.exerciseSolved.connect(_onExerciseSolved)
 	GameData.exerciseDebugged.connect(_onExerciseDebugged)
+	insigniaDesbloqueada.connect(_onInsigniaDesbloqueada)
 
 # ── API pública ───────────────────────────────────────────────────────────────
 
@@ -126,15 +185,48 @@ func _onProblemsChanged() -> void:
 		unlock(ID_PRIMER_PUZZLE)
 	if solved >= GameData.TOTAL_PROBLEMS:
 		unlock(ID_NIVEL_1)
+	if _todasResueltas(MISIONES_PANADERIA):
+		unlock(ID_N1_PANADERIA)
+	if _todasResueltas(MISIONES_ESCUELA):
+		unlock(ID_N1_ESCUELA)
+	# El examen se aprueba al marcar resuelto al guardia (nivel1Terminado)
+	if GameData.nivel1Terminado and GameData.nivel1ExamReinicios == 0:
+		unlock(ID_N1_EXAMEN_1ER)
+
+func _todasResueltas(ids: Array) -> bool:
+	for id in ids:
+		if not GameData.isSolved(RUTA_DIALOGOS_N1 % id):
+			return false
+	return true
 
 func _onRachaChanged(value: int) -> void:
 	if value >= 5:
 		unlock(ID_RACHA_5)
+	if value >= 12:
+		unlock(ID_RACHA_12)
+	if value >= 25:
+		unlock(ID_RACHA_25)
 
 # Niveles 2 y 3: GameData avisa cada vez que se acredita un ejercicio.
 func _onExerciseSolved(level: int, _code: String) -> void:
-	if level == 2 and GameData.solvedCount(2) >= 4:
+	if level == 2 and GameData.solvedCount(2) >= 8:
 		unlock(ID_N2_CAZADOR)
+	if GameData.levelRequirementsDone(2):
+		unlock(ID_N2_COMPLETO)
+	if GameData.perfectExercises.has("EX2"):
+		unlock(ID_N2_IMPECABLE)
+	if GameData.perfectCount(3) >= 5:
+		unlock(ID_N3_SIN_BUGS)
+	_checkNivel3()
+
+func _onInsigniaDesbloqueada(id: String) -> void:
+	if id == ID_N3_MAESTRO:
+		_checkNivel3()
+
+# Nivel 3 completo = 10 ejercicios + examen final (que otorga el Maestro del Núcleo).
+func _checkNivel3() -> void:
+	if isUnlocked(ID_N3_MAESTRO) and GameData.solvedCount(3) >= GameData.levelTotal(3):
+		unlock(ID_N3_COMPLETO)
 
 func _onExerciseDebugged(_code: String) -> void:
 	unlock(ID_DEPURADOR)
