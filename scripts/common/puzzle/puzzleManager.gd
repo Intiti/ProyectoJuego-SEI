@@ -966,7 +966,11 @@ func _onSuccess():
 		return
 
 	var puntaje = _calcularPuntaje()
-	GameData.gatopuntos += puntaje
+	GameData.addPoints(1, puntaje)
+	# Corrigió tras equivocarse (los distractores fallados quedan bloqueados, no se puede repetir
+	# el mismo error): cuenta para la insignia transversal "Depurador Persistente".
+	if _errores >= 1:
+		GameData.reportDebugged("L1")
 
 	# Lanzar celebración y tablón simultáneamente; esperar a que el jugador presione continuar
 	DJManager.playFanfare()
@@ -1000,26 +1004,13 @@ func _onSuccess():
 		close()
 
 func _calcularPuntaje() -> int:
-	# Contar slots rellenables
+	# Contar slots rellenables; la regla de puntos/penalización/bono vive en GameData
+	# y es la misma para los tres niveles.
 	var rellenables = 0
 	for s in _steps:
 		if not s.get("fixed", false):
 			rellenables += 1
-	var base = rellenables * 20
-
-	# Penalizacion por errores (1 error: sin penalización, 2: 25%, 3+: 50%)
-	var penalizacion = 0
-	if _errores == 2:
-		penalizacion = int(base * 0.25)
-	elif _errores >= 3:
-		penalizacion = int(base * 0.50)
-
-	# Bonificacion por racha global (desde 3 correctas seguidas sin fallo entre puzzles)
-	var bonus = 0
-	if GameData.rachaGlobal >= 3:
-		bonus = GameData.rachaGlobal * 5
-
-	return max(0, base - penalizacion + bonus)
+	return int(GameData.scoreBreakdown(1, rellenables, _errores)["total"])
 
 # Lanza la celebración de arcoíris + texto flotante y el tablón simultáneamente.
 # El tablón sube desde abajo junto con el texto "MIAUGORITMO COMPLETADO".
@@ -1032,20 +1023,15 @@ func _playCompletionWithTablon(puntaje: int, summary: Dictionary = {}) -> void:
 	for s in _steps:
 		if not s.get("fixed", false):
 			rellenables += 1
-	var base = rellenables * 20
-	var penalizacion = 0
-	if _errores == 2:
-		penalizacion = int(base * 0.25)
-	elif _errores >= 3:
-		penalizacion = int(base * 0.50)
-	var bonus = 0
-	if GameData.rachaGlobal >= 3:
-		bonus = GameData.rachaGlobal * 5
+	var parts: Dictionary = GameData.scoreBreakdown(1, rellenables, _errores)
+	var base: int = int(parts["base"])
+	var penalizacion: int = int(parts["pen"])
+	var bonus: int = int(parts["bonus"])
 
 	var rainbowBlocks: Array = _collectRainbowBlocks()
 
 	var titleText: String = "MIAUGORITMO COMPLETADO"
-	var baseText: String = "Puntaje base  (%d bloques × 20):  %d pts" % [rellenables, base]
+	var baseText: String = "Puntaje base  (%d bloques × %d):  %d pts" % [rellenables, GameData.POINTS_PER_BLOCK[1], base]
 	var penText: String = ""
 	if penalizacion > 0:
 		var pct = "25%" if _errores == 2 else "50%"
@@ -1211,16 +1197,7 @@ func _scoreBreakdown() -> Dictionary:
 	for st in _steps:
 		if not st.get("fixed", false):
 			rellenables += 1
-	var base := rellenables * 20
-	var penalizacion := 0
-	if _errores == 2:
-		penalizacion = int(base * 0.25)
-	elif _errores >= 3:
-		penalizacion = int(base * 0.50)
-	var bonus := 0
-	if GameData.rachaGlobal >= 3:
-		bonus = GameData.rachaGlobal * 5
-	return {"base": base, "pen": penalizacion, "bonus": bonus}
+	return GameData.scoreBreakdown(1, rellenables, _errores)
 
 func _collectRainbowBlocks() -> Array:
 	var blocks: Array = []
@@ -1266,7 +1243,7 @@ func _finishExamExercise(npc: Node) -> void:
 		await _playExamStepCelebration(index + 1, total)
 	else:
 		var examScore: int = maxi(0, _examAccBase - _examAccPen + _examAccBonus)
-		GameData.gatopuntos += examScore
+		GameData.addPoints(1, examScore)
 		await _playCompletionWithTablon(examScore, {
 			"title": "EXAMEN COMPLETADO",
 			"count": total,

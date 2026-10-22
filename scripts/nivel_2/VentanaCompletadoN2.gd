@@ -165,12 +165,19 @@ func mostrar_celebracion(codigo: String, titulo: String, puntos: int, errores: i
 	elif errores == 2:
 		texto_desglose = "2 errores cometidos: Descuento del 25%."
 	else:
-		texto_desglose = "%d errores cometidos: Descuento del 50%." % errores
-	
+		texto_desglose = "%d errores cometidos: Descuento del 50%%." % errores
+
 	var puntajes = get_node_or_null("/root/PuntajesNivel2")
-	if puntajes and puntajes.racha_actual >= 3:
-		texto_desglose += " (+10 Bonus por racha de aciertos)"
-	
+
+	# Desglose real con las reglas compartidas (base, penalización y bono de racha).
+	var d: Dictionary = GameData.lastBreakdown
+	if String(d.get("code", "")) == codigo:
+		texto_desglose += "\nPuntaje base:  %d pts" % int(d["base"])
+		if int(d["pen"]) > 0:
+			texto_desglose += "   ·   Penalización:  -%d pts" % int(d["pen"])
+		if int(d["bonus"]) > 0:
+			texto_desglose += "   ·   Bonus racha (x%d):  +%d pts" % [GameData.rachaGlobal, int(d["bonus"])]
+
 	label_desglose.text = texto_desglose
 	
 	# Comprobar si se obtuvo la insignia oficial

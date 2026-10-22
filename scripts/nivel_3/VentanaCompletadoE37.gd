@@ -201,13 +201,12 @@ func mostrar_completado(errores: int) -> void:
 # CALCULAR PUNTOS
 # ==========================================
 
+# Muestra los puntos que de verdad se acreditaron (base - penalización + bono de racha),
+# calculados con las reglas compartidas de GameData. Si el ejercicio no se acreditó en esta
+# sesión (repetición), se usa el valor de referencia sin bono.
 func calcular_puntos(errores: int) -> int:
-	if errores <= 1:
-		return 240
-	elif errores == 2:
-		return 180
-	else:
-		return 120
+	var base: int = 240 - GameData.errorPenalty(240, errores)
+	return GameData.creditedPoints("E3.7", base)
 
 
 # ==========================================

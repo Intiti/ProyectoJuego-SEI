@@ -31,6 +31,7 @@ const ESCENAS_BANCO_EXAMEN: Dictionary = {
 const RUTA_EXAMEN_PRINCIPAL: String = "res://scenes/ExamenNivel3/ExamenPrincipal.tscn"
 const RUTA_RESULTADO_EXAMEN: String = "res://scenes/ExamenNivel3/ResultadoExamen.tscn"
 const ManualNivel3Script = preload("res://scripts/nivel_3/compartidos/ManualNivel3.gd")
+const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
 
 # Variables originales conservadas por compatibilidad
 var puntos_por_ejercicio: Dictionary = {}
@@ -308,11 +309,17 @@ func obtener_max_errores_examen() -> int:
 
 func registrar_error_en_examen() -> bool:
 	examen_errores_actuales += 1
+	var gd_err: Node = get_node_or_null("/root/GameData")
+	if gd_err != null and gd_err.has_method("streakFail"):
+		gd_err.call("streakFail")   # un error reinicia la racha global
 	return examen_errores_actuales >= MAX_ERRORES_EXAMEN
 
 
 func registrar_pregunta_examen_superada(id_banco: int, titulo: String) -> String:
 	examen_respuestas_correctas += 1
+	var gd_ok: Node = get_node_or_null("/root/GameData")
+	if gd_ok != null and gd_ok.has_method("streakHit"):
+		gd_ok.call("streakHit", 1)   # cada acierto suma a la racha global
 	examen_detalle_intento.append({
 		"id_banco": id_banco,
 		"titulo": titulo,
@@ -495,6 +502,12 @@ func mostrar_hud_identificacion_y_audio(escena_padre: Node) -> void:
 	capa.add_child(barra)
 	escena_padre.add_child(capa)
 
+	# Mismo cuadro de puntaje que los niveles 1 y 2 (arriba a la izquierda).
+	if escena_padre.get_node_or_null("ScoreHUD") == null:
+		var hud := ScoreHudScript.new()
+		hud.name = "ScoreHUD"
+		escena_padre.add_child(hud)
+
 	btn_audio.pressed.connect(func() -> void:
 		var dj_node: Node = get_node_or_null("/root/DJManager")
 		if dj_node != null and dj_node.has_method("toggle_mute"):
@@ -547,8 +560,10 @@ func registrar_ejercicio(id_ejercicio: String, puntos: int) -> void:
 
 	var game_data: Node = get_node_or_null("/root/GameData")
 	if game_data != null:
-		if "gatopuntos" in game_data:
-			game_data.set("gatopuntos", int(game_data.get("gatopuntos")) + puntos_reales)
+		# Las ventanas del Nivel 3 acreditan con GameData.completeExercise() (reglas compartidas
+		# de puntos y racha). Esta ruta solo suma si alguien registra un ejercicio sin pasar por ahí.
+		if game_data.has_method("isExerciseSolved") and not bool(game_data.call("isExerciseSolved", id_ejercicio)):
+			game_data.call("addPoints", 3, puntos_reales)
 		if "playerScore" in game_data:
 			game_data.set("playerScore", int(game_data.get("playerScore")) + puntos_reales)
 
@@ -580,7 +595,7 @@ func registrar_resultado_detallado(id_ejercicio: String, puntos: int, errores: i
 		intento["cerrado"] = true
 		intento["completo"] = true
 		intento["puntos"] = puntos
-		if maximo > 0 and puntos == maximo and maximo == int(intento.get("maximo", 0)) and int(intento.errores) == 0:
+		if maximo > 0 and puntos >= maximo and maximo == int(intento.get("maximo", 0)) and int(intento.errores) == 0:
 			ejercicios_perfectos[id_ejercicio] = true
 	intentos_insignias[id_ejercicio] = intento
 	registrar_ejercicio(id_ejercicio, puntos)
@@ -606,8 +621,8 @@ func registrar_resultado_examen(aprobado: bool, errores: int, puntos_bono: int =
 			ejercicios_completados["EX3_FINAL"] = true
 			_recalcular_puntos_totales()
 			var game_data: Node = get_node_or_null("/root/GameData")
-			if game_data != null and "gatopuntos" in game_data:
-				game_data.set("gatopuntos", int(game_data.get("gatopuntos")) + puntos_bono)
+			if game_data != null and game_data.has_method("addPoints"):
+				game_data.call("addPoints", 3, puntos_bono)
 			puntos_actualizados.emit(puntos_totales)
 
 	_evaluar_insignias()
@@ -691,6 +706,12 @@ func _desbloquear_insignia(id_insignia: String, lograda_sin_ayuda: bool) -> void
 
 	insignias_otorgadas[id_insignia] = true
 	modalidad_insignias[id_insignia] = modalidad
+
+	# Insignia unificada del juego (toast + pantalla de insignias): aprobar el examen final.
+	if id_insignia == "insignia_examen_final":
+		var ins: Node = get_node_or_null("/root/Insignias")
+		if ins != null and ins.has_method("unlock"):
+			ins.call("unlock", "n3_maestro_nucleo")
 
 	var dj: Node = get_node_or_null("/root/DJManager")
 	if dj != null and dj.has_method("play_sfx"):

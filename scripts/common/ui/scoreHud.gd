@@ -6,8 +6,13 @@ extends CanvasLayer
 #      Puntaje Villa Miaulemana:      120
 #      Problemas resueltos:          3/10
 #
-#  Está OCULTO hasta que el jugador resuelve el primer problema (el del
-#  alcalde). Ahí aparece con una animación. Se actualiza solo.
+#  Sirve a los tres niveles: el rótulo y los contadores cambian según la escena
+#  (Villa Miaulemana 1·10, Bosque Profundo 2·5, Complejo Subterráneo 3·10) y
+#  muestran los puntos GANADOS EN ESE NIVEL (GameData.puntosNivel).
+#
+#  En el Nivel 1 está OCULTO hasta que el jugador resuelve el primer problema (el
+#  del alcalde); ahí aparece con una animación. En los niveles 2 y 3 se ve desde
+#  el principio. Se actualiza solo.
 #  Los valores van en una columna ANCHA alineada a la derecha (VALUE_WIDTH),
 #  así el cuadro no cambia de tamaño cuando el puntaje crece.
 #
@@ -32,6 +37,7 @@ const VALUE_WIDTH := 150.0     # ancho reservado para el número (súbelo si lo 
 const LABEL_GAP   := 16
 
 var _font: Font = null
+var _level: int = 1
 var _box: PanelContainer
 var _scoreValue: Label
 var _problemsValue: Label
@@ -46,17 +52,36 @@ var _popTween: Tween = null
 func _ready() -> void:
 	layer = 1
 	_font = load(FONT_PATH)
+	_level = _detectLevel()
 	_build()
-	_shown = GameData.gatopuntos
+	_shown = _levelScore()
 	_target = _shown
-	_problemsShown = GameData.solvedProblemsCount()
+	_problemsShown = GameData.solvedCount(_level)
 	_refreshTexts()
-	# Si ya resolvió el primero antes (cambió de escena), aparece de inmediato
-	_unlocked = GameData.firstProblemSolved()
+	# Nivel 1: si ya resolvió el primero antes (cambió de escena), aparece de inmediato.
+	# Niveles 2 y 3: visible desde el principio.
+	_unlocked = _level > 1 or GameData.firstProblemSolved()
 	_box.visible = _unlocked
 	GameData.gatopuntosChanged.connect(_onScoreChanged)
 	# Que quede DETRÁS del diálogo y del puzzle (misma capa, se dibuja primero)
 	call_deferred("_sendToBack")
+
+# El nivel se deduce de la escena a la que pertenece este HUD.
+func _detectLevel() -> int:
+	var node: Node = get_parent()
+	while node != null and node.scene_file_path == "":
+		node = node.get_parent()
+	var path: String = node.scene_file_path if node != null else ""
+	if path == "" and get_tree().current_scene != null:
+		path = get_tree().current_scene.scene_file_path
+	if path.contains("/nivel_2/"):
+		return 2
+	if path.contains("/Nivel_3/") or path.contains("/ExamenNivel3/"):
+		return 3
+	return 1
+
+func _levelScore() -> int:
+	return int(GameData.puntosNivel.get(_level, 0))
 
 func _sendToBack() -> void:
 	var p := get_parent()
@@ -118,7 +143,7 @@ func _build() -> void:
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_box.add_child(vbox)
 
-	_scoreValue = _makeRow("Puntaje Villa Miaulemana:", 22, COLOR_TEXT)
+	_scoreValue = _makeRow("Puntaje %s:" % GameData.levelName(_level), 22, COLOR_TEXT)
 
 	var divider := ColorRect.new()
 	divider.color = COLOR_DIVIDER
@@ -130,14 +155,14 @@ func _build() -> void:
 
 func _refreshTexts() -> void:
 	_scoreValue.text = str(_shown)
-	_problemsValue.text = "%d/%d" % [_problemsShown, GameData.TOTAL_PROBLEMS]
+	_problemsValue.text = "%d/%d" % [_problemsShown, GameData.levelTotal(_level)]
 
 # ── Actualización ─────────────────────────────────────────────────────────────
 # Si hay un puzzle abierto (la pantalla lo tapa todo), esperamos a que se cierre
 # para mostrar la aparición / animaciones y que el jugador sí las vea.
 
-func _onScoreChanged(newValue: int) -> void:
-	_target = newValue
+func _onScoreChanged(_newValue: int) -> void:
+	_target = _levelScore()
 
 func _process(_delta: float) -> void:
 	if _puzzleOpen():
@@ -147,7 +172,7 @@ func _process(_delta: float) -> void:
 		if GameData.firstProblemSolved():
 			_unlocked = true
 			_box.visible = true
-			_problemsShown = GameData.solvedProblemsCount()
+			_problemsShown = GameData.solvedCount(_level)
 			_refreshTexts()
 			_appear()
 		return
@@ -155,7 +180,7 @@ func _process(_delta: float) -> void:
 	if _target != _shown:
 		_animateScoreTo(_target)
 
-	var solved := GameData.solvedProblemsCount()
+	var solved: int = GameData.solvedCount(_level)
 	if solved != _problemsShown:
 		_problemsShown = solved
 		_refreshTexts()

@@ -43,54 +43,37 @@ func seleccionar_examen_aleatorio(excluir_idx: int = -1) -> int:
 	print("PuntajesNivel2: Examen activo asignado dinámicamente -> Índice %d (excluido: %d)" % [examen_activo_idx, excluir_idx])
 	return examen_activo_idx
 
-## Registra la finalización de un ejercicio calculando puntos según fórmula oficial del PDF
+## Registra la finalización de un ejercicio. Los puntos, la penalización, la racha y el
+## bono los calcula GameData con las mismas reglas que los Niveles 1 y 3 (base: 40 por bloque).
 func registrar_ejercicio(codigo: String, bloques_completados: int, errores: int) -> int:
 	if ejercicios_completados.has(codigo):
 		print("PuntajesNivel2: El ejercicio %s ya estaba completado." % codigo)
 		return ejercicios_completados[codigo]
-	
-	# Fórmula oficial PDF (Pág. 10):
-	# Base = bloques * 40
-	var base: int = bloques_completados * PUNTOS_BASE_BLOQUE
-	var puntos: int = base
-	
-	if errores == 2:
-		puntos = int(base * 0.75) # -25%
-	elif errores >= 3:
-		puntos = int(base * 0.50) # -50%
-	
-	# Manejo de racha global (bonus a partir del 3er acierto consecutivo)
-	if errores == 0:
-		racha_actual += 1
-		if racha_actual >= 3:
-			puntos += BONUS_RACHA_NIVEL2
-	else:
-		racha_actual = 0
-	
+
+	var r: Dictionary = GameData.completeExercise(2, codigo, bloques_completados, errores)
+	var puntos: int = int(r["total"])
+	racha_actual = GameData.rachaGlobal
+
 	ejercicios_completados[codigo] = puntos
 	puntos_totales += puntos
-	
-	# Sincronizar con GameData global si existe
-	if GameData:
-		GameData.gatopuntos += puntos
-		if "rachaGlobal" in GameData:
-			if errores == 0:
-				GameData.rachaGlobal += 1
-			else:
-				GameData.rachaGlobal = 0
-	
 	puntos_actualizados.emit(puntos_totales)
-	
-	# Comprobar insignia "Cazador de Ciclos" (>= 4 de 5 ejercicios resueltos)
+
+	# Mantiene el aviso interno del nivel; la insignia oficial la entrega el autoload Insignias.
 	_verificar_insignia()
-	
+
 	print("========================================")
 	print("NIVEL 2 - RETO COMPLETADO: ", codigo)
 	print("Puntos obtenidos: ", puntos, " (Errores: ", errores, ", Racha: ", racha_actual, ")")
 	print("Total Nivel 2: ", puntos_totales)
 	print("========================================")
-	
+
 	return puntos
+
+## Cada comprobación fallida reinicia la racha global (igual que un error en el Nivel 1).
+func registrar_error(codigo: String, firma: String = "") -> void:
+	GameData.noteError(codigo, firma)
+	GameData.streakFail(codigo)
+	racha_actual = GameData.rachaGlobal
 
 func _verificar_insignia() -> void:
 	if not insignias.has(NOMBRE_INSIGNIA) and ejercicios_completados.size() >= 4:

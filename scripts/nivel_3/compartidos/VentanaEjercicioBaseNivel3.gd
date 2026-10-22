@@ -830,7 +830,7 @@ func ejecutar_codigo() -> void:
 		validando_intento = false
 		ultimo_tipo_error = ""
 		panel_pista.hide()
-		var puntos_obtenidos: int = calcular_puntos()
+		var puntos_obtenidos: int = _acreditar_en_sistema_global()
 
 		_registrar_intento_log(true, duracion_seg, "NINGUNO", puntos_obtenidos)
 		registrar_puntaje(puntos_obtenidos)
@@ -839,6 +839,7 @@ func ejecutar_codigo() -> void:
 		mensaje_resultado.text = (
 			"¡Algoritmo correcto! " + str(validacion.get("resumen_casos", ""))
 			+ "\nPuntos obtenidos: +" + str(puntos_obtenidos)
+			+ _texto_desglose_puntos()
 		)
 		mensaje_resultado.add_theme_color_override("font_color", Color("#4ADE80"))
 		_animar_feedback(true)
@@ -867,6 +868,10 @@ func ejecutar_codigo() -> void:
 	# Respuesta incorrecta
 	validando_intento = false
 	errores += 1
+	if not repeticion_sin_puntos:
+		# Un error reinicia la racha global y queda registrado (misma regla que el Nivel 1).
+		GameData.noteError(_obtener_id_ejercicio(), "|".join(bloques_colocados))
+		GameData.streakFail(_obtener_id_ejercicio())
 	if sistema_puntos != null and sistema_puntos.has_method("registrar_error_insignia"):
 		errores = int(sistema_puntos.call("registrar_error_insignia", _obtener_id_ejercicio(), id_intento_insignia))
 	ultimo_tipo_error = detectar_tipo_error()
@@ -912,13 +917,35 @@ func detectar_tipo_error() -> String:
 	return "orden_incorrecto"
 
 
+# Valor del ejercicio antes del bono de racha: base del nivel menos la penalización por errores
+# (las mismas reglas que los niveles 1 y 2, centralizadas en GameData).
 func calcular_puntos() -> int:
 	var base: int = _obtener_total_espacios() * _obtener_puntos_por_bloque()
-	if errores <= 1:
-		return base
-	elif errores == 2:
-		return int(round(base * 0.75))
-	return int(round(base * 0.50))
+	return base - GameData.errorPenalty(base, errores)
+
+
+# Detalle de cómo se llegó al puntaje (solo si hubo penalización o bono de racha).
+func _texto_desglose_puntos() -> String:
+	var d: Dictionary = GameData.lastBreakdown
+	if repeticion_sin_puntos or String(d.get("code", "")) != _obtener_id_ejercicio():
+		return ""
+	var partes: Array[String] = []
+	if int(d["pen"]) > 0:
+		partes.append("Penalización: -%d" % int(d["pen"]))
+	if int(d["bonus"]) > 0:
+		partes.append("Bonus racha (x%d): +%d" % [GameData.rachaGlobal, int(d["bonus"])])
+	if partes.is_empty():
+		return ""
+	return "\n(Base %d · %s)" % [int(d["base"]), " · ".join(partes)]
+
+
+# Acredita el ejercicio con las reglas compartidas (racha + bono) y devuelve los puntos reales.
+# Una repetición no entrega puntos ni toca la racha: se devuelve el valor de referencia.
+func _acreditar_en_sistema_global() -> int:
+	if repeticion_sin_puntos:
+		return calcular_puntos()
+	var resultado: Dictionary = GameData.completeExercise(3, _obtener_id_ejercicio(), _obtener_total_espacios(), errores)
+	return int(resultado["total"])
 
 
 func registrar_puntaje(puntos: int) -> void:

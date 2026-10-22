@@ -90,13 +90,9 @@ func mostrar_completado(errores: int) -> void:
 
 	errores_cometidos = errores
 
-	# Calcular puntos según errores (4 bloques * 60 pts = 240 base)
-	if errores <= 1:
-		puntos_ganados = 240
-	elif errores == 2:
-		puntos_ganados = 180
-	else:
-		puntos_ganados = 120
+	# Puntos realmente acreditados (4 bloques * 60 = 240 base, menos penalización, más bono de
+	# racha) con las reglas compartidas de GameData; sin registro en esta sesión se usa la base.
+	puntos_ganados = GameData.creditedPoints("E3.1", 240 - GameData.errorPenalty(240, errores))
 
 	var dj: Node = get_node_or_null("/root/DJManager")
 	if dj != null and dj.has_method("play_sfx"):

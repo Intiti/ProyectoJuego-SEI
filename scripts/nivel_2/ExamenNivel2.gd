@@ -265,6 +265,7 @@ var _arrowOverlay: Label = null
 
 var resuelto: bool = false
 var vidas_actuales: int = MAX_VIDAS
+var _resultadoExamen: Dictionary = {}   # desglose de puntos del examen aprobado (reglas compartidas)
 var mostrando_fallo: bool = false
 var _reintentar_elegido: bool = true
 var _musica_previa: String = ""
@@ -792,6 +793,7 @@ func _on_alternativa_elegida(texto: String, correcto: bool, boton: PanelContaine
 				break
 
 		_mostrar_feedback("¡Correcto!", Color(0.4, 1.0, 0.5))
+		GameData.streakHit(1)   # cada acierto suma a la racha global, como en el Nivel 1
 		_currentStep += 1
 
 		await get_tree().create_timer(0.5).timeout
@@ -814,6 +816,7 @@ func _on_alternativa_elegida(texto: String, correcto: bool, boton: PanelContaine
 		boton.modulate.a = 0.5
 
 		vidas_actuales -= 1
+		GameData.streakFail()   # un error reinicia la racha global
 		_actualizar_vidas()
 
 		if vidas_actuales <= 0:
@@ -868,6 +871,9 @@ func _on_examen_superado() -> void:
 	_limpiar_alternativas()
 	stepLabel.text = "¡Completado!"
 	feedbackLabel.visible = false
+
+	# Puntos del examen con las reglas compartidas: cada vida perdida cuenta como un error.
+	_resultadoExamen = GameData.completeExam(2, "EX2", _steps.size(), MAX_VIDAS - vidas_actuales)
 
 	await _mostrar_completado()
 
@@ -947,6 +953,14 @@ func _mostrar_completado() -> void:
 
 	var lblMsg = Label.new()
 	lblMsg.text = "¡Examen aprobado!\nEstás listo para avanzar al Laboratorio Subterráneo."
+	if not _resultadoExamen.is_empty() and not bool(_resultadoExamen.get("repeat", false)):
+		var lost: int = MAX_VIDAS - vidas_actuales
+		lblMsg.text += "\n\nPuntaje base  (%d pasos × %d):  %d pts" % [_steps.size(), GameData.POINTS_PER_BLOCK[2], int(_resultadoExamen["base"])]
+		if int(_resultadoExamen["pen"]) > 0:
+			lblMsg.text += "\nPenalización  (%d errores):  -%d pts" % [lost, int(_resultadoExamen["pen"])]
+		if int(_resultadoExamen["bonus"]) > 0:
+			lblMsg.text += "\nBonus racha  (racha de %d):  +%d pts" % [GameData.rachaGlobal, int(_resultadoExamen["bonus"])]
+		lblMsg.text += "\nTotal:  +%d pts" % int(_resultadoExamen["total"])
 	lblMsg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lblMsg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lblMsg.add_theme_font_size_override("font_size", FONT_SIZE + 2)

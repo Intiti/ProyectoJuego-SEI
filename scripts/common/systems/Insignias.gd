@@ -26,6 +26,9 @@ const TOAST_HOLD := 4.5
 const ID_PRIMER_PUZZLE := "n1_primer_puzzle"
 const ID_RACHA_5 := "n1_racha_5"
 const ID_NIVEL_1 := "n1_nivel_completo"
+const ID_N2_CAZADOR := "n2_cazador_ciclos"
+const ID_N3_MAESTRO := "n3_maestro_nucleo"
+const ID_DEPURADOR := "depurador_persistente"
 
 const CATALOGO := [
 	{
@@ -43,6 +46,21 @@ const CATALOGO := [
 		"nombre": "Insignia del Gato Héroe de la Villa",
 		"descripcion": "Completaste los 10 ejercicios del Nivel 1. ¡Villa Miaulemana te lo agradece!",
 	},
+	{
+		"id": ID_N2_CAZADOR, "nivel": 2, "tier": PLATA, "face": 1,
+		"nombre": "Insignia del Cazador de Ciclos",
+		"descripcion": "Resolviste al menos 4 de los 5 ejercicios del Bosque Profundo, con ciclos que terminan correctamente.",
+	},
+	{
+		"id": ID_N3_MAESTRO, "nivel": 3, "tier": ORO, "face": 2,
+		"nombre": "Insignia del Maestro del Núcleo Cibernético",
+		"descripcion": "Superaste el examen integrador del complejo subterráneo sin quedarte sin vidas.",
+	},
+	{
+		"id": ID_DEPURADOR, "nivel": 0, "tier": BRONCE, "face": 0,
+		"nombre": "Insignia del Depurador Persistente",
+		"descripcion": "Corregiste una solución tras recibir feedback y resolviste el ejercicio sin repetir el mismo error.",
+	},
 ]
 
 var _desbloqueadas: Dictionary = {}   # id -> timestamp unix
@@ -58,6 +76,8 @@ func _ready() -> void:
 	_load()
 	GameData.problemsChanged.connect(_onProblemsChanged)
 	GameData.rachaChanged.connect(_onRachaChanged)
+	GameData.exerciseSolved.connect(_onExerciseSolved)
+	GameData.exerciseDebugged.connect(_onExerciseDebugged)
 
 # ── API pública ───────────────────────────────────────────────────────────────
 
@@ -110,6 +130,14 @@ func _onProblemsChanged() -> void:
 func _onRachaChanged(value: int) -> void:
 	if value >= 5:
 		unlock(ID_RACHA_5)
+
+# Niveles 2 y 3: GameData avisa cada vez que se acredita un ejercicio.
+func _onExerciseSolved(level: int, _code: String) -> void:
+	if level == 2 and GameData.solvedCount(2) >= 4:
+		unlock(ID_N2_CAZADOR)
+
+func _onExerciseDebugged(_code: String) -> void:
+	unlock(ID_DEPURADOR)
 
 # ── Toast ─────────────────────────────────────────────────────────────────────
 

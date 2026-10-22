@@ -54,11 +54,26 @@ func _build() -> void:
 
 	vbox.add_child(_label("INSIGNIAS", 40, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
 	vbox.add_child(_label("%d / %d conseguidas" % [Insignias.unlockedCount(), Insignias.totalCount()], 18, Color(0.82, 0.78, 1.0), HORIZONTAL_ALIGNMENT_CENTER))
-	vbox.add_child(_label("NIVEL 1", 20, Color(1.0, 0.90, 0.55), HORIZONTAL_ALIGNMENT_LEFT))
+	# La lista crece con los niveles 2 y 3: va dentro de un scroll para no salirse de la pantalla.
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(0, minf(get_viewport_rect().size.y * 0.52, 520.0))
+	vbox.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 10)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
 
-	for info in Insignias.getCatalogo():
-		if int(info["nivel"]) == 1:
-			vbox.add_child(_makeRow(info))
+	for level in [1, 2, 3, 0]:
+		var title: String = "TRANSVERSAL" if level == 0 else "NIVEL %d" % level
+		var header_added := false
+		for info in Insignias.getCatalogo():
+			if int(info["nivel"]) != level:
+				continue
+			if not header_added:
+				list.add_child(_label(title, 20, Color(1.0, 0.90, 0.55), HORIZONTAL_ALIGNMENT_LEFT))
+				header_added = true
+			list.add_child(_makeRow(info))
 
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 6)

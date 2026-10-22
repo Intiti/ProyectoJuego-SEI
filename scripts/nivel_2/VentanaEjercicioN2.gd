@@ -778,6 +778,10 @@ func _on_completado_cerrado() -> void:
 
 func _manejar_error(distractor: String, slot_idx: int = -1) -> void:
 	errores += 1
+	# Un error reinicia la racha global y queda registrado (misma regla que el Nivel 1).
+	var puntajes_err = get_node_or_null("/root/PuntajesNivel2")
+	if puntajes_err and puntajes_err.has_method("registrar_error"):
+		puntajes_err.registrar_error(codigo_ejercicio, "|".join(bloques_en_slots))
 	var explicacion: String = ""
 	var pista_texto: String = ""
 	
