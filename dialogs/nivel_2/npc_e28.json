@@ -1,0 +1,43 @@
+{
+	"npc_name": "Exploradora Lyra",
+	"lines": [
+		{
+			"speaker": "Exploradora Lyra",
+			"text": "¡Alto ahí, intrépido explorador! Este tramo del bosque está plagado de zarzas venenosas."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Pudo Panko cruzar por semejante laberinto de espinas?"
+		},
+		{
+			"speaker": "Exploradora Lyra",
+			"text": "Panko es muy ágil y saltó entre las ramas altas, pero dejó caer varias marcas. Para abrir paso seguro, debemos podar las lianas inspeccionando 4 ramas del sendero."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo identificamos las ramas peligrosas?"
+		},
+		{
+			"speaker": "Exploradora Lyra",
+			"text": "Debemos usar un ciclo while con índice 'i' hasta llegar a 4. En cada rama leemos su tipo; si es 'veneno', sumamos 1 al contador 'peligros' para preparar el bálsamo exacto."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un contador con filtro condicional interno: 'while i < 4:' y 'peligros = peligros + 1'. ¡Vamos al altar de corte!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Exploradora Lyra",
+			"text": "¡Conteo botánico impecable! Hemos neutralizado todas las espinas con la dosis correcta."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡Las zarzas venenosas se apartan abriendo paso hacia las alturas!"
+		},
+		{
+			"speaker": "Exploradora Lyra",
+			"text": "El viento sopla fuerte más adelante. ¡Sube hacia el Risco de los Vientos!"
+		}
+	]
+}

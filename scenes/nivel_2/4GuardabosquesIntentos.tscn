@@ -145,7 +145,7 @@ shape = SubResource("RectangleShape2D_barrera")
 [node name="SalidaBosque" type="Area2D" parent="."]
 position = Vector2(1860, 720)
 script = ExtResource("11_salida")
-siguiente_escena = "res://scenes/nivel_2/5PuenteDeTroncos.tscn"
+siguiente_escena = "res://scenes/nivel_2/5ArroyoDeLuciernagas.tscn"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SalidaBosque"]
 shape = SubResource("RectangleShape2D_salida")

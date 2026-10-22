@@ -1,0 +1,194 @@
+[gd_scene format=3 uid="uid://ctqtt65ktxmc1"]
+
+[ext_resource type="Script" uid="uid://cbeji66s7fhtr" path="res://scripts/nivel_2/Nivel2Base.gd" id="1_base"]
+[ext_resource type="Texture2D" uid="uid://c13egwdksuqtc" path="res://assets/nivel_2/fondos/Claro_Hongos.png" id="2_fondo"]
+[ext_resource type="PackedScene" uid="uid://player" path="res://scenes/common/actors/Player.tscn" id="3_player"]
+[ext_resource type="Script" uid="uid://b8g8q7yjfq14j" path="res://scripts/nivel_2/compartidos/ParticulasMisticas.gd" id="4_particulas"]
+[ext_resource type="Script" uid="uid://bmkf0ypxe4j8l" path="res://scripts/nivel_2/InteraccionGatoNivel2.gd" id="5_gato"]
+[ext_resource type="Texture2D" uid="uid://d044wgvpllq4g" path="res://assets/nivel_2/personajes/Gato_Alquimista.png" id="6_alquimista"]
+[ext_resource type="Script" uid="uid://doutifd7av8hj" path="res://scripts/nivel_2/InteraccionAltarN2.gd" id="7_altar"]
+[ext_resource type="Texture2D" uid="uid://datv45gc8d2ew" path="res://assets/nivel_2/personajes/Altar_Runico.png" id="8_altar_tex"]
+[ext_resource type="Script" uid="uid://br0r5013upuu6" path="res://scripts/nivel_2/compartidos/BarreraMistica.gd" id="9_barrera"]
+[ext_resource type="Texture2D" uid="uid://bawh3nlqbiv7i" path="res://assets/nivel_2/personajes/Puerta_Ramas.png" id="10_ramas"]
+[ext_resource type="Script" uid="uid://dwchudwcvlu0b" path="res://scripts/nivel_2/compartidos/SalidaBosque.gd" id="11_salida"]
+[ext_resource type="Script" uid="uid://b71njh3aib8q2" path="res://scripts/nivel_2/VentanaEjercicioN2.gd" id="12_ejercicio"]
+[ext_resource type="Script" uid="uid://daktjq6b5kmra" path="res://scripts/nivel_2/VentanaCompletadoN2.gd" id="13_completado"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_suelo"]
+size = Vector2(2300, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pared"]
+size = Vector2(60, 1200)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_npc"]
+radius = 110.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_letrae"]
+bg_color = Color(0.1, 0.15, 0.22, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.9, 0.8, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_barrera"]
+size = Vector2(50, 420)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_salida"]
+size = Vector2(100, 420)
+
+[node name="6ClaroDeHongos" type="Node2D" unique_id=1800359731]
+script = ExtResource("1_base")
+
+[node name="Fondo" type="Sprite2D" parent="." unique_id=716549548]
+position = Vector2(960, 540)
+texture = ExtResource("2_fondo")
+
+[node name="ParticulasMisticas" type="Node2D" parent="." unique_id=2083992217]
+script = ExtResource("4_particulas")
+
+[node name="Suelo" type="StaticBody2D" parent="." unique_id=861348049]
+position = Vector2(1000, 930)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Suelo" unique_id=345211648]
+shape = SubResource("RectangleShape2D_suelo")
+
+[node name="Paredes" type="StaticBody2D" parent="." unique_id=1387356011]
+
+[node name="ParedIzq" type="CollisionShape2D" parent="Paredes" unique_id=463148797]
+position = Vector2(-20, 540)
+shape = SubResource("RectangleShape2D_pared")
+
+[node name="ParedDer" type="CollisionShape2D" parent="Paredes" unique_id=1737959702]
+position = Vector2(1940, 540)
+shape = SubResource("RectangleShape2D_pared")
+
+[node name="Player" parent="." unique_id=1870615123 instance=ExtResource("3_player")]
+position = Vector2(120, 873)
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1039012011]
+limit_left = 0
+limit_top = 0
+limit_right = 1920
+limit_bottom = 1080
+position_smoothing_enabled = true
+
+[node name="GatoMistico" type="Area2D" parent="." unique_id=1869462072]
+position = Vector2(620, 905)
+script = ExtResource("5_gato")
+dialog_file = "res://dialogs/nivel_2/npc_e26.json"
+npc_nombre = "Alquimista Fael"
+
+[node name="Sprite2D" type="Sprite2D" parent="GatoMistico" unique_id=2108103221]
+texture_filter = 1
+position = Vector2(0, -60)
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("6_alquimista")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GatoMistico" unique_id=1951541580]
+position = Vector2(0, -50)
+shape = SubResource("CircleShape2D_npc")
+
+[node name="LetraE" type="Label" parent="GatoMistico" unique_id=1027711378]
+offset_left = -60.0
+offset_top = -175.0
+offset_right = 60.0
+offset_bottom = -135.0
+theme_override_colors/font_color = Color(0.3, 0.95, 0.85, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_letrae")
+text = "[E] Hablar"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AltarRunico" type="Area2D" parent="." unique_id=127413265]
+position = Vector2(1150, 905)
+script = ExtResource("7_altar")
+
+[node name="SpriteAltar" type="Sprite2D" parent="AltarRunico" unique_id=415329521]
+texture_filter = 1
+position = Vector2(0, -65)
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("8_altar_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AltarRunico" unique_id=1142815627]
+position = Vector2(0, -50)
+shape = SubResource("CircleShape2D_npc")
+
+[node name="LetraE" type="Label" parent="AltarRunico" unique_id=1531412902]
+offset_left = -110.0
+offset_top = -185.0
+offset_right = 110.0
+offset_bottom = -145.0
+theme_override_colors/font_color = Color(0.4, 1, 0.85, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_letrae")
+text = "[E] Activar Miaugoritmo"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BarreraMistica" type="StaticBody2D" parent="." unique_id=1055971969]
+position = Vector2(1650, 720)
+script = ExtResource("9_barrera")
+
+[node name="Sprite2D" type="Sprite2D" parent="BarreraMistica" unique_id=230261036]
+scale = Vector2(1.2, 1.3)
+texture = ExtResource("10_ramas")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BarreraMistica" unique_id=1333743080]
+shape = SubResource("RectangleShape2D_barrera")
+
+[node name="SalidaBosque" type="Area2D" parent="." unique_id=1958375217]
+position = Vector2(1860, 720)
+script = ExtResource("11_salida")
+siguiente_escena = "res://scenes/nivel_2/7TotemDeEspiritus.tscn"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SalidaBosque" unique_id=1781986577]
+shape = SubResource("RectangleShape2D_salida")
+
+[node name="EjercicioUI" type="CanvasLayer" parent="." unique_id=1845913303]
+layer = 8
+
+[node name="VentanaEjercicio" type="PanelContainer" parent="EjercicioUI" unique_id=110920450]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -520.0
+offset_top = -320.0
+offset_right = 520.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("12_ejercicio")
+codigo_ejercicio = "E2.6"
+titulo_ejercicio = "E2.6 · La poción de los hongos lunares"
+objetivo_aprendizaje = "OA3: ciclo con decremento de paso variable"
+contexto_npc = "Alquimista Fael"
+texto_instrucciones = "La poción mágica hierve a 30 grados y debe enfriarse en agitaciones de a 5 grados.
+Usa un ciclo while para mostrar la temperatura mientras sea mayor que 10; al alcanzar la temperatura ideal muestra «Poción lista»."
+explicaciones_error = {
+"    temp = 10": "Fijar 10 de golpe corta el proceso sin el enfriamiento paso a paso.",
+"    temp = temp + 5": "Sumar calienta la poción en vez de enfriarla.",
+"while temp < 10:": "La temperatura inicial es 30, por lo que nunca entraría al ciclo.",
+"while temp == 10:": "Como inicia en 30, la condición temp == 10 es falsa de inmediato."
+}
+
+[node name="VentanaCompletado" type="PanelContainer" parent="EjercicioUI" unique_id=4110712]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -370.0
+offset_top = -220.0
+offset_right = 370.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("13_completado")

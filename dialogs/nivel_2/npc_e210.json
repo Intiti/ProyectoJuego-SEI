@@ -1,0 +1,43 @@
+{
+	"npc_name": "Constructor Bram",
+	"lines": [
+		{
+			"speaker": "Constructor Bram",
+			"text": "¡Por el Gran Yunque del Bosque! Llegaste justo a tiempo, viajero."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Es este el cruce que lleva a las ruinas subterráneas? ¡Vi las huellas de Panko aquí!"
+		},
+		{
+			"speaker": "Constructor Bram",
+			"text": "¡Sí! Panko saltó al otro lado hacia las ruinas mecánicas subterráneas. Pero el viejo puente cedió y debo ensamblar uno nuevo con troncos sagrados."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo debe construirse el puente para que sea seguro?"
+		},
+		{
+			"speaker": "Constructor Bram",
+			"text": "Los pilares del abismo solo soportan un peso acumulado menor a 20 unidades y un límite estricto de menos de 5 troncos. Debemos leer el peso de cada tronco, acumularlo y detenernos si se alcanza cualquiera de los dos límites."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un ciclo con condición compuesta usando 'and': 'while peso_total < 20 and piezas < 5:'. ¡Construiré el programa desde cero en el Altar del Puente!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Constructor Bram",
+			"text": "¡El puente de troncos y enredaderas mágicas está completado y equilibrado con precisión rúnica!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡Las runas de los pilares brillan! ¡El camino hacia el Complejo Subterráneo está abierto!"
+		},
+		{
+			"speaker": "Constructor Bram",
+			"text": "¡Cruza el puente, amigo! Al otro lado del abismo encontrarás un antiguo altar rúnico descuidado. Los ancianos dicen que es una antigua matriz de teletransportación que conduce al laboratorio subterráneo. ¡Sintoniza su código para descender!"
+		}
+	]
+}

@@ -1,0 +1,43 @@
+{
+	"npc_name": "Chamán Zephyr",
+	"lines": [
+		{
+			"speaker": "Chamán Zephyr",
+			"text": "Paz a tus pasos, viajero. Te encuentras ante el Tótem de los Antiguos Guardianes."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Gran Chamán, necesito pasar al desfiladero. ¿Has sentido la presencia de Panko?"
+		},
+		{
+			"speaker": "Chamán Zephyr",
+			"text": "El pequeño felino fue bendecido por los espíritus del bosque hace un instante. Pero el tótem ha caído en letargo y sus ojos de piedra bloquean el portal."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo despertamos a los espíritus del tótem?"
+		},
+		{
+			"speaker": "Chamán Zephyr",
+			"text": "Debemos usar una bandera booleana. El tótem inicia en reposo ('activado = False'). Consultaremos orbes con 'input()' mientras no esté activo ('while not activado:'). Al dar con el orbe 'sagrado', cambiaremos la bandera a True."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un bucle de bandera centinela: 'while not activado:'. ¡Canalicemos la plegaria en el altar!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Chamán Zephyr",
+			"text": "¡Los ojos de zafiro del tótem se han iluminado! Los espíritus ancestrales sonríen."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡El portal de raíces se ha desenredado! El camino al laberinto de zarzas está despejado."
+		},
+		{
+			"speaker": "Chamán Zephyr",
+			"text": "Que la sabiduría de los ciclos te guíe en las profundidades de la espesura."
+		}
+	]
+}

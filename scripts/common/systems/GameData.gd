@@ -120,7 +120,7 @@ var rachaGlobal: int = 0:
 const POINTS_PER_BLOCK := {1: 20, 2: 40, 3: 60}
 const STREAK_BONUS_MIN := 3
 const STREAK_BONUS_PER_HIT := 5
-const LEVEL_TOTALS := {1: 10, 2: 5, 3: 10}
+const LEVEL_TOTALS := {1: 10, 2: 10, 3: 10}
 const LEVEL_NAMES := {1: "Villa Miaulemana", 2: "Bosque Profundo", 3: "Complejo Subterráneo"}
 
 signal exerciseSolved(level: int, code: String)

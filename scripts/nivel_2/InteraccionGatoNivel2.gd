@@ -51,7 +51,12 @@ const MAPA_TEXTURAS_NPC = {
 	"Rastreador Chikí": "res://assets/nivel_2/personajes/Gato_Rastreador.png",
 	"Druida Sylva": "res://assets/nivel_2/personajes/Gata_Recolectora.png",
 	"Guía Milo": "res://assets/nivel_2/personajes/Gato_Guia.png",
-	"Guardabosques Kaelen": "res://assets/nivel_2/personajes/Gato_Guardabosques.png"
+	"Guardabosques Kaelen": "res://assets/nivel_2/personajes/Gato_Guardabosques.png",
+	"Pescador Nyx": "res://assets/nivel_2/personajes/Gato_Pescador.png",
+	"Alquimista Fael": "res://assets/nivel_2/personajes/Gato_Alquimista.png",
+	"Chamán Zephyr": "res://assets/nivel_2/personajes/Gato_Chaman.png",
+	"Exploradora Lyra": "res://assets/nivel_2/personajes/Gato_Exploradora.png",
+	"Centinela Ronin": "res://assets/nivel_2/personajes/Gato_Centinela.png"
 }
 
 const MAPA_RETRATOS_NPC = {
@@ -60,7 +65,12 @@ const MAPA_RETRATOS_NPC = {
 	"Rastreador Chikí": "res://assets/nivel_2/personajes/retratos/Retrato_Rastreador.png",
 	"Druida Sylva": "res://assets/nivel_2/personajes/retratos/Retrato_Recolectora.png",
 	"Guía Milo": "res://assets/nivel_2/personajes/retratos/Retrato_Guia.png",
-	"Guardabosques Kaelen": "res://assets/nivel_2/personajes/retratos/Retrato_Guardabosques.png"
+	"Guardabosques Kaelen": "res://assets/nivel_2/personajes/retratos/Retrato_Guardabosques.png",
+	"Pescador Nyx": "res://assets/nivel_2/personajes/retratos/Retrato_Pescador.png",
+	"Alquimista Fael": "res://assets/nivel_2/personajes/retratos/Retrato_Alquimista.png",
+	"Chamán Zephyr": "res://assets/nivel_2/personajes/retratos/Retrato_Chaman.png",
+	"Exploradora Lyra": "res://assets/nivel_2/personajes/retratos/Retrato_Exploradora.png",
+	"Centinela Ronin": "res://assets/nivel_2/personajes/retratos/Retrato_Centinela.png"
 }
 
 func _ready() -> void:
@@ -123,6 +133,16 @@ func _obtener_retrato_seguro() -> Texture2D:
 			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Guardabosques.png"
 		elif "Bram" in npc_nombre or "Constructor" in npc_nombre:
 			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Constructor.png"
+		elif "Nyx" in npc_nombre or "Pescador" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Pescador.png"
+		elif "Fael" in npc_nombre or "Alquimista" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Alquimista.png"
+		elif "Zephyr" in npc_nombre or "Chaman" in npc_nombre or "Chamán" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Chaman.png"
+		elif "Lyra" in npc_nombre or "Exploradora" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Exploradora.png"
+		elif "Ronin" in npc_nombre or "Centinela" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/retratos/Retrato_Centinela.png"
 		else:
 			var escena_nombre = get_tree().current_scene.name if get_tree().current_scene else ""
 			if "Puente" in escena_nombre:
@@ -155,6 +175,16 @@ func _obtener_textura_segura() -> Texture2D:
 			ruta = "res://assets/nivel_2/personajes/Gato_Guardabosques.png"
 		elif "Bram" in npc_nombre or "Constructor" in npc_nombre:
 			ruta = "res://assets/nivel_2/personajes/Gato_Constructor.png"
+		elif "Nyx" in npc_nombre or "Pescador" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/Gato_Pescador.png"
+		elif "Fael" in npc_nombre or "Alquimista" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/Gato_Alquimista.png"
+		elif "Zephyr" in npc_nombre or "Chaman" in npc_nombre or "Chamán" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/Gato_Chaman.png"
+		elif "Lyra" in npc_nombre or "Exploradora" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/Gato_Exploradora.png"
+		elif "Ronin" in npc_nombre or "Centinela" in npc_nombre:
+			ruta = "res://assets/nivel_2/personajes/Gato_Centinela.png"
 		else:
 			var escena_nombre = get_tree().current_scene.name if get_tree().current_scene else ""
 			if "Puente" in escena_nombre:

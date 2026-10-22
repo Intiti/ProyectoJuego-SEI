@@ -57,11 +57,11 @@ var resuelto: bool = false
 # Catálogo oficial de respaldo del Banco de Ejercicios Nivel 2 (OA3)
 # Enunciados reescritos para que se entiendan mejor (reemplazan al de la escena).
 const INSTRUCCIONES_CLARAS := {
-	"E2.5": "El constructor arma un puente de troncos. El puente soporta como máximo 20 unidades de peso y 5 troncos.\nLee el peso de cada tronco, acumúlalo y detente cuando el peso total llegue a 20 o ya se hayan colocado 5 troncos; luego muestra el peso total.",
+	"E2.10": "El constructor arma un puente de troncos. El puente soporta como máximo 20 unidades de peso y 5 troncos.\nLee el peso de cada tronco, acumúlalo y detente cuando el peso total llegue a 20 o ya se hayan colocado 5 troncos; luego muestra el peso total.",
 }
-# Huecos cuyo orden entre sí no importa (ambas líneas son independientes): E2.5 acepta
+# Huecos cuyo orden entre sí no importa (ambas líneas son independientes): E2.10 acepta
 # "peso_total = ..." y "piezas = ..." en cualquier orden.
-const ORDEN_LIBRE := {"E2.5": [[1, 2]]}
+const ORDEN_LIBRE := {"E2.10": [[1, 2]]}
 
 const BANCO_DATOS_OFICIAL = {
 	"E2.1": {
@@ -173,7 +173,147 @@ const BANCO_DATOS_OFICIAL = {
 		"escena": "res://scenes/nivel_2/4GuardabosquesIntentos.tscn"
 	},
 	"E2.5": {
-		"titulo": "E2.5 · El puente de troncos",
+		"titulo": "E2.5 · El arroyo de las luciérnagas",
+		"oa": "OA3: acumulador con condición de umbral",
+		"npc": "Pescador Nyx",
+		"instrucciones": "El pescador Nyx necesita reunir al menos 15 unidades de luz para cruzar el arroyo.\nLee el destello de cada luciérnaga con int(input()), acumúlalo en 'luz' mientras sea menor a 15 y al finalizar muestra «Camino iluminado».",
+		"plantilla": ["luz = 0", "[?]", "    destello = int(input())", "[?]", "print(\"Camino iluminado\")"],
+		"correctas": ["while luz < 15:", "    luz = luz + destello"],
+		"disponibles": ["while luz < 15:", "    luz = luz + destello", "while luz <= 0:", "    luz = destello", "while luz > 15:", "    destello = destello + luz"],
+		"retroalimentacion": {
+			"while luz <= 0:": {
+				"error": "La luz inicia en 0. Con '<= 0' solo se ejecutaría en el primer instante y se detendría sin alcanzar la meta de 15.",
+				"pista": "El farol debe seguir capturando luciérnagas MIENTRAS la luz sea MENOR a 15 ('while luz < 15:')."
+			},
+			"    luz = destello": {
+				"error": "Esta instrucción sobrescribe el valor de luz en vez de acumular cada destello recibido.",
+				"pista": "Para acumular la energía lumínica, suma el valor previo más el nuevo: 'luz = luz + destello'."
+			},
+			"while luz > 15:": {
+				"error": "Como la luz inicial es 0, '0 > 15' es falso desde el primer momento y el ciclo nunca se ejecuta.",
+				"pista": "La condición debe permitir el paso mientras el acumulador no haya alcanzado las 15 unidades."
+			},
+			"    destello = destello + luz": {
+				"error": "Estás modificando la variable temporal 'destello' en lugar del acumulador principal 'luz'.",
+				"pista": "Actualiza la variable acumuladora sumándole el destello: 'luz = luz + destello'."
+			}
+		},
+		"escena": "res://scenes/nivel_2/5ArroyoDeLuciernagas.tscn"
+	},
+	"E2.6": {
+		"titulo": "E2.6 · La poción de los hongos lunares",
+		"oa": "OA3: ciclo con decremento de paso variable",
+		"npc": "Alquimista Fael",
+		"instrucciones": "La poción mágica hierve a 30 grados y debe enfriarse en agitaciones de a 5 grados.\nUsa un ciclo while para mostrar la temperatura mientras sea mayor que 10; al alcanzar la temperatura ideal muestra «Poción lista».",
+		"plantilla": ["temp = 30", "[?]", "    print(temp)", "[?]", "print(\"Poción lista\")"],
+		"correctas": ["while temp > 10:", "    temp = temp - 5"],
+		"disponibles": ["while temp > 10:", "    temp = temp - 5", "while temp < 10:", "    temp = temp + 5", "while temp == 10:", "    temp = 10"],
+		"retroalimentacion": {
+			"while temp < 10:": {
+				"error": "La poción comienza a 30 grados. La condición '30 < 10' es falsa de inmediato y el ciclo nunca se ejecuta.",
+				"pista": "El caldero debe enfriarse MIENTRAS la temperatura sea MAYOR a 10 ('while temp > 10:')."
+			},
+			"    temp = temp + 5": {
+				"error": "Sumar 5 calienta la poción en vez de enfriarla, alejándola del objetivo e iniciando un ciclo infinito.",
+				"pista": "Para enfriar la mezcla gradualmente, resta 5 en cada agitación: 'temp = temp - 5'."
+			},
+			"while temp == 10:": {
+				"error": "La temperatura inicial es 30, no 10. La condición es falsa de inicio.",
+				"pista": "Utiliza el operador mayor '>' para permitir el enfriamiento desde 30 hacia abajo."
+			},
+			"    temp = 10": {
+				"error": "Fijar 10 de golpe detiene el proceso en una vuelta sin mostrar la reducción gradual requerida.",
+				"pista": "Reduce la temperatura de a 5 unidades por vuelta con 'temp = temp - 5'."
+			}
+		},
+		"escena": "res://scenes/nivel_2/6ClaroDeHongos.tscn"
+	},
+	"E2.7": {
+		"titulo": "E2.7 · El despertar del tótem astral",
+		"oa": "OA3: ciclo con bandera booleana",
+		"npc": "Chamán Zephyr",
+		"instrucciones": "El tótem ancestral inicia en reposo (activado = False).\nConsulta orbes con input() mientras no esté activado. Si el orbe es «sagrado», activa la bandera para culminar el ciclo y muestra «Espíritu despierto».",
+		"plantilla": ["activado = False", "[?]", "    orbe = input()", "    if orbe == \"sagrado\":", "[?]", "print(\"Espíritu despierto\")"],
+		"correctas": ["while not activado:", "        activado = True"],
+		"disponibles": ["while not activado:", "        activado = True", "while activado:", "        activado = False", "if not activado:", "        orbe = \"sagrado\""],
+		"retroalimentacion": {
+			"while activado:": {
+				"error": "La bandera 'activado' comienza en False. Como la condición es falsa de inicio, el ciclo nunca comienza.",
+				"pista": "El ciclo debe ejecutarse MIENTRAS el tótem NO esté activo ('while not activado:')."
+			},
+			"        activado = False": {
+				"error": "Asignar False mantiene la bandera apagada y el ciclo continuará indefinidamente.",
+				"pista": "Al recibir el orbe sagrado, cambia el estado a verdadero: 'activado = True'."
+			},
+			"if not activado:": {
+				"error": "Un condicional 'if' solo evalúa una vez; si el primer orbe no es sagrado, el programa se cierra sin reintentar.",
+				"pista": "Para seguir solicitando orbes hasta dar con el correcto, debes emplear un ciclo 'while'."
+			},
+			"        orbe = \"sagrado\"": {
+				"error": "Modificar el texto del orbe no actualiza la bandera booleana 'activado' que controla la salida del ciclo.",
+				"pista": "Asigna el valor booleano 'True' a la variable de control 'activado'."
+			}
+		},
+		"escena": "res://scenes/nivel_2/7TotemDeEspiritus.tscn"
+	},
+	"E2.8": {
+		"titulo": "E2.8 · La purga de zarzas espinosas",
+		"oa": "OA3: ciclo con contador y filtro condicional",
+		"npc": "Exploradora Lyra",
+		"instrucciones": "Debes revisar exactamente 4 ramas en el sendero usando el índice 'i'.\nEn cada vuelta lee el tipo de rama por teclado; si el tipo es «veneno», incrementa el contador 'peligros'. Al finalizar muestra el total de peligros.",
+		"plantilla": ["i = 0", "peligros = 0", "[?]", "    tipo = input()", "    if tipo == \"veneno\":", "[?]", "    i = i + 1", "print(peligros)"],
+		"correctas": ["while i < 4:", "        peligros = peligros + 1"],
+		"disponibles": ["while i < 4:", "        peligros = peligros + 1", "while i <= 4:", "        peligros = 1", "while peligros < 4:", "        i = i + 1"],
+		"retroalimentacion": {
+			"while i <= 4:": {
+				"error": "Con '<= 4' el índice 'i' recorre 0, 1, 2, 3 y 4 (5 ramas en total), excediendo las 4 solicitadas.",
+				"pista": "Como 'i' comienza en 0, para realizar 4 iteraciones exactas usa 'while i < 4:'."
+			},
+			"        peligros = 1": {
+				"error": "Asignar 1 reinicia la variable en lugar de sumar cada peligro encontrado a lo largo del camino.",
+				"pista": "Incrementa el contador sumándole 1 a su valor previo: 'peligros = peligros + 1'."
+			},
+			"while peligros < 4:": {
+				"error": "La repetición debe guiarse por las 4 muestras analizadas ('i'), no por la cantidad de venenos hallados.",
+				"pista": "Controla el número de repeticiones con el contador 'i': 'while i < 4:'."
+			},
+			"        i = i + 1": {
+				"error": "Incrementar 'i' dentro del 'if' provocaría un doble avance del índice, saltándose ramas sin inspeccionar.",
+				"pista": "Dentro del condicional solo debes incrementar el acumulador 'peligros'."
+			}
+		},
+		"escena": "res://scenes/nivel_2/8LaberintoDeZarzas.tscn"
+	},
+	"E2.9": {
+		"titulo": "E2.9 · El ascenso al risco ventoso",
+		"oa": "OA3: ciclo con condición compuesta and",
+		"npc": "Centinela Ronin",
+		"instrucciones": "La distancia es 20 metros y la energía es 10 unidades.\nMientras la distancia sea mayor a 0 Y la energía sea mayor a 0, avanza restando 5 a distancia y 2 a energía en cada tramo. Al finalizar muestra «Llegada al risco».",
+		"plantilla": ["distancia = 20", "energia = 10", "[?]", "    distancia = distancia - 5", "[?]", "print(\"Llegada al risco\")"],
+		"correctas": ["while distancia > 0 and energia > 0:", "    energia = energia - 2"],
+		"disponibles": ["while distancia > 0 and energia > 0:", "    energia = energia - 2", "while distancia > 0 or energia > 0:", "    energia = energia + 2", "while distancia == 0 and energia == 0:", "    distancia = 0"],
+		"retroalimentacion": {
+			"while distancia > 0 or energia > 0:": {
+				"error": "Con 'or', si la energía llega a 0 pero aún queda distancia, el escalador continuaría sin fuerzas.",
+				"pista": "Ambas condiciones deben cumplirse simultáneamente; utiliza el operador lógico 'and'."
+			},
+			"    energia = energia + 2": {
+				"error": "Subir el risco gasta energía, no la regenera; sumar energía generaría un ciclo erróneo.",
+				"pista": "Resta 2 a la energía en cada paso: 'energia = energia - 2'."
+			},
+			"while distancia == 0 and energia == 0:": {
+				"error": "Al inicio distancia es 20 y energía es 10; la condición '20 == 0' es falsa de inmediato.",
+				"pista": "El ascenso debe operar mientras ambas variables sean mayores a 0: '> 0 and > 0'."
+			},
+			"    distancia = 0": {
+				"error": "Asignar 0 directamente anula el progreso gradual del ascenso.",
+				"pista": "La distancia ya se decrementa en la línea superior; en este hueco debes actualizar el consumo de 'energia'."
+			}
+		},
+		"escena": "res://scenes/nivel_2/9RiscoDeLosVientos.tscn"
+	},
+	"E2.10": {
+		"titulo": "E2.10 · El puente de troncos",
 		"oa": "OA3: acumulador con condición compuesta",
 		"npc": "Constructor Bram",
 		"instrucciones": "El constructor arma un puente de troncos. El puente soporta como máximo 20 unidades de peso y 5 troncos.\nLee el peso de cada tronco, acumúlalo y detente cuando el peso total llegue a 20 o ya se hayan colocado 5 troncos; luego muestra el peso total.",
@@ -198,7 +338,7 @@ const BANCO_DATOS_OFICIAL = {
 				"pista": "El puente comienza vacío; debemos agregar troncos mientras el peso sea menor a 20 y las piezas menores a 5 ('< 20 and < 5')."
 			}
 		},
-		"escena": "res://scenes/nivel_2/5PuenteDeTroncos.tscn"
+		"escena": "res://scenes/nivel_2/10PuenteDeTroncos.tscn"
 	}
 }
 

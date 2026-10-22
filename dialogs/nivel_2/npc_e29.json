@@ -1,0 +1,43 @@
+{
+	"npc_name": "Centinela Ronin",
+	"lines": [
+		{
+			"speaker": "Centinela Ronin",
+			"text": "¡Firmes! Estás en el Risco de los Vientos, el último paso antes del abismo ancestral."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡Centinela! ¿Has visto a Panko? El sendero parece terminar en esta cordillera."
+		},
+		{
+			"speaker": "Centinela Ronin",
+			"text": "Vi a Panko trepar a toda velocidad hacia el puente de troncos que une con las ruinas mecánicas. Sin embargo, las ráfagas aquí arriba son implacables."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo escalamos el risco con este vendaval?"
+		},
+		{
+			"speaker": "Centinela Ronin",
+			"text": "Quedan 20 metros de distancia y nos restan 10 puntos de energía. Cada impulso reduce 5 metros de distancia pero gasta 2 de energía. Solo podemos seguir escalando mientras quede distancia Y quede energía."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Una condición compuesta con 'and': 'while distancia > 0 and energia > 0:'. ¡Sincronicemos la escalada en el Altar del Risco!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Centinela Ronin",
+			"text": "¡Ascenso completado con valor y rigor felino! Hemos llegado a la cima de la cordillera."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡Puedo ver el gran abismo y el Puente de Troncos al frente!"
+		},
+		{
+			"speaker": "Centinela Ronin",
+			"text": "El Constructor Bram te espera en el puente. ¡Avanza y reúne a Panko de una vez por todas!"
+		}
+	]
+}

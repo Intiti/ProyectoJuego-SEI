@@ -1,0 +1,43 @@
+{
+	"npc_name": "Alquimista Fael",
+	"lines": [
+		{
+			"speaker": "Alquimista Fael",
+			"text": "¡Por mis bigotes destiladores! ¡Cuidado con esas esporas flotantes, amigo!"
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Qué ocurre aquí? Este claro está lleno de setas resplandecientes."
+		},
+		{
+			"speaker": "Alquimista Fael",
+			"text": "Los hongos lunares desprenden un polvo adormecedor. Panko pasó corriendo estornudando hacia la arboleda sagrada."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¿Cómo puedo atravesar las esporas de forma segura?"
+		},
+		{
+			"speaker": "Alquimista Fael",
+			"text": "Tengo un caldero con brebaje purificador, pero hierve a 30 grados. Debemos enfriarlo agitando la mezcla de a 5 grados por paso hasta que su temperatura baje a 10 grados o menos."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "Un ciclo con decremento de 5 en 5: 'while temp > 10:' y 'temp = temp - 5'. ¡Activemos el altar de destilación!"
+		}
+	],
+	"outro_lines": [
+		{
+			"speaker": "Alquimista Fael",
+			"text": "¡Burbujas cristalinas! La poción ha alcanzado la temperatura perfecta sin evaporarse."
+		},
+		{
+			"speaker": "Jugador",
+			"text": "¡El vapor purificador limpia el aire del claro! Las esporas ya no hacen daño."
+		},
+		{
+			"speaker": "Alquimista Fael",
+			"text": "Las zarzas del sendero se han replegado. ¡Sigue la senda hacia el Tótem Astral!"
+		}
+	]
+}
