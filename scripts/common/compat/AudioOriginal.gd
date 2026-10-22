@@ -22,6 +22,9 @@ const MUSIC_TRACKS: Dictionary = {
 	"intro": "res://assets/audio/music/Intro.mp3",
 	"villa": "res://assets/audio/music/Villa_Miaulemana.mp3",
 	"examen": "res://assets/audio/music/Puzzle_Battle.mp3",
+	# Nivel 2: pon aquí tu música propia. Si el archivo no existe se usa "bosque_alt".
+	"bosque": "res://assets/audio/music/bosque.mp3",
+	"bosque_alt": "res://assets/audio/music/Intro.mp3",
 }
 
 const FADE_DURATION := 1.2   # segundos de crossfade
@@ -120,6 +123,8 @@ func playMusic(trackKey: String) -> void:
 		return
 
 	var path: String = MUSIC_TRACKS[trackKey]
+	if not ResourceLoader.exists(path) and MUSIC_TRACKS.has(trackKey + "_alt"):
+		path = MUSIC_TRACKS[trackKey + "_alt"]
 	var stream = load(path)
 	if not stream:
 		push_warning("DJManager: no se pudo cargar '%s'" % path)

@@ -26,7 +26,8 @@ const MUSIC_TRACKS: Dictionary = {
 	"menu": "res://assets/audio/music/Main.mp3",
 	"intro": "res://assets/audio/music/Intro.mp3",
 	"villa": "res://assets/audio/music/Villa_Miaulemana.mp3",
-	"laboratorio": "res://assets/audio/music/Intro.mp3",
+	"laboratorio": "res://assets/audio/music/Core.mp3",
+	"laboratorio_alt": "res://assets/audio/music/Intro.mp3",
 	"examen": "res://assets/audio/music/Puzzle_Battle.mp3",
 	"rescate": "res://assets/audio/music/Puzzle_Battle.mp3",
 	"victoria": "res://assets/audio/music/Main.mp3"
@@ -37,7 +38,8 @@ const MUSIC_SETTINGS: Dictionary = {
 	"menu": {"pitch": 1.0, "db": -3.0},
 	"intro": {"pitch": 1.0, "db": -3.0},
 	"villa": {"pitch": 1.0, "db": -3.0},
-	"laboratorio": {"pitch": 0.86, "db": -4.0},
+	"laboratorio": {"pitch": 1.0, "db": -3.5},
+	"laboratorio_alt": {"pitch": 0.86, "db": -4.0},
 	"examen": {"pitch": 0.96, "db": -4.5},
 	"rescate": {"pitch": 1.05, "db": -3.5},
 	"victoria": {"pitch": 1.02, "db": -2.5}
@@ -181,6 +183,10 @@ func play_music(track_name: String, fade_duration: float = 0.8) -> void:
 			return
 
 	var path: String = MUSIC_TRACKS.get(track_name, "")
+	var clave_ajustes: String = track_name
+	if (path == "" or not ResourceLoader.exists(path)) and MUSIC_TRACKS.has(track_name + "_alt"):
+		clave_ajustes = track_name + "_alt"
+		path = MUSIC_TRACKS[clave_ajustes]
 	if path == "" or not ResourceLoader.exists(path):
 		push_warning("DJManager: pista no encontrada: " + track_name)
 		return
@@ -193,7 +199,7 @@ func play_music(track_name: String, fade_duration: float = 0.8) -> void:
 	if stream is AudioStreamMP3:
 		(stream as AudioStreamMP3).loop = true
 
-	var ajustes: Dictionary = MUSIC_SETTINGS.get(track_name, {"pitch": 1.0, "db": -3.0})
+	var ajustes: Dictionary = MUSIC_SETTINGS.get(clave_ajustes, {"pitch": 1.0, "db": -3.0})
 	var pitch_objetivo: float = float(ajustes.get("pitch", 1.0))
 	var db_objetivo: float = float(ajustes.get("db", -3.0))
 
