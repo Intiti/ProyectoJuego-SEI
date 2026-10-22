@@ -6,6 +6,8 @@ extends PanelContainer
 
 signal completado_cerrado
 
+const Estilo = preload("res://scripts/common/ui/ejercicioEstilo.gd")
+
 @export var es_ultimo_ejercicio: bool = false
 @export_file("*.tscn") var siguiente_escena_directa: String = ""
 
@@ -38,14 +40,12 @@ func _construir_interfaz() -> void:
 	custom_minimum_size = Vector2(740, 440)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.07, 0.12, 0.98)
-	style.border_color = Color(0.3, 0.95, 0.8, 1.0)
-	style.set_border_width_all(3)
-	style.set_corner_radius_all(16)
+	var style: StyleBoxFlat = Estilo.windowStyle(16)
+	style.bg_color = Color(0.04, 0.04, 0.07, 0.97)   # fondo del tablón de completado
+	style.border_color = Color(0.55, 0.30, 0.85, 1.0)
 	style.content_margin_left = 32
-	style.content_margin_top = 22
 	style.content_margin_right = 32
+	style.content_margin_top = 22
 	style.content_margin_bottom = 24
 	add_theme_stylebox_override("panel", style)
 	
@@ -65,11 +65,13 @@ func _construir_interfaz() -> void:
 	top_bar.add_child(spacer_left)
 	
 	label_titulo = Label.new()
-	label_titulo.text = "✨ ¡TAREA COMPLETADA CON ÉXITO! ✨"
+	label_titulo.text = "MIAUGORITMO COMPLETADO"
 	label_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label_titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label_titulo.add_theme_font_size_override("font_size", 24)
-	label_titulo.add_theme_color_override("font_color", Color(0.4, 1.0, 0.85))
+	label_titulo.add_theme_font_size_override("font_size", 34)
+	label_titulo.add_theme_color_override("font_color", Color.WHITE)
+	label_titulo.add_theme_color_override("font_outline_color", Color(0.05, 0.05, 0.08, 1.0))
+	label_titulo.add_theme_constant_override("outline_size", 4)
 	top_bar.add_child(label_titulo)
 	
 	btn_cerrar_popup = Button.new()
@@ -141,8 +143,8 @@ func _construir_interfaz() -> void:
 	btn_continuar.add_theme_font_size_override("font_size", 20)
 	
 	var style_btn = StyleBoxFlat.new()
-	style_btn.bg_color = Color(0.15, 0.55, 0.45, 1.0)
-	style_btn.border_color = Color(0.3, 0.95, 0.8, 1.0)
+	style_btn.bg_color = Color(0.20, 0.16, 0.42, 1.0)
+	style_btn.border_color = Estilo.BORDER
 	style_btn.set_border_width_all(1)
 	style_btn.set_corner_radius_all(10)
 	btn_continuar.add_theme_stylebox_override("normal", style_btn)

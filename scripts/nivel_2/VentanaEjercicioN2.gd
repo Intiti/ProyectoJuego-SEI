@@ -7,6 +7,8 @@ extends PanelContainer
 
 signal ejercicio_completado(puntos: int, errores: int)
 
+const Estilo = preload("res://scripts/common/ui/ejercicioEstilo.gd")
+
 @export var codigo_ejercicio: String = "E2.1"
 @export var titulo_ejercicio: String = "E2.1 · El sendero de las huellas"
 @export var objetivo_aprendizaje: String = "OA3: ciclo con contador"
@@ -30,7 +32,7 @@ var npc_gato = null
 var label_titulo: Label
 var label_oa: Label
 var label_estado: Label
-var label_instrucciones: Label
+var label_instrucciones: RichTextLabel
 var contenedor_bloques: VBoxContainer
 var contenedor_codigo: VBoxContainer
 var label_pista: Label
@@ -226,16 +228,8 @@ func _construir_interfaz() -> void:
 	custom_minimum_size = Vector2(1060, 640)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	
-	var style_panel = StyleBoxFlat.new()
-	style_panel.bg_color = Color(0.04, 0.07, 0.12, 0.98)
-	style_panel.border_color = Color(0.25, 0.85, 0.75, 1.0)
-	style_panel.set_border_width_all(3)
-	style_panel.set_corner_radius_all(16)
-	style_panel.content_margin_left = 24
-	style_panel.content_margin_top = 18
-	style_panel.content_margin_right = 24
-	style_panel.content_margin_bottom = 18
-	add_theme_stylebox_override("panel", style_panel)
+	# Misma paleta que el puzzle del Nivel 1 (EjercicioEstilo).
+	add_theme_stylebox_override("panel", Estilo.windowStyle())
 	
 	var vbox_principal = VBoxContainer.new()
 	vbox_principal.add_theme_constant_override("separation", 10)
@@ -253,7 +247,7 @@ func _construir_interfaz() -> void:
 	label_titulo.text = titulo_ejercicio
 	label_titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label_titulo.add_theme_font_size_override("font_size", 22)
-	label_titulo.add_theme_color_override("font_color", Color(0.3, 0.95, 0.85))
+	label_titulo.add_theme_color_override("font_color", Estilo.TITLE)
 	fila_header.add_child(label_titulo)
 	
 	btn_ver_banco = Button.new()
@@ -278,7 +272,7 @@ func _construir_interfaz() -> void:
 	label_oa = Label.new()
 	label_oa.text = "🎯 " + objetivo_aprendizaje + "  |  👤 NPC: " + contexto_npc
 	label_oa.add_theme_font_size_override("font_size", 14)
-	label_oa.add_theme_color_override("font_color", Color(0.7, 0.85, 0.95))
+	label_oa.add_theme_color_override("font_color", Color(0.82, 0.78, 1.0))
 	label_oa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fila_meta.add_child(label_oa)
 	
@@ -288,12 +282,9 @@ func _construir_interfaz() -> void:
 	label_estado.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
 	fila_meta.add_child(label_estado)
 	
-	# 3. Instrucciones
-	label_instrucciones = Label.new()
-	label_instrucciones.text = texto_instrucciones
-	label_instrucciones.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_instrucciones.add_theme_font_size_override("font_size", 15)
-	label_instrucciones.add_theme_color_override("font_color", Color(0.9, 0.93, 0.98))
+	# 3. Instrucciones (mismo encabezado y coloreado de palabras que el Nivel 1)
+	vbox_principal.add_child(Estilo.makeHeading(20))
+	label_instrucciones = Estilo.makePrompt(texto_instrucciones, 18)
 	vbox_principal.add_child(label_instrucciones)
 	
 	# 4. Columnas: Banco de Bloques y Algoritmo
@@ -315,7 +306,7 @@ func _construir_interfaz() -> void:
 	var lbl_banco = Label.new()
 	lbl_banco.text = "📦 Banco de Bloques (haz clic para insertar):"
 	lbl_banco.add_theme_font_size_override("font_size", 14)
-	lbl_banco.add_theme_color_override("font_color", Color(0.4, 0.95, 0.8))
+	lbl_banco.add_theme_color_override("font_color", Estilo.HEADING)
 	col_izq.add_child(lbl_banco)
 	
 	var scroll_bloques = ScrollContainer.new()
@@ -343,7 +334,7 @@ func _construir_interfaz() -> void:
 	var lbl_alg = Label.new()
 	lbl_alg.text = "🛠️ Miaugoritmo en Construcción (clic en un bloque para retirar):"
 	lbl_alg.add_theme_font_size_override("font_size", 14)
-	lbl_alg.add_theme_color_override("font_color", Color(0.4, 0.95, 0.8))
+	lbl_alg.add_theme_color_override("font_color", Estilo.CONSOLE_TITLE)
 	col_der.add_child(lbl_alg)
 	
 	var panel_codigo = PanelContainer.new()
@@ -351,16 +342,7 @@ func _construir_interfaz() -> void:
 	panel_codigo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel_codigo.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	panel_codigo.mouse_filter = Control.MOUSE_FILTER_PASS
-	var style_cod = StyleBoxFlat.new()
-	style_cod.bg_color = Color(0.02, 0.04, 0.07, 0.95)
-	style_cod.border_color = Color(0.18, 0.35, 0.45, 1.0)
-	style_cod.set_border_width_all(2)
-	style_cod.set_corner_radius_all(10)
-	style_cod.content_margin_left = 16
-	style_cod.content_margin_top = 12
-	style_cod.content_margin_right = 16
-	style_cod.content_margin_bottom = 12
-	panel_codigo.add_theme_stylebox_override("panel", style_cod)
+	panel_codigo.add_theme_stylebox_override("panel", Estilo.consoleStyle())
 	col_der.add_child(panel_codigo)
 	
 	var scroll_cod = ScrollContainer.new()
@@ -580,6 +562,7 @@ func abrir_reto() -> void:
 		_construir_interfaz()
 	_cargar_datos_respaldo_si_vacio()
 	_resolver_referencias()
+	Estilo.setPromptText(label_instrucciones, texto_instrucciones)
 	visible = true
 	resuelto = false
 	bloques_en_slots.clear()
@@ -757,11 +740,24 @@ func _manejar_exito() -> void:
 	
 	ejercicio_completado.emit(puntos_ganados, errores)
 	
+	# Feedback igual al del Nivel 1: "¡Correcto!" en verde, sonidito (o RACHA xN) y los
+	# bloques en arcoíris durante un instante antes de pasar a la pantalla de completado.
+	panel_pista.visible = false
+	mostrar_mensaje("¡Correcto!", Estilo.OK)
+	btn_comprobar.disabled = true
+	btn_limpiar.disabled = true
+	_aplicar_arcoiris()
+	Estilo.playOk(self)
+	await get_tree().create_timer(Estilo.OK_HOLD).timeout
+	btn_comprobar.disabled = false
+	btn_limpiar.disabled = false
+	
 	# Desbloquear la barrera mística del escenario
 	if barrera_mistica and barrera_mistica.has_method("desbloquear_barrera"):
 		barrera_mistica.desbloquear_barrera()
 	
 	visible = false
+	Estilo.playFanfare()
 	
 	if ventana_completado and ventana_completado.has_method("mostrar_celebracion"):
 		if not ventana_completado.completado_cerrado.is_connected(_on_completado_cerrado):
@@ -769,6 +765,19 @@ func _manejar_exito() -> void:
 		ventana_completado.mostrar_celebracion(codigo_ejercicio, titulo_ejercicio, puntos_ganados, errores)
 	else:
 		_on_completado_cerrado()
+
+# Bloques colocados en arcoíris, como al completar un ejercicio del Nivel 1.
+func _aplicar_arcoiris() -> void:
+	var total: int = botones_slots.size()
+	for i in total:
+		var b: Button = botones_slots[i]
+		if not is_instance_valid(b):
+			continue
+		var sb: StyleBoxFlat = Estilo.rainbowStyle(i, total)
+		for estado in ["normal", "hover", "pressed", "focus", "disabled"]:
+			b.add_theme_stylebox_override(estado, sb)
+		for color_nombre in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color"]:
+			b.add_theme_color_override(color_nombre, Color(0.08, 0.08, 0.10))
 
 func _on_completado_cerrado() -> void:
 	if npc_gato and npc_gato.has_method("iniciar_dialogo"):
@@ -813,7 +822,8 @@ func _manejar_error(distractor: String, slot_idx: int = -1) -> void:
 		else:
 			pista_texto = "Comprueba que la condición permita repetir y que las variables se modifiquen en cada vuelta."
 	
-	mostrar_mensaje("Error en el algoritmo: " + explicacion, Color("#FF6E6E"))
+	mostrar_mensaje("Error en el algoritmo: " + explicacion, Estilo.ERR)
+	Estilo.playError(self)
 	label_pista.text = "💡 Pista: " + pista_texto
 	panel_pista.visible = true
 

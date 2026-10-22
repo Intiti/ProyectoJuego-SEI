@@ -94,9 +94,7 @@ func mostrar_completado(errores: int) -> void:
 	# racha) con las reglas compartidas de GameData; sin registro en esta sesión se usa la base.
 	puntos_ganados = GameData.creditedPoints("E3.1", 240 - GameData.errorPenalty(240, errores))
 
-	var dj: Node = get_node_or_null("/root/DJManager")
-	if dj != null and dj.has_method("play_sfx"):
-		dj.call("play_sfx", "ejercicio_completado")
+	# La fanfarria de completado suena en la ventana del ejercicio (igual que en el Nivel 1).
 
 	# Registrar puntos del ejercicio E3.1
 	var sistema_puntos: Node = get_node_or_null("/root/PuntajesNivel3")

@@ -9,6 +9,8 @@ extends PanelContainer
 
 signal ejercicio_resuelto(errores: int)
 
+const Estilo = preload("res://scripts/common/ui/ejercicioEstilo.gd")
+
 var nombre_nivel: Label = null
 var puntos_nivel: Label = null
 var titulo: Label = null
@@ -35,6 +37,7 @@ var botones_bloques: Array[Button] = []
 var bloques_texto_original: Dictionary = {}
 var bloques_colocados: Array[String] = []
 var errores: int = 0
+var prompt_estilizado: RichTextLabel = null
 var id_intento_insignia: int = -1
 var boton_repetir_insignia: Button = null
 var estado_insignia: Label = null
@@ -201,8 +204,53 @@ func configurar_interfaz() -> void:
 	_estilizar_boton_accion(boton_ejecutar, "▶ Comprobar", Color("#065F46"), Color("#34D399"))
 	_estilizar_boton_accion(boton_cerrar, "✕ Cerrar", Color("#7F1D1D"), Color("#F87171"))
 
+	_aplicar_estilo_nivel1()
+
 	panel_pista.hide()
 	actualizar_puntos_encabezado()
+
+
+# Misma presentación que el puzzle del Nivel 1: paleta, instrucción con palabras coloreadas
+# y panel de código como "consola". No cambia la mecánica ni los nodos de la escena.
+func _aplicar_estilo_nivel1() -> void:
+	add_theme_stylebox_override("panel", Estilo.windowStyle())
+	titulo.add_theme_color_override("font_color", Estilo.TITLE)
+	titulo_construccion.add_theme_color_override("font_color", Estilo.CONSOLE_TITLE)
+	var panel_alg := get_node_or_null("ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo") as PanelContainer
+	if panel_alg != null:
+		panel_alg.add_theme_stylebox_override("panel", Estilo.consoleStyle())
+	var rotulo_bloques := get_node_or_null("ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/TituloBloques") as Label
+	if rotulo_bloques != null:
+		rotulo_bloques.add_theme_color_override("font_color", Estilo.HEADING)
+
+	# Encabezado "Instrucción del nivel" y texto coloreado (el Label original queda oculto).
+	var fila_instr := instrucciones.get_parent() as Control
+	var contenido := get_node_or_null("ContenidoEjercicio") as VBoxContainer
+	if fila_instr != null and contenido != null:
+		var encabezado: Label = Estilo.makeHeading(18)
+		contenido.add_child(encabezado)
+		contenido.move_child(encabezado, fila_instr.get_index())
+		prompt_estilizado = Estilo.makePrompt(_obtener_instruccion_ejercicio(), 16)
+		fila_instr.add_child(prompt_estilizado)
+		fila_instr.move_child(prompt_estilizado, instrucciones.get_index())
+		instrucciones.hide()
+
+
+# Bloques colocados en arcoíris, como al completar un ejercicio del Nivel 1.
+func _aplicar_arcoiris() -> void:
+	if lista_algoritmo == null:
+		return
+	var botones: Array[Button] = []
+	for fila in lista_algoritmo.get_children():
+		for hijo in fila.get_children():
+			if hijo is Button:
+				botones.append(hijo)
+	for i in botones.size():
+		var sb: StyleBoxFlat = Estilo.rainbowStyle(i, botones.size())
+		for estado in ["normal", "hover", "pressed", "focus", "disabled"]:
+			botones[i].add_theme_stylebox_override(estado, sb)
+		for nombre_color in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color"]:
+			botones[i].add_theme_color_override(nombre_color, Color(0.08, 0.08, 0.10))
 
 
 # Solo presentación: conservar referencias y conexiones al envolver los contenedores.
@@ -841,9 +889,9 @@ func ejecutar_codigo() -> void:
 			+ "\nPuntos obtenidos: +" + str(puntos_obtenidos)
 			+ _texto_desglose_puntos()
 		)
-		mensaje_resultado.add_theme_color_override("font_color", Color("#4ADE80"))
+		mensaje_resultado.add_theme_color_override("font_color", Estilo.OK)
 		_animar_feedback(true)
-		_reproducir_sfx("correcto")
+		Estilo.playOk(self)   # mismo sonidito (o RACHA xN) que el Nivel 1
 
 		boton_ejecutar.disabled = true
 		boton_reiniciar.disabled = true
@@ -851,6 +899,11 @@ func ejecutar_codigo() -> void:
 			boton_pista.disabled = true
 		for b in botones_bloques:
 			b.disabled = true
+
+		# Como en el Nivel 1: se ve el acierto (bloques en arcoíris) un instante antes del completado.
+		_aplicar_arcoiris()
+		await get_tree().create_timer(Estilo.OK_HOLD).timeout
+		Estilo.playFanfare()
 
 		ejercicio_resuelto.emit(errores)
 
@@ -889,9 +942,9 @@ func ejecutar_codigo() -> void:
 		"Solución incorrecta (Intento #" + str(intentos_realizados) + " | " + penalizacion_txt + ").\n"
 		+ explicacion + " Haz clic en un bloque colocado para cambiarlo."
 	)
-	mensaje_resultado.add_theme_color_override("font_color", Color("#F87171"))
+	mensaje_resultado.add_theme_color_override("font_color", Estilo.ERR)
 	_animar_feedback(false)
-	_reproducir_sfx("incorrecto")
+	Estilo.playError(self)   # sonido de error + sacudida, igual que el Nivel 1
 
 
 func validar_algoritmo_y_casos() -> Dictionary:

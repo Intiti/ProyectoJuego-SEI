@@ -185,9 +185,7 @@ func mostrar_completado(errores: int) -> void:
 			+ "¡Cruza la puerta para superar la Evaluación Final y rescatarlo!"
 		)
 
-	var dj: Node = get_node_or_null("/root/DJManager")
-	if dj != null and dj.has_method("play_sfx"):
-		dj.call("play_sfx", "ejercicio_completado")
+	# La fanfarria de completado suena en la ventana del ejercicio (igual que en el Nivel 1).
 
 	actualizar_puntos_totales()
 
