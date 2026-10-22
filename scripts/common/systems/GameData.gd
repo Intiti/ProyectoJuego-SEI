@@ -25,9 +25,11 @@ const FIRST_PROBLEM := "res://dialogs/nivel_1/npc_e11.json"   # el del alcalde
 signal problemsChanged
 
 const LeaderboardScript = preload("res://scripts/common/systems/LeaderboardNivel1.gd")
+const LeaderboardNivelesScript = preload("res://scripts/common/systems/LeaderboardNiveles.gd")
 const GUARDIA_FILE := "res://dialogs/nivel_1/npc_guardia_villa2.json"
 
 signal nivel1Submitted
+signal nivelSubmitted(level: int)
 
 var rachaMaxNivel1: int = 0
 var nivel1Terminado: bool = false
@@ -35,6 +37,14 @@ var nivel1Resumen: Dictionary = {}
 var nivel1SubmitDone: bool = false
 var nivel1SubmitOk: bool = false
 var nivel1ResumenMostrado: bool = false
+var rachaMaxNivel2: int = 0
+var rachaMaxNivel3: int = 0
+var nivel2Terminado: bool = false
+var nivel3Terminado: bool = false
+var nivelResumen: Dictionary = {2: {}, 3: {}}
+var nivelSubmitDone: Dictionary = {2: false, 3: false}
+var nivelSubmitOk: Dictionary = {2: false, 3: false}
+var nivelResumenMostrado: Dictionary = {2: false, 3: false}
 # Veces que se reinició el examen del Nivel 1 (0 = aprobado al primer intento)
 var nivel1ExamReinicios: int = 0
 # Ejercicios/exámenes de los niveles 2 y 3 resueltos sin ningún error: código -> true
@@ -58,6 +68,39 @@ func _submitNivel1() -> void:
 	nivel1SubmitDone = true
 	nivel1Submitted.emit()
 
+func finishNivel(level: int) -> void:
+	if level == 2:
+		if nivel2Terminado:
+			return
+		nivel2Terminado = true
+	elif level == 3:
+		if nivel3Terminado:
+			return
+		nivel3Terminado = true
+	else:
+		return
+	var racha: int = rachaMaxNivel2 if level == 2 else rachaMaxNivel3
+	nivelResumen[level] = {
+		"score": int(puntosNivel.get(level, 0)),
+		"racha": racha,
+		"problemas": solvedCount(level),
+	}
+	_submitNivel(level)
+
+func showNivelResumen(level: int):
+	if nivelResumenMostrado.get(level, false) or not nivelResumen.get(level, {}).has("score"):
+		return null
+	nivelResumenMostrado[level] = true
+	var resumen = load("res://scripts/common/ui/resumenNivel.gd").new(level)
+	get_tree().root.add_child(resumen)
+	return resumen
+
+func _submitNivel(level: int) -> void:
+	var resumen: Dictionary = nivelResumen[level]
+	nivelSubmitOk[level] = await LeaderboardNivelesScript.submitFinalScore(level, resumen["score"], resumen["racha"], playerName)
+	nivelSubmitDone[level] = true
+	nivelSubmitted.emit(level)
+
 func resetRun() -> void:
 	solvedDialogs.clear()
 	alcaldePuzzleSolved = false
@@ -69,6 +112,14 @@ func resetRun() -> void:
 	nivel1ExamReinicios = 0
 	perfectExercises.clear()
 	rachaMaxNivel1 = 0
+	rachaMaxNivel2 = 0
+	rachaMaxNivel3 = 0
+	nivel2Terminado = false
+	nivel3Terminado = false
+	nivelResumen = {2: {}, 3: {}}
+	nivelSubmitDone = {2: false, 3: false}
+	nivelSubmitOk = {2: false, 3: false}
+	nivelResumenMostrado = {2: false, 3: false}
 	rachaGlobal = 0
 	gatopuntos = 0
 	solvedExercises.clear()
@@ -104,6 +155,10 @@ var rachaGlobal: int = 0:
 		rachaGlobal = value
 		if not nivel1Terminado and value > rachaMaxNivel1:
 			rachaMaxNivel1 = value
+		elif nivel1Terminado and not nivel2Terminado and value > rachaMaxNivel2:
+			rachaMaxNivel2 = value
+		elif nivel2Terminado and not nivel3Terminado and value > rachaMaxNivel3:
+			rachaMaxNivel3 = value
 		rachaChanged.emit(value)
 
 
@@ -269,6 +324,8 @@ func completeExam(level: int, code: String, blocks: int, errors: int) -> Diction
 	if level == 2:
 		nivel2ExamenAprobado = true
 	addPoints(level, int(r["total"]))
+	if level == 2:
+		finishNivel(2)
 	exerciseSolved.emit(level, code)
 	syncLevelSummaries()
 	return r

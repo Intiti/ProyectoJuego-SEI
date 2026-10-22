@@ -38,7 +38,7 @@ const MUSIC_SETTINGS: Dictionary = {
 	"menu": {"pitch": 1.0, "db": -3.0},
 	"intro": {"pitch": 1.0, "db": -3.0},
 	"villa": {"pitch": 1.0, "db": -3.0},
-	"laboratorio": {"pitch": 1.0, "db": -3.5},
+	"laboratorio": {"pitch": 1.0, "db": -0.1},
 	"laboratorio_alt": {"pitch": 0.86, "db": -4.0},
 	"examen": {"pitch": 0.96, "db": -4.5},
 	"rescate": {"pitch": 1.05, "db": -3.5},

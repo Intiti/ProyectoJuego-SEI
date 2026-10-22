@@ -24,6 +24,11 @@ func _olvidar_progreso_de_sesiones_anteriores() -> void:
 			archivo.store_string(JSON.stringify(datos, "\t"))
 			archivo.close()
 
+func registrar_rescate_panko() -> void:
+	super.registrar_rescate_panko()
+	GameData.finishNivel(3)
+	GameData.showNivelResumen(3)
+
 func _cargar_perfil_estudiante() -> void:
 	var game_data := _obtener_gamedata()
 	var alias_actual: String = str(game_data.get("playerName")) if game_data != null else ""

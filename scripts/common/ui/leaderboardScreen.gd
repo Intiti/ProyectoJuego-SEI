@@ -1,8 +1,9 @@
 extends Control
 
-const LeaderboardScript = preload("res://scripts/common/systems/LeaderboardNivel1.gd")
+const LeaderboardScript = preload("res://scripts/common/systems/LeaderboardNiveles.gd")
 const FONT_PATH := "res://assets/fonts/MotionControl-Bold.otf"
 const MAX_ROWS := 10
+const LEVELS := [1, 2, 3]
 const COL_POS := 70.0
 const COL_SCORE := 150.0
 const COL_STREAK := 190.0
@@ -15,7 +16,10 @@ const COLOR_TOP := [Color("#FFD84D"), Color("#DDE4EC"), Color("#E9A866")]
 var _font: Font = null
 var _statusLabel: Label
 var _rowsBox: VBoxContainer
+var _levelLabel: Label
 var _closing: bool = false
+var _level: int = 1
+var _requestId: int = 0
 
 func _ready() -> void:
 	if ResourceLoader.exists(FONT_PATH):
@@ -61,16 +65,15 @@ func _build() -> void:
 	panel.add_child(vbox)
 
 	vbox.add_child(_label("RANKING", 40, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER))
-	vbox.add_child(_label("NIVEL 1", 20, COLOR_HEADER, HORIZONTAL_ALIGNMENT_CENTER))
+	_levelLabel = _label(GameData.levelName(_level).to_upper(), 20, COLOR_HEADER, HORIZONTAL_ALIGNMENT_CENTER)
+	vbox.add_child(_levelLabel)
+	vbox.add_child(_buildLevelTabs())
 	vbox.add_child(_makeRow("#", "Nombre", "Puntaje", "Mayor racha", COLOR_HEADER, 18, false, false))
 
 	_rowsBox = VBoxContainer.new()
 	_rowsBox.add_theme_constant_override("separation", 6)
 	_rowsBox.custom_minimum_size = Vector2(0, 320)
 	vbox.add_child(_rowsBox)
-
-	_statusLabel = _label("Cargando...", 22, COLOR_SOFT, HORIZONTAL_ALIGNMENT_CENTER)
-	_rowsBox.add_child(_statusLabel)
 
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -86,11 +89,45 @@ func _build() -> void:
 	buttons.add_child(back)
 	back.grab_focus()
 
-func _load() -> void:
-	var result: Dictionary = await LeaderboardScript.fetchTop(MAX_ROWS)
-	if _closing or not is_inside_tree():
+func _buildLevelTabs() -> Control:
+	var tabs := HBoxContainer.new()
+	tabs.alignment = BoxContainer.ALIGNMENT_CENTER
+	tabs.add_theme_constant_override("separation", 12)
+	var group := ButtonGroup.new()
+	for level in LEVELS:
+		var tab := Button.new()
+		tab.text = "NIVEL %d" % level
+		tab.toggle_mode = true
+		tab.button_group = group
+		tab.button_pressed = level == _level
+		tab.custom_minimum_size = Vector2(150, 44)
+		tab.add_theme_font_size_override("font_size", 20)
+		if _font != null:
+			tab.add_theme_font_override("font", _font)
+		tab.pressed.connect(_selectLevel.bind(level))
+		tabs.add_child(tab)
+	return tabs
+
+func _selectLevel(level: int) -> void:
+	if level == _level:
 		return
-	_statusLabel.queue_free()
+	_level = level
+	_levelLabel.text = GameData.levelName(level).to_upper()
+	_load()
+
+func _clearRows() -> void:
+	for child in _rowsBox.get_children():
+		child.queue_free()
+
+func _load() -> void:
+	_requestId += 1
+	var myRequest := _requestId
+	_clearRows()
+	_showStatus("Cargando...")
+	var result: Dictionary = await LeaderboardScript.fetchTop(_level, MAX_ROWS)
+	if _closing or not is_inside_tree() or myRequest != _requestId:
+		return
+	_clearRows()
 	if not result["ok"]:
 		_showStatus("No se pudo conectar con el ranking.")
 		return

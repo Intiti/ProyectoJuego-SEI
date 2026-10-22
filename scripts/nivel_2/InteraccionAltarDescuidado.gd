@@ -273,6 +273,10 @@ func iniciar_secuencia_teletransporte() -> void:
 	
 	await tween_flash.finished
 	
+	var resumenNivel = GameData.showNivelResumen(2)
+	if resumenNivel != null:
+		await resumenNivel.closed
+	
 	# 5. Salto al Laboratorio Subterráneo (Nivel 3)
 	print("AltarDescuidado: Teletransporte completado. Cargando Nivel 3...")
 	if ResourceLoader.exists(ESCENA_NIVEL_3):
