@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://dqgdwchjfc0p7" path="res://scenes/common/ui/DialogBox.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/common/ui/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/common/actors/NPC.tscn" id="6_hvy7h"]
+[ext_resource type="Texture2D" uid="uid://cagpirt84uxjv" path="res://assets/characters/npcs/gato_profesor.png" id="7_udrcy"]
+[ext_resource type="Texture2D" uid="uid://erkmog23b2pd" path="res://assets/characters/npcs/gato_quimico.png" id="8_xs35j"]
+[ext_resource type="Texture2D" uid="uid://pf3uknpc6pbx" path="res://assets/characters/npcs/gato_tres_gatitos.png" id="9_widqb"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)
@@ -49,11 +52,14 @@ shape = SubResource("2")
 [node name="NPC_E16" parent="." unique_id=1466623536 instance=ExtResource("6_hvy7h")]
 position = Vector2(337, 554)
 dialogFile = "res://dialogs/nivel_1/npc_e16.json"
+npcSprite = ExtResource("7_udrcy")
 
 [node name="NPC_E19" parent="." unique_id=1488189590 instance=ExtResource("6_hvy7h")]
 position = Vector2(912, 558)
 dialogFile = "res://dialogs/nivel_1/npc_e19.json"
+npcSprite = ExtResource("8_xs35j")
 
 [node name="NPC_E20" parent="." unique_id=610928664 instance=ExtResource("6_hvy7h")]
-position = Vector2(626, 554)
+position = Vector2(630, 550)
 dialogFile = "res://dialogs/nivel_1/npc_e20.json"
+npcSprite = ExtResource("9_widqb")

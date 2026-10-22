@@ -7,7 +7,9 @@
 [ext_resource type="PackedScene" path="res://scenes/common/ui/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/common/actors/NPC.tscn" id="7_tlqdt"]
 [ext_resource type="Texture2D" uid="uid://dxm3q8eq0c6u1" path="res://assets/environment/school.png" id="7_v0d3p"]
+[ext_resource type="Texture2D" uid="uid://dad71eaqjy1vd" path="res://assets/characters/npcs/gato_constructor.png" id="8_qs7hl"]
 [ext_resource type="Script" uid="uid://c4supe7umnv8k" path="res://scripts/common/actors/guardia.gd" id="8_tlqdt"]
+[ext_resource type="Texture2D" uid="uid://bamjswcw4ijcg" path="res://assets/characters/npcs/gato_guardia.png" id="10_vjdve"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)
@@ -57,9 +59,11 @@ texture = ExtResource("7_v0d3p")
 position = Vector2(722, 541)
 scale = Vector2(1.25, 1.25)
 dialogFile = "res://dialogs/nivel_1/npc_e14.json"
+npcSprite = ExtResource("8_qs7hl")
 
 [node name="Guardia1" parent="." unique_id=359357008 instance=ExtResource("7_tlqdt")]
 position = Vector2(996.99994, 544.00006)
 scale = Vector2(1.25, 1.25)
 script = ExtResource("8_tlqdt")
 dialogFile = "res://dialogs/nivel_1/npc_guardia_villa2.json"
+npcSprite = ExtResource("10_vjdve")
