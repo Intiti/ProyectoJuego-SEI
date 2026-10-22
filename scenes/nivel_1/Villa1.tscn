@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dqgdwchjfc0p7" path="res://scenes/common/ui/DialogBox.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/common/ui/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/common/actors/NPC.tscn" id="6_obl85"]
+[ext_resource type="Texture2D" uid="uid://d4k6d72o7tro8" path="res://assets/characters/npcs/don_plateado.png" id="8_8526i"]
 [ext_resource type="Texture2D" uid="uid://ngey2bco522o" path="res://assets/characters/npcs/competidores.png" id="8_lyhf2"]
 [ext_resource type="Texture2D" uid="uid://ccixske2edl32" path="res://assets/environment/pan.png" id="9_qaur8"]
 
@@ -58,6 +59,7 @@ texture = ExtResource("9_qaur8")
 position = Vector2(202, 545)
 scale = Vector2(1.25, 1.25)
 dialogFile = "res://dialogs/nivel_1/npc_e18.json"
+npcSprite = ExtResource("8_8526i")
 
 [node name="NPC_E13" parent="." unique_id=308801687 instance=ExtResource("6_obl85")]
 position = Vector2(937, 535.00006)

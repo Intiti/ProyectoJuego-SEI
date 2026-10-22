@@ -1,61 +1,40 @@
+
 extends Area2D
 
 # ==========================================
 # MGTS - NIVEL 3 - EJERCICIO E3.1
-# INTERACCION CON EL GATO GUARDIAN
-# HISTORIA DE PANKO
+# INTERACCION CON LA CONSOLA
 # ==========================================
 
-signal iniciar_ejercicio
+signal solicitar_abrir_ejercicio
 
 
 # ==========================================
 # REFERENCIAS
 # ==========================================
 
-@onready var jugador: CharacterBody2D = get_node_or_null(
-	"../Player"
-) as CharacterBody2D
+@onready var jugador: CharacterBody2D = (
+	get_node_or_null("../Player") as CharacterBody2D
+)
 
-@onready var letra_e: Label = get_node_or_null(
-	"LetraE"
-) as Label
+@onready var letra_e: Label = (
+	get_node_or_null("LetraE") as Label
+)
 
-@onready var dialogo_ui: CanvasLayer = get_node_or_null(
-	"../DialogoUI"
-) as CanvasLayer
+@onready var indicador_objetivo: Label = (
+	get_node_or_null("IndicadorObjetivo") as Label
+)
 
-@onready var fondo_dialogo: Control = get_node_or_null(
-	"../DialogoUI/FondoDialogo"
-) as Control
+# Pantalla real del ejercicio E3.1.
+@onready var pantalla_ejercicio: CanvasLayer = (
+	get_node_or_null("../EjercicioUI") as CanvasLayer
+)
 
-@onready var caja_dialogo: Control = get_node_or_null(
-	"../DialogoUI/CajaDialogo"
-) as Control
-
-@onready var retrato_jugador: TextureRect = get_node_or_null(
-	"../DialogoUI/RetratosDialogo/RetratoJugador"
-) as TextureRect
-
-@onready var retrato_npc: TextureRect = get_node_or_null(
-	"../DialogoUI/RetratosDialogo/RetratoNPC"
-) as TextureRect
-
-@onready var nombre_gato: Label = get_node_or_null(
-	"../DialogoUI/CajaDialogo/ContenidoDialogo/NombreGato"
-) as Label
-
-@onready var texto_dialogo: Label = get_node_or_null(
-	"../DialogoUI/CajaDialogo/ContenidoDialogo/TextoDialogo"
-) as Label
-
-@onready var continuar_label: Label = get_node_or_null(
-	"../DialogoUI/CajaDialogo/ContenidoDialogo/ContinuarLabel"
-) as Label
-
-# Consola E3.1 que mostrara el signo !
-@onready var consola_objetivo: Node = get_node_or_null(
-	"../InteraccionConsola"
+# Ventana que contiene los bloques.
+@onready var ventana_ejercicio: Control = (
+	get_node_or_null(
+		"../EjercicioUI/VentanaEjercicio"
+	) as Control
 )
 
 
@@ -64,53 +43,12 @@ signal iniciar_ejercicio
 # ==========================================
 
 var jugador_cerca: bool = false
-var dialogo_activo: bool = false
-var dialogo_terminado: bool = false
 
-var indice_dialogo: int = 0
+var objetivo_activado: bool = false
+var objetivo_completado: bool = false
+var ejercicio_abierto: bool = false
 
 var fisica_jugador_activa: bool = true
-var referencias_correctas: bool = false
-
-var estilo_dialogo: StyleBoxFlat
-
-
-# ==========================================
-# COLORES
-# ==========================================
-
-const COLOR_ILUMINADO: Color = Color.WHITE
-
-const COLOR_OSCURO: Color = Color(
-	0.3, 0.3, 0.3, 1.0
-)
-
-const COLOR_PROTAGONISTA: Color = Color(
-	0.65, 0.42, 1.0, 1.0
-)
-
-const COLOR_GATO_GUARDIAN: Color = Color(
-	0.0, 0.87, 1.0, 1.0
-)
-
-const COLOR_FONDO_CAJA: Color = Color(
-	0.045, 0.065, 0.11, 0.97
-)
-
-
-# ==========================================
-# CONVERSACION E3.1
-# ==========================================
-
-var dialogos: Array[String] = [
-	"¡Alto! Esta entrada está restringida. ¿Qué haces aquí a estas horas?",
-	"Estoy buscando a Panko, mi gato. Seguí sus huellas hasta este laboratorio.",
-	"¿Panko? Hace poco detectamos una pequeña criatura entrando por los conductos de ventilación.",
-	"¡Tiene que ser él! Por favor, necesito encontrarlo.",
-	"Ten cuidado. Desde que falló el sistema central, algunas zonas se han vuelto peligrosas.",
-	"No importa lo que encuentre ahí dentro. No pienso irme sin Panko.",
-	"Entonces demuestra que puedo confiar en ti. Activa la consola de acceso y abriré el primer paso hacia el laboratorio."
-]
 
 
 # ==========================================
@@ -121,183 +59,135 @@ func _ready() -> void:
 
 	monitoring = true
 
-	referencias_correctas = comprobar_referencias()
+	objetivo_activado = false
+	objetivo_completado = false
+	ejercicio_abierto = false
 
-	if letra_e != null:
-		letra_e.hide()
+	# Ocultar indicadores al iniciar.
+	actualizar_indicadores()
 
-	if dialogo_ui != null:
-		dialogo_ui.hide()
+	# Ocultar la pantalla del ejercicio.
+	if pantalla_ejercicio != null:
+		pantalla_ejercicio.hide()
 
-	if not referencias_correctas:
-		push_error(
-			"E3.1: revisa los nodos del gato y DialogoUI."
-		)
-		return
-
-	preparar_estilo_dialogo()
-
+	# Conectar deteccion del jugador.
 	if not body_entered.is_connected(_cuando_entra):
 		body_entered.connect(_cuando_entra)
 
 	if not body_exited.is_connected(_cuando_sale):
 		body_exited.connect(_cuando_sale)
 
-	print("E3.1: Gato Guardian preparado.")
-
-
-# ==========================================
-# COMPROBAR REFERENCIAS
-# ==========================================
-
-func comprobar_referencias() -> bool:
-
-	var correcto: bool = true
-
+	# Comprobar referencias.
 	if jugador == null:
-		push_error("E3.1: falta Player.")
-		correcto = false
+		push_error(
+			"E3.1: no se encontro Player."
+		)
 
 	if letra_e == null:
-		push_error("E3.1: falta LetraE.")
-		correcto = false
-
-	if dialogo_ui == null:
-		push_error("E3.1: falta DialogoUI.")
-		correcto = false
-
-	if fondo_dialogo == null:
-		push_error("E3.1: falta FondoDialogo.")
-		correcto = false
-
-	if caja_dialogo == null:
-		push_error("E3.1: falta CajaDialogo.")
-		correcto = false
-
-	if retrato_jugador == null:
-		push_error("E3.1: falta RetratoJugador.")
-		correcto = false
-
-	if retrato_npc == null:
-		push_error("E3.1: falta RetratoNPC.")
-		correcto = false
-
-	if nombre_gato == null:
-		push_error("E3.1: falta NombreGato.")
-		correcto = false
-
-	if texto_dialogo == null:
-		push_error("E3.1: falta TextoDialogo.")
-		correcto = false
-
-	if continuar_label == null:
-		push_error("E3.1: falta ContinuarLabel.")
-		correcto = false
-
-	if consola_objetivo == null:
 		push_warning(
-			"E3.1: no se encontro InteraccionConsola."
+			"E3.1: no se encontro LetraE."
 		)
 
-	return correcto
-
-
-# ==========================================
-# PREPARAR BORDE DEL DIALOGO
-# ==========================================
-
-func preparar_estilo_dialogo() -> void:
-
-	estilo_dialogo = StyleBoxFlat.new()
-
-	estilo_dialogo.bg_color = COLOR_FONDO_CAJA
-	estilo_dialogo.border_color = COLOR_GATO_GUARDIAN
-
-	estilo_dialogo.set_border_width_all(3)
-	estilo_dialogo.set_corner_radius_all(16)
-	estilo_dialogo.set_content_margin_all(16)
-
-	if caja_dialogo is PanelContainer:
-		caja_dialogo.add_theme_stylebox_override(
-			"panel",
-			estilo_dialogo
-		)
-
-	elif caja_dialogo is Panel:
-		caja_dialogo.add_theme_stylebox_override(
-			"panel",
-			estilo_dialogo
-		)
-
-	else:
+	if indicador_objetivo == null:
 		push_warning(
-			"E3.1: CajaDialogo debe ser Panel o PanelContainer."
+			"E3.1: no se encontro IndicadorObjetivo."
 		)
 
-
-# ==========================================
-# CAMBIAR COLOR SEGUN PERSONAJE
-# ==========================================
-
-func cambiar_color_dialogo(
-	color_personaje: Color
-) -> void:
-
-	if estilo_dialogo != null:
-		estilo_dialogo.border_color = color_personaje
-		estilo_dialogo.emit_changed()
-
-	if nombre_gato != null:
-		nombre_gato.add_theme_color_override(
-			"font_color",
-			color_personaje
+	if pantalla_ejercicio == null:
+		push_error(
+			"E3.1: no se encontro EjercicioUI."
 		)
 
+	if ventana_ejercicio == null:
+		push_warning(
+			"E3.1: no se encontro VentanaEjercicio."
+		)
 
-# ==========================================
-# DETECTAR AL JUGADOR
-# ==========================================
-
-func _cuando_entra(cuerpo: Node2D) -> void:
-
-	if cuerpo == jugador:
-		jugador_cerca = true
-		actualizar_letra_e()
-
-
-func _cuando_sale(cuerpo: Node2D) -> void:
-
-	if cuerpo == jugador:
-		jugador_cerca = false
-		actualizar_letra_e()
+	print("E3.1: consola preparada.")
 
 
 # ==========================================
-# MOSTRAR E SOBRE EL GATO
+# ACTIVAR OBJETIVO DESPUES DEL DIALOGO
 # ==========================================
 
-func actualizar_letra_e() -> void:
+func mostrar_objetivo() -> void:
 
-	if letra_e == null:
+	if objetivo_completado:
 		return
 
-	letra_e.visible = (
-		jugador_cerca
-		and not dialogo_activo
-		and not dialogo_terminado
+	objetivo_activado = true
+
+	actualizar_indicadores()
+
+	print(
+		"E3.1: objetivo activado despues del dialogo."
 	)
 
 
 # ==========================================
-# TECLA E
+# ACTUALIZAR LOS INDICADORES ! Y E
+# ==========================================
+
+func actualizar_indicadores() -> void:
+
+	var disponible: bool = (
+		objetivo_activado
+		and not objetivo_completado
+		and not ejercicio_abierto
+	)
+
+	# Mostrar ! cuando el jugador esta lejos.
+	if indicador_objetivo != null:
+
+		indicador_objetivo.visible = (
+			disponible
+			and not jugador_cerca
+		)
+
+	# Mostrar E cuando el jugador esta cerca.
+	if letra_e != null:
+
+		letra_e.visible = (
+			disponible
+			and jugador_cerca
+		)
+
+
+# ==========================================
+# JUGADOR ENTRA EN EL AREA
+# ==========================================
+
+func _cuando_entra(cuerpo: Node2D) -> void:
+
+	if cuerpo != jugador:
+		return
+
+	jugador_cerca = true
+
+	actualizar_indicadores()
+
+
+# ==========================================
+# JUGADOR SALE DEL AREA
+# ==========================================
+
+func _cuando_sale(cuerpo: Node2D) -> void:
+
+	if cuerpo != jugador:
+		return
+
+	jugador_cerca = false
+
+	actualizar_indicadores()
+
+
+# ==========================================
+# DETECTAR TECLA E
 # ==========================================
 
 func _unhandled_key_input(
 	event: InputEvent
 ) -> void:
-
-	if not referencias_correctas:
-		return
 
 	if not event is InputEventKey:
 		return
@@ -308,126 +198,66 @@ func _unhandled_key_input(
 	if event.keycode != KEY_E:
 		return
 
-	# Si el dialogo esta activo,
-	# avanzar a la siguiente frase.
-	if dialogo_activo:
-
-		avanzar_dialogo()
-
-		get_viewport().set_input_as_handled()
+	if not jugador_cerca:
 		return
 
-	# Si todavia no hemos hablado con el gato,
-	# iniciar la conversacion.
-	if jugador_cerca and not dialogo_terminado:
+	if not objetivo_activado:
+		return
 
-		iniciar_dialogo()
+	if objetivo_completado:
+		return
 
-		get_viewport().set_input_as_handled()
+	if ejercicio_abierto:
+		return
+
+	abrir_ejercicio()
+
+	get_viewport().set_input_as_handled()
 
 
 # ==========================================
-# INICIAR DIALOGO
+# ABRIR PANTALLA DEL EJERCICIO E3.1
 # ==========================================
 
-func iniciar_dialogo() -> void:
+func abrir_ejercicio() -> void:
 
-	if not referencias_correctas:
+	if ejercicio_abierto:
 		return
 
-	if dialogo_activo or dialogo_terminado:
+	if not objetivo_activado:
 		return
 
-	dialogo_activo = true
-	indice_dialogo = 0
+	if objetivo_completado:
+		return
 
-	if letra_e != null:
-		letra_e.hide()
+	if pantalla_ejercicio == null:
+		push_error(
+			"E3.1: no existe EjercicioUI."
+		)
+		return
 
+	ejercicio_abierto = true
+
+	# Ocultar ! y E.
+	actualizar_indicadores()
+
+	# Congelar al protagonista.
 	congelar_jugador()
 
-	dialogo_ui.show()
-	fondo_dialogo.show()
-	caja_dialogo.show()
+	# Mostrar la interfaz.
+	pantalla_ejercicio.show()
 
-	retrato_jugador.show()
-	retrato_npc.show()
+	# Mostrar la ventana de los bloques.
+	if ventana_ejercicio != null:
+		ventana_ejercicio.show()
 
-	nombre_gato.show()
-	texto_dialogo.show()
-	continuar_label.show()
+	# Mantener compatibilidad con otras
+	# conexiones del ejercicio.
+	solicitar_abrir_ejercicio.emit()
 
-	mostrar_dialogo()
-
-	print("E3.1: dialogo iniciado.")
-
-
-# ==========================================
-# MOSTRAR DIALOGO
-# ==========================================
-
-func mostrar_dialogo() -> void:
-
-	if not referencias_correctas:
-		return
-
-	if indice_dialogo >= dialogos.size():
-		finalizar_dialogo()
-		return
-
-	texto_dialogo.text = dialogos[indice_dialogo]
-
-	texto_dialogo.autowrap_mode = (
-		TextServer.AUTOWRAP_WORD_SMART
+	print(
+		"E3.1: pantalla del ejercicio abierta."
 	)
-
-	continuar_label.text = (
-		"Presiona E para continuar"
-	)
-
-	retrato_jugador.show()
-	retrato_npc.show()
-
-	if indice_dialogo % 2 == 0:
-
-		# Habla el Gato Guardian.
-		nombre_gato.text = "GATO GUARDIÁN"
-
-		retrato_npc.modulate = COLOR_ILUMINADO
-		retrato_jugador.modulate = COLOR_OSCURO
-
-		cambiar_color_dialogo(
-			COLOR_GATO_GUARDIAN
-		)
-
-	else:
-
-		# Habla el protagonista.
-		nombre_gato.text = GameData.playerName.to_upper()   # nombre real del jugador
-
-		retrato_jugador.modulate = COLOR_ILUMINADO
-		retrato_npc.modulate = COLOR_OSCURO
-
-		cambiar_color_dialogo(
-			COLOR_PROTAGONISTA
-		)
-
-
-# ==========================================
-# AVANZAR DIALOGO
-# ==========================================
-
-func avanzar_dialogo() -> void:
-
-	if not dialogo_activo:
-		return
-
-	indice_dialogo += 1
-
-	if indice_dialogo >= dialogos.size():
-		finalizar_dialogo()
-	else:
-		mostrar_dialogo()
 
 
 # ==========================================
@@ -444,6 +274,7 @@ func congelar_jugador() -> void:
 	)
 
 	jugador.velocity = Vector2.ZERO
+
 	jugador.set_physics_process(false)
 
 
@@ -462,66 +293,60 @@ func descongelar_jugador() -> void:
 
 
 # ==========================================
-# FINALIZAR DIALOGO
+# CERRAR EJERCICIO SIN COMPLETAR
 # ==========================================
 
-func finalizar_dialogo() -> void:
+func cerrar_ejercicio() -> void:
 
-	if not dialogo_activo:
+	if not ejercicio_abierto:
 		return
 
-	dialogo_activo = false
-	dialogo_terminado = true
+	ejercicio_abierto = false
 
-	# Ocultar el dialogo.
-	if dialogo_ui != null:
-		dialogo_ui.hide()
+	# Ocultar pantalla.
+	if pantalla_ejercicio != null:
+		pantalla_ejercicio.hide()
 
-	# La E del gato no vuelve a aparecer.
-	if letra_e != null:
-		letra_e.hide()
-
-	# Restaurar retratos.
-	if retrato_jugador != null:
-		retrato_jugador.modulate = COLOR_ILUMINADO
-
-	if retrato_npc != null:
-		retrato_npc.modulate = COLOR_ILUMINADO
-
-	# El protagonista vuelve a moverse.
+	# Permitir movimiento.
 	descongelar_jugador()
 
-	# Habilitar el ejercicio E3.1.
-	iniciar_ejercicio.emit()
+	# Mostrar E o ! segun la distancia.
+	actualizar_indicadores()
 
-	# ======================================
-	# ACTIVAR ! SOBRE LA CONSOLA
-	# ======================================
+	print(
+		"E3.1: ejercicio cerrado sin completar."
+	)
 
-	if consola_objetivo != null:
 
-		if consola_objetivo.has_method("mostrar_objetivo"):
+# ==========================================
+# EJERCICIO COMPLETADO
+# ==========================================
 
-			consola_objetivo.call(
-				"mostrar_objetivo"
-			)
+func completar_ejercicio() -> void:
 
-			print(
-				"E3.1: indicador ! activado."
-			)
+	objetivo_completado = true
+	objetivo_activado = false
+	ejercicio_abierto = false
 
-		else:
+	# Ocultar la pantalla.
+	if pantalla_ejercicio != null:
+		pantalla_ejercicio.hide()
 
-			push_warning(
-				"E3.1: la consola no tiene "
-				+ "mostrar_objetivo()."
-			)
+	# Devolver movimiento.
+	descongelar_jugador()
 
-	else:
+	# Ocultar definitivamente ! y E.
+	actualizar_indicadores()
 
-		push_warning(
-			"E3.1: no se encontro la consola. "
-			+ "Revisa su nombre en el arbol."
-		)
+	print(
+		"E3.1: ejercicio completado."
+	)
 
-	print("E3.1: dialogo terminado.")
+
+# ==========================================
+# OCULTAR OBJETIVO
+# ==========================================
+
+func ocultar_objetivo() -> void:
+
+	completar_ejercicio()

@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://scenes/common/ui/PuzzleUI.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c3n5yetcib2e6" path="res://scenes/common/actors/NPC.tscn" id="6_npc"]
 [ext_resource type="Texture2D" uid="uid://cwn8xd1jpcgti" path="res://assets/characters/npcs/gato_granjero.png" id="7_gkci6"]
+[ext_resource type="Texture2D" uid="uid://1u1dhihqhjwt" path="res://assets/characters/npcs/miette.png" id="8_bnnbr"]
+[ext_resource type="Texture2D" uid="uid://blhftra6puxq0" path="res://assets/characters/npcs/rosalinda.png" id="9_6ycer"]
 
 [sub_resource type="RectangleShape2D" id="1"]
 size = Vector2(1152, 32)
@@ -55,7 +57,9 @@ npcSprite = ExtResource("7_gkci6")
 [node name="NPC_E15" parent="." unique_id=643704097 instance=ExtResource("6_npc")]
 position = Vector2(574, 548)
 dialogFile = "res://dialogs/nivel_1/npc_e15.json"
+npcSprite = ExtResource("8_bnnbr")
 
 [node name="NPC_E17" parent="." unique_id=825243061 instance=ExtResource("6_npc")]
 position = Vector2(920, 552)
 dialogFile = "res://dialogs/nivel_1/npc_e17.json"
+npcSprite = ExtResource("9_6ycer")

@@ -366,7 +366,7 @@ func _cargar_perfil_estudiante() -> void:
 	var game_data: Node = _obtener_gamedata()
 	if game_data != null:
 		var nombre_gd: String = str(game_data.get("playerName")).strip_edges()
-		if nombre_gd != "" and nombre_gd != "Player" and nombre_gd != "SIN_ASIGNAR" and nombre_gd != "<null>":
+		if nombre_gd != "" and nombre_gd != "SIN_ASIGNAR" and nombre_gd != "<null>":
 			id_jugador = nombre_gd
 			identificacion_confirmada_sesion = true
 			_guardar_perfil_estudiante()
@@ -415,7 +415,7 @@ func obtener_id_jugador() -> String:
 	var game_data: Node = _obtener_gamedata()
 	if game_data != null and "playerName" in game_data:
 		var nombre_gd: String = str(game_data.get("playerName")).strip_edges()
-		if nombre_gd != "" and nombre_gd != "Player" and nombre_gd != "SIN_ASIGNAR" and nombre_gd != "<null>":
+		if nombre_gd != "" and nombre_gd != "SIN_ASIGNAR" and nombre_gd != "<null>":
 			if nombre_gd != id_jugador:
 				id_jugador = nombre_gd
 				_guardar_perfil_estudiante()
@@ -913,6 +913,9 @@ func _guardar_progreso_local() -> void:
 
 
 func _cargar_progreso_local() -> void:
+	# El progreso del nivel NO se retoma entre sesiones: cada partida empieza en cero (ejercicios,
+	# examen y rescate). Solo se conservan los puntajes finales para el ranking y las insignias.
+	return
 	if not FileAccess.file_exists(RUTA_PROGRESO_JSON):
 		return
 	var archivo := FileAccess.open(RUTA_PROGRESO_JSON, FileAccess.READ)
