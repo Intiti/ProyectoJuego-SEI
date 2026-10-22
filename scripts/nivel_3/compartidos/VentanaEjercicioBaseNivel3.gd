@@ -38,6 +38,8 @@ var bloques_texto_original: Dictionary = {}
 var bloques_colocados: Array[String] = []
 var errores: int = 0
 var prompt_estilizado: RichTextLabel = null
+var etiqueta_paso: Label = null
+var _slots_erroneos: Array[int] = []   # huecos marcados como incorrectos tras Comprobar
 var id_intento_insignia: int = -1
 var boton_repetir_insignia: Button = null
 var estado_insignia: Label = null
@@ -93,7 +95,7 @@ func _ready() -> void:
 	configurar_interfaz()
 	conectar_botones()
 	preparar_bloques()
-	_configurar_distribucion_adaptable()
+	_finalizar_pantalla_nivel1()
 	_preparar_repeticion_insignia()
 	iniciar_ejercicio()
 	print(_obtener_id_ejercicio() + ": ventana de ejercicio preparada.")
@@ -199,58 +201,76 @@ func configurar_interfaz() -> void:
 	mensaje_resultado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto_pista.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
-	_estilizar_boton_accion(boton_reiniciar, "↺ Reiniciar", Color("#334155"), Color("#64748B"))
-	_estilizar_boton_accion(boton_pista, "💡 Pista", Color("#78350F"), Color("#F59E0B"))
-	_estilizar_boton_accion(boton_ejecutar, "▶ Comprobar", Color("#065F46"), Color("#34D399"))
-	_estilizar_boton_accion(boton_cerrar, "✕ Cerrar", Color("#7F1D1D"), Color("#F87171"))
-
-	_aplicar_estilo_nivel1()
+	_construir_pantalla_nivel1()
 
 	panel_pista.hide()
 	actualizar_puntos_encabezado()
 
 
-# Misma presentación que el puzzle del Nivel 1: paleta, instrucción con palabras coloreadas
-# y panel de código como "consola". No cambia la mecánica ni los nodos de la escena.
-func _aplicar_estilo_nivel1() -> void:
-	add_theme_stylebox_override("panel", Estilo.windowStyle())
-	titulo.add_theme_color_override("font_color", Estilo.TITLE)
-	titulo_construccion.add_theme_color_override("font_color", Estilo.CONSOLE_TITLE)
-	var panel_alg := get_node_or_null("ContenidoEjercicio/ColumnasEjercicio/AreaAlgoritmo/PanelAlgoritmo") as PanelContainer
-	if panel_alg != null:
-		panel_alg.add_theme_stylebox_override("panel", Estilo.consoleStyle())
-	var rotulo_bloques := get_node_or_null("ContenidoEjercicio/ColumnasEjercicio/PanelBloques/BloquesDisponibles/TituloBloques") as Label
-	if rotulo_bloques != null:
-		rotulo_bloques.add_theme_color_override("font_color", Estilo.HEADING)
+# Misma pantalla que el puzzle del Nivel 1: instrucción, consola a la izquierda y bloques a la
+# derecha. Se reutilizan los nodos funcionales de la escena (banco, lista de código y botones),
+# solo cambian de lugar y de aspecto; la lógica del ejercicio no se toca.
+func _construir_pantalla_nivel1() -> void:
+	var viejo := get_node_or_null("ContenidoEjercicio") as Control
+	var ui: Dictionary = Estilo.buildScreen(self, "Bloques disponibles")
 
-	# Encabezado "Instrucción del nivel" y texto coloreado (el Label original queda oculto).
-	var fila_instr := instrucciones.get_parent() as Control
-	var contenido := get_node_or_null("ContenidoEjercicio") as VBoxContainer
-	if fila_instr != null and contenido != null:
-		var encabezado: Label = Estilo.makeHeading(18)
-		contenido.add_child(encabezado)
-		contenido.move_child(encabezado, fila_instr.get_index())
-		prompt_estilizado = Estilo.makePrompt(_obtener_instruccion_ejercicio(), 16)
-		fila_instr.add_child(prompt_estilizado)
-		fila_instr.move_child(prompt_estilizado, instrucciones.get_index())
-		instrucciones.hide()
+	titulo = ui["title_right"]
+	titulo.text = _obtener_titulo_ejercicio()
+	prompt_estilizado = ui["prompt"]
+	Estilo.setPromptText(prompt_estilizado, _obtener_instruccion_ejercicio())
+	titulo_construccion = ui["console_title"]
+	mensaje_resultado = ui["feedback"]
+	panel_pista = ui["hint_panel"]
+	texto_pista = ui["hint_label"]
+
+	# Lista del código dentro de la consola
+	(ui["code_box"] as Node).queue_free()
+	lista_algoritmo.reparent(ui["code_scroll"])
+	lista_algoritmo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lista_algoritmo.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lista_algoritmo.add_theme_constant_override("separation", 4)
+
+	# Banco de bloques en la columna derecha
+	(ui["bank_box"] as Node).queue_free()
+	panel_bloques.reparent(ui["bank_scroll"])
+	panel_bloques.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_bloques.add_theme_constant_override("separation", 10)
+
+	# Botones de acción en la fila inferior
+	etiqueta_paso = ui["step_label"]
+	var fila: HBoxContainer = ui["buttons"]
+	for par in [[boton_reiniciar, "Reiniciar", "neutral"], [boton_pista, "Pista", "warn"], [boton_ejecutar, "Comprobar", "primary"]]:
+		var boton: Button = par[0]
+		if boton != null:
+			boton.reparent(fila)
+			Estilo.styleActionButton(boton, par[1], par[2])
+	boton_ejecutar.custom_minimum_size = Vector2(190, 48)
+
+	# La interfaz antigua queda oculta (sus nodos siguen existiendo para el resto del código).
+	if viejo != null:
+		viejo.hide()
 
 
-# Bloques colocados en arcoíris, como al completar un ejercicio del Nivel 1.
+# Mantiene el comportamiento de ocultar la barra superior de L3 mientras la ventana está abierta.
+func _finalizar_pantalla_nivel1() -> void:
+	var viejo := get_node_or_null("ContenidoEjercicio") as VBoxContainer
+	if viejo != null:
+		_configurar_encabezado_visual(viejo)
+	# El nombre del ejercicio queda arriba a la izquierda.
+	titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+
+# Bloques del código en arcoíris, como al completar un ejercicio del Nivel 1.
 func _aplicar_arcoiris() -> void:
 	if lista_algoritmo == null:
 		return
-	var botones: Array[Button] = []
+	var bloques: Array[PanelContainer] = []
 	for fila in lista_algoritmo.get_children():
 		for hijo in fila.get_children():
-			if hijo is Button:
-				botones.append(hijo)
-	for i in botones.size():
-		var sb: StyleBoxFlat = Estilo.rainbowStyle(i, botones.size())
-		for estado in ["normal", "hover", "pressed", "focus", "disabled"]:
-			botones[i].add_theme_stylebox_override(estado, sb)
-		for nombre_color in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color"]:
-			botones[i].add_theme_color_override(nombre_color, Color(0.08, 0.08, 0.10))
+			if hijo is PanelContainer:
+				bloques.append(hijo)
+	for i in bloques.size():
+		bloques[i].add_theme_stylebox_override("panel", Estilo.rainbowStyle(i, bloques.size()))
 
 
 # Solo presentación: conservar referencias y conexiones al envolver los contenedores.
@@ -496,6 +516,7 @@ func reiniciar_ejercicio() -> void:
 
 func reiniciar_espacios() -> void:
 	var total_esp: int = _obtener_total_espacios()
+	_slots_erroneos.clear()
 	bloques_colocados.clear()
 	for i in range(total_esp):
 		bloques_colocados.append("")
@@ -543,53 +564,19 @@ func _actualizar_estilos_botones_disponibles() -> void:
 			continue
 		var txt: String = str(bloques_texto_original.get(boton, boton.text))
 		var esta_colocado: bool = bloques_colocados.has(txt)
-
+		boton.text = txt.strip_edges()
+		# Bloque de color como las alternativas del Nivel 1; si ya está colocado se atenúa.
+		Estilo.styleBankButton(boton, txt)
 		if esta_colocado:
-			boton.text = txt
 			boton.tooltip_text = "Bloque colocado en el algoritmo. Haz clic para quitarlo."
-			var estilo_colocado := StyleBoxFlat.new()
-			estilo_colocado.bg_color = Color(0.09, 0.13, 0.22, 0.85)
-			estilo_colocado.border_color = Color("#38BDF8")
-			estilo_colocado.set_border_width_all(2)
-			estilo_colocado.set_corner_radius_all(8)
-			estilo_colocado.content_margin_left = 8
-			estilo_colocado.content_margin_right = 8
-			estilo_colocado.content_margin_top = 2
-			estilo_colocado.content_margin_bottom = 2
-			boton.add_theme_stylebox_override("normal", estilo_colocado)
-
-			var hover_col := estilo_colocado.duplicate()
-			hover_col.bg_color = Color(0.22, 0.12, 0.18, 0.95)
-			hover_col.border_color = Color("#F87171")
-			boton.add_theme_stylebox_override("hover", hover_col)
-			boton.add_theme_stylebox_override("pressed", hover_col)
-			boton.add_theme_color_override("font_color", Color("#93C5FD"))
-			boton.modulate = Color(0.85, 0.95, 1.0, 0.92)
+			var usado: StyleBoxFlat = Estilo.usedStyle(txt)
+			for estado in ["normal", "hover", "pressed", "focus"]:
+				boton.add_theme_stylebox_override(estado, usado)
+			for nombre_color in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+				boton.add_theme_color_override(nombre_color, Color(0.55, 0.55, 0.55))
 		else:
-			boton.text = txt
 			boton.tooltip_text = "Haz clic para colocar este bloque en el algoritmo."
-			var paleta: Dictionary = _obtener_colores_bloque(txt)
-			var bg: Color = paleta["bg"]
-			var border: Color = paleta["border"]
-
-			var estilo_disp := StyleBoxFlat.new()
-			estilo_disp.bg_color = bg
-			estilo_disp.border_color = border
-			estilo_disp.set_border_width_all(2)
-			estilo_disp.set_corner_radius_all(8)
-			estilo_disp.content_margin_left = 8
-			estilo_disp.content_margin_right = 8
-			estilo_disp.content_margin_top = 2
-			estilo_disp.content_margin_bottom = 2
-			boton.add_theme_stylebox_override("normal", estilo_disp)
-
-			var hover_disp := estilo_disp.duplicate()
-			hover_disp.bg_color = bg.lightened(0.16)
-			hover_disp.border_color = border.lightened(0.2)
-			boton.add_theme_stylebox_override("hover", hover_disp)
-			boton.add_theme_stylebox_override("pressed", hover_disp)
-			boton.add_theme_color_override("font_color", paleta["text"])
-			boton.modulate = Color(1, 1, 1, 1)
+		boton.modulate = Color(1, 1, 1, 1)
 
 
 func presionar_bloque(boton: Button) -> void:
@@ -611,6 +598,7 @@ func presionar_bloque(boton: Button) -> void:
 		return
 
 	bloques_colocados[indice_libre] = texto_bloque
+	_slots_erroneos.clear()
 	mensaje_resultado.text = ""
 	_reproducir_sfx("bloque_colocar")
 	_actualizar_estilos_botones_disponibles()
@@ -628,6 +616,7 @@ func quitar_bloque_colocado(posicion: int) -> void:
 	# Eliminar el bloque seleccionado y reorganizar los demás manteniendo su orden lógico
 	bloques_colocados.remove_at(posicion)
 	bloques_colocados.append("")
+	_slots_erroneos.clear()
 
 	mensaje_resultado.text = "Bloque devuelto a las opciones disponibles."
 	mensaje_resultado.add_theme_color_override("font_color", Color("#94A3B8"))
@@ -669,6 +658,12 @@ func actualizar_codigo_mostrado() -> void:
 
 	lista_algoritmo.add_theme_constant_override("separation", 3)
 	var primer_libre: int = obtener_espacio_libre()
+	if etiqueta_paso != null:
+		var colocados: int = 0
+		for b in bloques_colocados:
+			if b != "":
+				colocados += 1
+		etiqueta_paso.text = "Colocados %d de %d" % [colocados, total_esp]
 	var lineas: PackedStringArray = plantilla.split("\n")
 
 	for linea_raw in lineas:
@@ -704,104 +699,32 @@ func _detectar_indice_espacio(texto_limpio: String, total_esp: int) -> int:
 
 
 func _agregar_fila_codigo_fijo(texto_codigo: String, espacios_indent: int) -> void:
-	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 0)
-
-	if espacios_indent > 0:
-		var margen := Control.new()
-		margen.custom_minimum_size = Vector2(espacios_indent * 8.0, 0)
-		fila.add_child(margen)
-
-	var lbl := Label.new()
-	lbl.text = texto_codigo
-	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lbl.add_theme_font_size_override("font_size", 15)
-	if texto_codigo.begins_with("else:") or texto_codigo.begins_with("elif ") or texto_codigo.begins_with("while ") or texto_codigo.begins_with("if "):
-		lbl.add_theme_color_override("font_color", Color("#FCD34D"))
-	elif texto_codigo.contains("print("):
-		lbl.add_theme_color_override("font_color", Color("#6EE7B7"))
-	else:
-		lbl.add_theme_color_override("font_color", Color("#E2E8F0"))
-
-	fila.add_child(lbl)
-	lista_algoritmo.add_child(fila)
+	# Línea fija: bloque bloqueado, igual que las líneas fijas del Nivel 1
+	lista_algoritmo.add_child(Estilo.makeRow(espacios_indent / 4, Estilo.makeCodeBlock(texto_codigo, "locked")))
 
 
 func _agregar_fila_espacio_visual(indice: int, espacios_indent: int, es_siguiente_disponible: bool) -> void:
-	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 6)
-
-	if espacios_indent > 0:
-		var guia := Control.new()
-		guia.custom_minimum_size = Vector2(espacios_indent * 8.0, 0)
-		fila.add_child(guia)
-
-	var btn_slot := Button.new()
-	btn_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn_slot.custom_minimum_size = Vector2(0, 24)
-	btn_slot.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	btn_slot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	btn_slot.clip_text = false
-	btn_slot.add_theme_font_size_override("font_size", 14)
-
 	var contenido_actual: String = bloques_colocados[indice] if indice < bloques_colocados.size() else ""
-
+	var bloque: Control
+	var con_flecha: bool = false
 	if contenido_actual != "":
-		btn_slot.text = contenido_actual
-		btn_slot.tooltip_text = "Haz clic para quitar este bloque del algoritmo."
-		btn_slot.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-
-		var paleta: Dictionary = _obtener_colores_bloque(contenido_actual)
-		var bg: Color = paleta["bg"]
-		var border: Color = paleta["border"]
-
-		var estilo_lleno := StyleBoxFlat.new()
-		estilo_lleno.bg_color = bg
-		estilo_lleno.border_color = border
-		estilo_lleno.set_border_width_all(2)
-		estilo_lleno.set_corner_radius_all(6)
-		estilo_lleno.content_margin_left = 8
-		estilo_lleno.content_margin_right = 8
-		estilo_lleno.content_margin_top = 2
-		estilo_lleno.content_margin_bottom = 2
-		btn_slot.add_theme_stylebox_override("normal", estilo_lleno)
-
-		var hover_lleno := estilo_lleno.duplicate()
-		hover_lleno.bg_color = Color("#7F1D1D")
-		hover_lleno.border_color = Color("#F87171")
-		btn_slot.add_theme_stylebox_override("hover", hover_lleno)
-		btn_slot.add_theme_stylebox_override("pressed", hover_lleno)
-		btn_slot.add_theme_color_override("font_color", paleta["text"])
-
-		btn_slot.pressed.connect(quitar_bloque_colocado.bind(indice))
+		# Bloque colocado: clic para quitarlo; en rojo si Comprobar lo marcó incorrecto
+		bloque = Estilo.makeCodeBlock(contenido_actual, "wrong" if _slots_erroneos.has(indice) else "locked")
+		bloque.tooltip_text = "Haz clic para quitar este bloque del algoritmo."
+		bloque.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		bloque.gui_input.connect(_on_bloque_colocado_gui_input.bind(indice))
 	else:
-		btn_slot.disabled = true
-		var estilo_vacio := StyleBoxFlat.new()
-		estilo_vacio.set_corner_radius_all(6)
-		estilo_vacio.content_margin_left = 8
-		estilo_vacio.content_margin_right = 8
-		estilo_vacio.content_margin_top = 2
-		estilo_vacio.content_margin_bottom = 2
+		bloque = Estilo.makeEmptySlot()
+		con_flecha = es_siguiente_disponible
+	var fila_hueco: HBoxContainer = Estilo.makeRow(espacios_indent / 4, bloque, con_flecha)
+	lista_algoritmo.add_child(fila_hueco)
+	if con_flecha:
+		Estilo.ensureVisible(fila_hueco)
 
-		if es_siguiente_disponible:
-			btn_slot.text = "▸  Selecciona un bloque para colocar aquí..."
-			estilo_vacio.bg_color = Color(0.08, 0.16, 0.28, 0.95)
-			estilo_vacio.border_color = Color("#38BDF8")
-			estilo_vacio.set_border_width_all(2)
-			btn_slot.add_theme_color_override("font_disabled_color", Color("#7DD3FC"))
-		else:
-			btn_slot.text = "•  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─"
-			estilo_vacio.bg_color = Color(0.06, 0.09, 0.16, 0.75)
-			estilo_vacio.border_color = Color(0.28, 0.35, 0.48, 0.7)
-			estilo_vacio.set_border_width_all(1)
-			btn_slot.add_theme_color_override("font_disabled_color", Color("#64748B"))
 
-		btn_slot.add_theme_stylebox_override("disabled", estilo_vacio)
-		btn_slot.add_theme_stylebox_override("normal", estilo_vacio)
-
-	fila.add_child(btn_slot)
-	lista_algoritmo.add_child(fila)
+func _on_bloque_colocado_gui_input(evento: InputEvent, indice: int) -> void:
+	if evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT:
+		quitar_bloque_colocado(indice)
 
 
 func mostrar_pista() -> void:
@@ -814,16 +737,16 @@ func mostrar_pista() -> void:
 	var pistas_dict: Dictionary = _obtener_pistas()
 	var idx_err: int = _obtener_primer_espacio_incorrecto()
 
-	var prefijo: String = "💡 Pista: "
+	var prefijo: String = "Pista: "
 	if errores >= 2 or pistas_usadas >= 3:
-		prefijo = "💡 Ayuda detallada: "
+		prefijo = "Ayuda detallada: "
 	elif errores == 1 or pistas_usadas == 2:
-		prefijo = "💡 Pista de estructura: "
+		prefijo = "Pista de estructura: "
 
 	if ultimo_tipo_error != "" and mensajes_error.has(ultimo_tipo_error):
 		texto_pista.text = prefijo + _limpiar_etiquetas_tecnicas(str(mensajes_error[ultimo_tipo_error]))
 		if (errores >= 1 or pistas_usadas >= 2) and pistas_dict.has(idx_err):
-			texto_pista.text += "\n👉 " + _limpiar_etiquetas_tecnicas(str(pistas_dict.get(idx_err, "")))
+			texto_pista.text += "\n" + _limpiar_etiquetas_tecnicas(str(pistas_dict.get(idx_err, "")))
 		panel_pista.show()
 		return
 
@@ -884,11 +807,7 @@ func ejecutar_codigo() -> void:
 		registrar_puntaje(puntos_obtenidos)
 		actualizar_puntos_encabezado()
 
-		mensaje_resultado.text = (
-			"¡Algoritmo correcto! " + str(validacion.get("resumen_casos", ""))
-			+ "\nPuntos obtenidos: +" + str(puntos_obtenidos)
-			+ _texto_desglose_puntos()
-		)
+		mensaje_resultado.text = "¡Correcto!"
 		mensaje_resultado.add_theme_color_override("font_color", Estilo.OK)
 		_animar_feedback(true)
 		Estilo.playOk(self)   # mismo sonidito (o RACHA xN) que el Nivel 1
@@ -900,10 +819,34 @@ func ejecutar_codigo() -> void:
 		for b in botones_bloques:
 			b.disabled = true
 
-		# Como en el Nivel 1: se ve el acierto (bloques en arcoíris) un instante antes del completado.
-		_aplicar_arcoiris()
-		await get_tree().create_timer(Estilo.OK_HOLD).timeout
+		# Igual que el Nivel 1: fanfarria y tablón de MIAUGORITMO COMPLETADO sobre la consola, con
+		# los bloques en arcoíris. La ventana de completado de la escena sigue haciendo su trabajo
+		# (registro, mensaje de historia, insignia, puerta), pero ya no se ve: su contenido pasa al tablón.
 		Estilo.playFanfare()
+		var repeticion: bool = repeticion_sin_puntos
+		var detalle: Dictionary = GameData.lastBreakdown
+		var es_repeticion: bool = repeticion or String(detalle.get("code", "")) != _obtener_id_ejercicio()
+		var lineas: Dictionary = Estilo.scoreLines(3, _obtener_total_espacios(), errores, detalle, es_repeticion)
+
+		var notas: Array[String] = []
+		var quiere_repetir: bool = false
+		if ventana_completado != null and ventana_completado.has_method("mostrar_completado"):
+			ventana_completado.call("mostrar_completado", errores)
+			_actualizar_feedback_insignia()
+			ventana_completado.hide()
+			var msg_historia := ventana_completado.get_node_or_null("ContenidoCompletado/MensajeExito") as Label
+			if msg_historia != null:
+				notas.append(msg_historia.text)
+			if estado_insignia != null:
+				notas.append(estado_insignia.text)
+			if sistema_puntos != null and sistema_puntos.has_method("tiene_insignia_ejercicio"):
+				quiere_repetir = not bool(sistema_puntos.call("tiene_insignia_ejercicio", _obtener_id_ejercicio()))
+
+		var eleccion: String = await Estilo.playTablon(self, Estilo.collectBlocks(lista_algoritmo), {
+			"base": lineas["base"], "pen": lineas["pen"], "bonus": lineas["bonus"], "total": lineas["total"],
+			"notes": notas,
+			"extra_button": "Repetir para mejorar" if quiere_repetir else "",
+		})
 
 		ejercicio_resuelto.emit(errores)
 
@@ -912,10 +855,12 @@ func ejecutar_codigo() -> void:
 		if puerta_seguridad != null and puerta_seguridad.has_method("desbloquear_puerta"):
 			puerta_seguridad.call("desbloquear_puerta")
 
+		if eleccion == "extra":
+			_repetir_para_insignia()
+			return
 		hide()
-		if ventana_completado != null and ventana_completado.has_method("mostrar_completado"):
-			ventana_completado.call("mostrar_completado", errores)
-			_actualizar_feedback_insignia()
+		if ventana_completado != null and ventana_completado.has_method("continuar_juego"):
+			ventana_completado.call("continuar_juego")
 		return
 
 	# Respuesta incorrecta
@@ -929,22 +874,30 @@ func ejecutar_codigo() -> void:
 		errores = int(sistema_puntos.call("registrar_error_insignia", _obtener_id_ejercicio(), id_intento_insignia))
 	ultimo_tipo_error = detectar_tipo_error()
 	_registrar_intento_log(false, duracion_seg, ultimo_tipo_error, 0)
+	_marcar_huecos_incorrectos()
 
 	var mensajes_error: Dictionary = _obtener_mensajes_error()
 	var explicacion: String = _limpiar_etiquetas_tecnicas(
 		str(mensajes_error.get(ultimo_tipo_error, "Revisa el orden y las condiciones de los bloques seleccionados."))
 	)
 	var penalizacion_txt: String = (
-		"Sin penalización en 1° error" if errores == 1
-		else ("Penalización actual: -25%" if errores == 2 else "Penalización actual: -50%")
+		"sin penalización en el 1° error" if errores == 1
+		else ("penalización actual -25%" if errores == 2 else "penalización actual -50%")
 	)
-	mensaje_resultado.text = (
-		"Solución incorrecta (Intento #" + str(intentos_realizados) + " | " + penalizacion_txt + ").\n"
-		+ explicacion + " Haz clic en un bloque colocado para cambiarlo."
-	)
+	mensaje_resultado.text = "Incorrecto (intento #%d, %s). %s" % [intentos_realizados, penalizacion_txt, explicacion]
 	mensaje_resultado.add_theme_color_override("font_color", Estilo.ERR)
 	_animar_feedback(false)
 	Estilo.playError(self)   # sonido de error + sacudida, igual que el Nivel 1
+
+
+# Tras un Comprobar fallido, los bloques incorrectos quedan en rojo hasta que el jugador los cambie.
+func _marcar_huecos_incorrectos() -> void:
+	var resp: Array = _obtener_respuesta_correcta()
+	_slots_erroneos.clear()
+	for i in range(_obtener_total_espacios()):
+		if bloques_colocados[i] != str(resp[i]):
+			_slots_erroneos.append(i)
+	actualizar_codigo_mostrado()
 
 
 func validar_algoritmo_y_casos() -> Dictionary:
