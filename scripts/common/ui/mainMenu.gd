@@ -17,8 +17,8 @@ var busy: bool = false
 
 func _ready():
 	_applyGlobalTheme()
-	if OS.is_debug_build():
-		add_child(DevPanelScript.new())
+	#if OS.is_debug_build():
+		#add_child(DevPanelScript.new())
 	DJManager.playMusic("menu")
 
 func _applyGlobalTheme() -> void:
