@@ -4,6 +4,7 @@ const LEVEL1_SCENE := "res://scenes/nivel_1/Main.tscn"
 const LEVEL2_SCENE := "res://scenes/nivel_2/1SenderoDeLasHuellas.tscn"
 const LEVEL3_SCENE := "res://scenes/Nivel_3/1Entrada del Laboratorio.tscn"
 const MARGIN := 16.0
+const FormularioAliasScript := preload("res://scripts/common/ui/formularioAlias.gd")
 
 func _ready() -> void:
 	anchor_left = 1.0
@@ -56,13 +57,13 @@ func _makeStyle(color: Color) -> StyleBoxFlat:
 	return style
 
 func _onSkipPressed() -> void:
-	GameData.playerName = "Player"
+	GameData.assignAlias(FormularioAliasScript.generateAlias())
 	get_tree().change_scene_to_file(LEVEL1_SCENE)
 
 func _onLevel2Pressed() -> void:
-	GameData.playerName = "Player"
+	GameData.assignAlias(FormularioAliasScript.generateAlias())
 	get_tree().change_scene_to_file(LEVEL2_SCENE)
 
 func _onLevel3Pressed() -> void:
-	GameData.playerName = "Player"
+	GameData.assignAlias(FormularioAliasScript.generateAlias())
 	get_tree().change_scene_to_file(LEVEL3_SCENE)

@@ -103,6 +103,12 @@ func _submitNivel(level: int) -> void:
 	nivelSubmitDone[level] = true
 	nivelSubmitted.emit(level)
 
+func assignAlias(alias: String) -> void:
+	playerName = alias
+	var p3: Node = get_node_or_null("/root/PuntajesNivel3")
+	if p3 != null and p3.has_method("obtener_id_jugador"):
+		p3.call("obtener_id_jugador")
+
 func resetRun() -> void:
 	solvedDialogs.clear()
 	alcaldePuzzleSolved = false

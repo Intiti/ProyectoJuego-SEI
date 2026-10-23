@@ -17,7 +17,8 @@ var busy: bool = false
 
 func _ready():
 	_applyGlobalTheme()
-	add_child(DevPanelScript.new())
+	if OS.is_debug_build():
+		add_child(DevPanelScript.new())
 	DJManager.playMusic("menu")
 
 func _applyGlobalTheme() -> void:
@@ -39,7 +40,7 @@ func _on_play_button_pressed() -> void:
 
 func _onAliasConfirmado(alias: String) -> void:
 	GameData.resetRun()
-	GameData.playerName = alias
+	GameData.assignAlias(alias)
 	await get_tree().create_timer(0.3).timeout
 	get_tree().change_scene_to_file("res://scenes/nivel_0/Intro.tscn")
 
