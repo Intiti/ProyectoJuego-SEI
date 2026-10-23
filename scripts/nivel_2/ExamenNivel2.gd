@@ -832,11 +832,13 @@ func _on_alternativa_elegida(texto: String, correcto: bool, boton: PanelContaine
 		boton.modulate.a = 0.5
 
 		vidas_actuales -= 1
+		ReporteNivel.examenPregunta(2, "EX2", false, {"paso": _currentStep + 1, "respuesta": texto, "variante": ejercicio_idx})
 		GameData.streakFail()   # un error reinicia la racha global
 		_actualizar_vidas()
 
 		if vidas_actuales <= 0:
 			_mostrar_feedback("Sin vidas. ¡Inténtalo de nuevo!", Color(1.0, 0.35, 0.35))
+			ReporteNivel.examenIntento(2, false, {"errores": MAX_VIDAS, "vidasPerdidas": MAX_VIDAS, "variante": ejercicio_idx})
 			await get_tree().create_timer(0.8).timeout
 			await _mostrar_examen_fallido()
 		else:

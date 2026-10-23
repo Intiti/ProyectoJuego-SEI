@@ -524,6 +524,12 @@ func _onAlternativeChosen(block):
 		_loadCurrentStep()
 	else:
 		_errores += 1
+		var fallo: Dictionary = {"paso": _currentStep + 1, "respuesta": block.displayText}
+		if _examMode:
+			fallo["archivo"] = str(_currentData.get("exam_file", ""))
+			ReporteNivel.examenPregunta(1, _reportCode(), false, fallo)
+		else:
+			ReporteNivel.fallo(1, _reportCode(), fallo)
 		DJManager.playError()
 		_rachaActual = 0
 		GameData.rachaGlobal = 0
@@ -768,6 +774,7 @@ func _showStreakPopup(n: int) -> void:
 # y espera a que el jugador presione "Intentar de nuevo" o "Salir".
 # Retorna true si quiere reintentar, false si quiere salir.
 func _showExamFailed() -> void:
+	ReporteNivel.examenIntento(1, false, {"errores": EXAM_MAX_ERRORS, "ejercicioFallido": int(_currentData.get("exam_index", 0)) + 1})
 	panel.move_to_front()
 	_disableCommandList()
 
@@ -966,6 +973,7 @@ func _onSuccess():
 		return
 
 	var puntaje = _calcularPuntaje()
+	ReporteNivel.acierto(1, _reportCode(), {"errores": _errores, "puntos": puntaje, "rachaMax": _rachaMax})
 	GameData.addPoints(1, puntaje)
 	# Corrigió tras equivocarse (los distractores fallados quedan bloqueados, no se puede repetir
 	# el mismo error): cuenta para la insignia transversal "Depurador Persistente".
@@ -1230,8 +1238,18 @@ func _applyRainbow(blocks: Array, hueBase: float) -> void:
 		style.content_margin_bottom = 6
 		block.add_theme_stylebox_override("panel", style)
 
+func _reportCode() -> String:
+	if _examMode:
+		return "EX1.%d" % (int(_currentData.get("exam_index", 0)) + 1)
+	if is_instance_valid(_activeNpc):
+		var f: String = str(_activeNpc.get("dialogFile")).get_file().get_basename()
+		if f.begins_with("npc_e") and f.substr(5).is_valid_int():
+			return "E1.%d" % (int(f.substr(5)) - 10)
+	return "L1"
+
 func _finishExamExercise(npc: Node) -> void:
 	var parts: Dictionary = _scoreBreakdown()
+	ReporteNivel.examenPregunta(1, _reportCode(), true, {"errores": _errores, "puntos": int(parts["total"]), "archivo": str(_currentData.get("exam_file", ""))})
 	_examAccBase += int(parts["base"])
 	_examAccPen += int(parts["pen"])
 	_examAccBonus += int(parts["bonus"])
@@ -1244,6 +1262,7 @@ func _finishExamExercise(npc: Node) -> void:
 	else:
 		var examScore: int = maxi(0, _examAccBase - _examAccPen + _examAccBonus)
 		GameData.addPoints(1, examScore)
+		ReporteNivel.examenIntento(1, true, {"puntos": examScore, "reinicios": GameData.nivel1ExamReinicios})
 		await _playCompletionWithTablon(examScore, {
 			"title": "EXAMEN COMPLETADO",
 			"count": total,

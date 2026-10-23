@@ -60,6 +60,7 @@ func markSolved(dialogFile: String) -> void:
 			"racha": rachaMaxNivel1,
 			"problemas": solvedProblemsCount(),
 		}
+		ReporteNivel.cerrarNivel(1)
 		_submitNivel1()
 	syncLevelSummaries()
 
@@ -85,6 +86,7 @@ func finishNivel(level: int) -> void:
 		"racha": racha,
 		"problemas": solvedCount(level),
 	}
+	ReporteNivel.cerrarNivel(level)
 	_submitNivel(level)
 
 func showNivelResumen(level: int):
@@ -132,6 +134,7 @@ func resetRun() -> void:
 	var p2: Node = get_node_or_null("/root/PuntajesNivel2")
 	if p2 != null and p2.has_method("reiniciar_nivel"):
 		p2.call("reiniciar_nivel")
+	ReporteNivel.reiniciar()
 	problemsChanged.emit()
 
 func solvedProblemsCount() -> int:
@@ -323,6 +326,7 @@ func completeExam(level: int, code: String, blocks: int, errors: int) -> Diction
 	lastBreakdown["level"] = level
 	if level == 2:
 		nivel2ExamenAprobado = true
+		ReporteNivel.examenIntento(2, true, {"errores": errors, "vidasPerdidas": errors, "puntos": int(r["total"])})
 	addPoints(level, int(r["total"]))
 	if level == 2:
 		finishNivel(2)

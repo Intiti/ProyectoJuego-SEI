@@ -53,6 +53,7 @@ func registrar_ejercicio(codigo: String, bloques_completados: int, errores: int)
 	var r: Dictionary = GameData.completeExercise(2, codigo, bloques_completados, errores)
 	var puntos: int = int(r["total"])
 	racha_actual = GameData.rachaGlobal
+	ReporteNivel.acierto(2, codigo, {"errores": errores, "puntos": puntos, "bloques": bloques_completados})
 
 	ejercicios_completados[codigo] = puntos
 	puntos_totales += puntos
@@ -72,6 +73,7 @@ func registrar_ejercicio(codigo: String, bloques_completados: int, errores: int)
 ## Cada comprobación fallida reinicia la racha global (igual que un error en el Nivel 1).
 func registrar_error(codigo: String, firma: String = "") -> void:
 	GameData.noteError(codigo, firma)
+	ReporteNivel.fallo(2, codigo, {"respuesta": firma.split("|")})
 	GameData.streakFail(codigo)
 	racha_actual = GameData.rachaGlobal
 

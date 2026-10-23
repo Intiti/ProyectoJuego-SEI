@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 GameData="*uid://bwor56u7fav5e"
 Insignias="*res://scripts/common/systems/Insignias.gd"
+ReporteNivel="*res://scripts/common/systems/ReporteNivel.gd"
 ManualUi="*uid://d0i7w0ptkwghb"
 DJManager="*uid://d4agv0rb58k1t"
 PuntajesNivel2="*res://scripts/nivel_2/compartidos/PuntajesNivel2.gd"

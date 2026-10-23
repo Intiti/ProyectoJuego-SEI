@@ -226,6 +226,7 @@ func _loadPuzzleData(path: String) -> Dictionary:
 		puzzleData["player_scene"] = _examPlayerScene
 		puzzleData["exam_mode"] = true   # ← activa sistema de vidas en puzzleManager
 		puzzleData["exam_index"] = _examIndex
+		puzzleData["exam_file"] = _examPicked[_examIndex].get_file().get_basename()
 		puzzleData["exam_total"] = _examPicked.size()
 		# Sin outro_lines: el examen usa onExamPuzzleFinished en su lugar
 	return puzzleData

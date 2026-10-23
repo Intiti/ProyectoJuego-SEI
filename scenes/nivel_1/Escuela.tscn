@@ -48,6 +48,9 @@ shape = SubResource("2")
 [node name="DialogBox" parent="." unique_id=1827364593 instance=ExtResource("4")]
 
 [node name="PuzzleUI" parent="." unique_id=1275682542 instance=ExtResource("5")]
+levelPrompt = null
+expectedOutput = null
+levelVars = null
 
 [node name="NPC_E16" parent="." unique_id=1466623536 instance=ExtResource("6_hvy7h")]
 position = Vector2(337, 554)

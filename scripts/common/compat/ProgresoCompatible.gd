@@ -24,6 +24,30 @@ func _olvidar_progreso_de_sesiones_anteriores() -> void:
 			archivo.store_string(JSON.stringify(datos, "\t"))
 			archivo.close()
 
+func registrar_intento_log(datos: Dictionary) -> void:
+	super.registrar_intento_log(datos)
+	var id: String = str(datos.get("ejercicio", ""))
+	var ok: bool = bool(datos.get("siFueCorrectaONo", false))
+	var detalle: Dictionary = {
+		"respuesta": datos.get("respuestaJugador", []),
+		"tiempoSeg": float(datos.get("tiempoDeRespuesta", 0.0)),
+		"tipoError": str(datos.get("tipoError", "NINGUNO")),
+		"pistas": int(datos.get("pistasUtilizadas", 0)),
+		"intento": int(datos.get("numeroIntento", 0)),
+	}
+	if id.begins_with("EX"):
+		ReporteNivel.examenPregunta(3, id, ok, detalle)
+	elif ok:
+		detalle["errores"] = int(datos.get("erroresAcumulados", 0))
+		detalle["puntos"] = int(datos.get("puntajeObtenido", 0))
+		ReporteNivel.acierto(3, id, detalle)
+	else:
+		ReporteNivel.fallo(3, id, detalle)
+
+func registrar_resultado_examen(aprobado: bool, errores: int, puntos_bono: int = 300) -> void:
+	super.registrar_resultado_examen(aprobado, errores, puntos_bono)
+	ReporteNivel.examenIntento(3, aprobado, {"errores": errores, "puntosBono": puntos_bono if aprobado else 0})
+
 func registrar_rescate_panko() -> void:
 	super.registrar_rescate_panko()
 	GameData.finishNivel(3)
