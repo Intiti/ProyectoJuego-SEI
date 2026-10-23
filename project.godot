@@ -24,6 +24,7 @@ DJManager="*uid://d4agv0rb58k1t"
 PuntajesNivel2="*res://scripts/nivel_2/compartidos/PuntajesNivel2.gd"
 PuntajesNivel3="*res://scripts/common/compat/ProgresoCompatible.gd"
 Talo="*uid://bpmdn8oc34pg7"
+TituloZona="*res://scripts/common/systems/TituloZona.gd"
 
 [display]
 
