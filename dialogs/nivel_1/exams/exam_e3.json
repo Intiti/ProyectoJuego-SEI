@@ -200,10 +200,10 @@
 		  },
 		  {
 			"type": "print",
-			"text": "  print(\"día cálido\")",
+			"text": "  print(\"día true\")",
 			"correct": false,
 			"config": {
-			  "value": "\"día cálido\""
+			  "value": "\"día true\""
 			}
 		  }
 		]
