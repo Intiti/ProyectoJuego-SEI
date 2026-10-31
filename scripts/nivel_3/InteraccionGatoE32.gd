@@ -157,7 +157,7 @@ func mostrar_dialogo() -> void:
 		retrato_jugador.modulate = COLOR_OSCURO
 		aplicar_color_dialogo(COLOR_GATO_DATOS)
 	else:
-		nombre_gato.text = GameData.playerName.to_upper()   # nombre real del jugador
+		nombre_gato.text = GameData.characterName.to_upper()   # nombre elegido por el jugador (no el alias)
 		retrato_jugador.modulate = COLOR_ILUMINADO
 		retrato_npc.modulate = COLOR_OSCURO
 		aplicar_color_dialogo(COLOR_PROTAGONISTA)

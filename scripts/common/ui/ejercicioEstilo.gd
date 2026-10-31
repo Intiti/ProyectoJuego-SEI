@@ -634,7 +634,6 @@ static func playTablon(host: Control, blocks: Array, opts: Dictionary) -> String
 	var W: float = host.size.x
 	var H: float = host.size.y
 	var tablonW: float = minf(W * 0.58, 760.0)
-	var tablonH: float = H * 0.50
 	var tablonX: float = (W - tablonW) * 0.5
 
 	var tablon := PanelContainer.new()
@@ -648,9 +647,12 @@ static func playTablon(host: Control, blocks: Array, opts: Dictionary) -> String
 	tablonStyle.content_margin_top = 20
 	tablonStyle.content_margin_bottom = 20
 	tablon.add_theme_stylebox_override("panel", tablonStyle)
-	tablon.custom_minimum_size = Vector2(tablonW, tablonH)
+	# Solo se fija el ancho mínimo; el alto lo decide el contenido (antes se forzaba H*0.5 y, junto con
+	# las etiquetas autowrap sin ancho, el tablón salía larguísimo).
+	var contentW: float = tablonW - 48.0 - 6.0   # márgenes laterales (24+24) + bordes (3+3)
+	tablon.custom_minimum_size = Vector2(tablonW, 0)
 	tablon.position = Vector2(tablonX, H)
-	tablon.size = Vector2(tablonW, tablonH)
+	tablon.size = Vector2(tablonW, 100)
 	tablon.mouse_filter = Control.MOUSE_FILTER_STOP
 	celebration.add_child(tablon)
 
@@ -690,18 +692,23 @@ static func playTablon(host: Control, blocks: Array, opts: Dictionary) -> String
 	var lblBase := Label.new()
 	lblBase.text = String(opts.get("base", ""))
 	lblBase.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lblBase.custom_minimum_size.x = contentW
 	lblBase.add_theme_font_size_override("font_size", fontSize + 2)
 	lblBase.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
 	vb.add_child(lblBase)
 	if String(opts.get("pen", "")) != "":
 		var lblPen := Label.new()
 		lblPen.text = String(opts["pen"])
+		lblPen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lblPen.custom_minimum_size.x = contentW
 		lblPen.add_theme_font_size_override("font_size", fontSize + 2)
 		lblPen.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
 		vb.add_child(lblPen)
 	if String(opts.get("bonus", "")) != "":
 		var lblBonus := Label.new()
 		lblBonus.text = String(opts["bonus"])
+		lblBonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lblBonus.custom_minimum_size.x = contentW
 		lblBonus.add_theme_font_size_override("font_size", fontSize + 2)
 		lblBonus.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 		vb.add_child(lblBonus)
@@ -711,6 +718,8 @@ static func playTablon(host: Control, blocks: Array, opts: Dictionary) -> String
 	var lblTotal := Label.new()
 	lblTotal.text = String(opts.get("total", ""))
 	lblTotal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lblTotal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lblTotal.custom_minimum_size.x = contentW
 	lblTotal.add_theme_font_size_override("font_size", fontSize + 4)
 	lblTotal.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
 	vb.add_child(lblTotal)
@@ -723,6 +732,7 @@ static func playTablon(host: Control, blocks: Array, opts: Dictionary) -> String
 		lblNota.text = String(nota)
 		lblNota.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lblNota.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lblNota.custom_minimum_size.x = contentW
 		lblNota.add_theme_font_size_override("font_size", fontSize)
 		lblNota.add_theme_color_override("font_color", Color(0.82, 0.78, 1.0))
 		vb.add_child(lblNota)
@@ -750,8 +760,9 @@ static func playTablon(host: Control, blocks: Array, opts: Dictionary) -> String
 
 	# El tablón sube desde abajo hasta quedar centrado (se espera un frame para conocer su alto real)
 	await tree.process_frame
-	var altoFinal: float = maxf(tablon.size.y, tablon.get_combined_minimum_size().y)
-	tablon.size.y = altoFinal
+	await tree.process_frame
+	var altoFinal: float = clampf(tablon.get_combined_minimum_size().y, 0.0, maxf(100.0, H - 16.0))
+	tablon.size = Vector2(tablonW, altoFinal)
 	var targetY: float = maxf(8.0, (H - altoFinal) * 0.5)
 	var tween := tablon.create_tween()
 	tween.tween_property(tablon, "position:y", targetY, 0.65).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

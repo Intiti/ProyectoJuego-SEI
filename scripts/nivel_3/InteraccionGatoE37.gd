@@ -376,7 +376,7 @@ func mostrar_dialogo() -> void:
 	else:
 
 		# Habla el protagonista.
-		nombre_gato.text = GameData.playerName.to_upper()   # nombre real del jugador
+		nombre_gato.text = GameData.characterName.to_upper()   # nombre elegido por el jugador (no el alias)
 
 		retrato_jugador.modulate = COLOR_ILUMINADO
 		retrato_npc.modulate = COLOR_OSCURO
