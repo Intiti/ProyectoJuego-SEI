@@ -277,10 +277,10 @@
 		  },
 		  {
 			"type": "print",
-			"text": "  print(\"viaje caro\")",
+			"text": "  print(\"viaje false\")",
 			"correct": false,
 			"config": {
-			  "value": "\"viaje caro\""
+			  "value": "\"viaje false\""
 			}
 		  }
 		]

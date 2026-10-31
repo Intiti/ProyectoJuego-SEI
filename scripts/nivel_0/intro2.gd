@@ -18,6 +18,7 @@ const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
 const TutorialHintScript = preload("res://scripts/common/ui/tutorialHint.gd")
 const ScoreHudScript = preload("res://scripts/common/ui/scoreHud.gd")
 const FaderScript = preload("res://scripts/common/ui/sceneFader.gd")
+const PozoSecuenciaScript = preload("res://scripts/nivel_0/pozoSecuencia.gd")
 
 # Dónde flota el indicador respecto al centro del pozo
 const POZO_PROMPT_OFFSET := Vector2(0, -80)
@@ -184,14 +185,14 @@ func _onWellInteract():
 	# Bloquear al jugador
 	_blockPlayer()
 
-	# Fade a negro y cambiar a Main
-	$FadeLayer.visible = true
-	var tween = create_tween()
-	tween.tween_property(fadeRect, "color", Color(0, 0, 0, 1), 1.0)
-	tween.tween_callback(func():
-		FaderScript.coverNow(self)   # el negro pasa a la raíz y sobrevive al cambio de escena
-		get_tree().change_scene_to_file("res://scenes/nivel_1/Main.tscn")
-	)
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		var sequence = PozoSecuenciaScript.new()
+		add_child(sequence)
+		await sequence.play(player)
+
+	FaderScript.coverNow(self)
+	get_tree().change_scene_to_file("res://scenes/nivel_1/Main.tscn")
 
 # ─── Utilidades ───────────────────────────────────────────────────────────────
 
