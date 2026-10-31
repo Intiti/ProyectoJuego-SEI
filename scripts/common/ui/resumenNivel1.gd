@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+signal closed
+
 const LeaderboardScript = preload("res://scripts/common/systems/LeaderboardNivel1.gd")
 const FONT_PATH := "res://assets/fonts/MotionControl-Bold.otf"
 const COLOR_HEADER := Color(1.0, 0.90, 0.55)
@@ -220,5 +222,6 @@ func _close() -> void:
 	var t := create_tween()
 	t.tween_property(_root, "modulate:a", 0.0, 0.4)
 	await t.finished
+	closed.emit()
 	if not _loading:
 		queue_free()

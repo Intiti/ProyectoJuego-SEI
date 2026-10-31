@@ -51,7 +51,11 @@ func registrar_resultado_examen(aprobado: bool, errores: int, puntos_bono: int =
 func registrar_rescate_panko() -> void:
 	super.registrar_rescate_panko()
 	GameData.finishNivel(3)
-	GameData.showNivelResumen(3)
+	var resumen = GameData.showNivelResumen(3)
+	# El post test es obligatorio: aparece al cerrar el resumen del Nivel 3 (o de inmediato si no hay resumen).
+	if resumen != null and resumen.has_signal("closed"):
+		await resumen.closed
+	MenuPausa.mostrarPostTestObligatorio()
 
 func _cargar_perfil_estudiante() -> void:
 	var game_data := _obtener_gamedata()

@@ -54,6 +54,11 @@ func _on_ranking_button_pressed() -> void:
 		return
 	add_child(LeaderboardScreenScript.new())
 
+func _on_quit_button_pressed() -> void:
+	if busy:
+		return
+	get_tree().quit()
+
 func _on_confirm_button_pressed() -> void:
 	if busy:
 		return
