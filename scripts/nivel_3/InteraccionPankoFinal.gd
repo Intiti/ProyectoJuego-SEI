@@ -322,7 +322,7 @@ func mostrar_dialogo() -> void:
 	var nombre: String = str(linea["nombre"])
 	var mensaje: String = str(linea["texto"])
 
-	nombre_personaje.text = GameData.playerName if nombre == "Jugador" else nombre   # nombre real del jugador
+	nombre_personaje.text = GameData.characterName if nombre == "Jugador" else nombre   # nombre real del jugador
 	texto_dialogo.text = mensaje
 
 	texto_dialogo.autowrap_mode = (

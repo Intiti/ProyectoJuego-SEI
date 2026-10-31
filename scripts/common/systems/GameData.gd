@@ -1,6 +1,8 @@
 extends Node
 
 var playerName: String = "Jugador"
+const DEFAULT_CHARACTER_NAME := "Jugador"
+var characterName: String = DEFAULT_CHARACTER_NAME
 var alcaldePuzzleSolved: bool = false
 
 # Escena de origen para spawn correcto al cambiar de villa
@@ -103,8 +105,10 @@ func _submitNivel(level: int) -> void:
 	nivelSubmitDone[level] = true
 	nivelSubmitted.emit(level)
 
-func assignAlias(alias: String) -> void:
+func assignAlias(alias: String, newCharacterName: String = "") -> void:
 	playerName = alias
+	var cleaned: String = newCharacterName.strip_edges()
+	characterName = cleaned if cleaned != "" else DEFAULT_CHARACTER_NAME
 	var p3: Node = get_node_or_null("/root/PuntajesNivel3")
 	if p3 != null and p3.has_method("obtener_id_jugador"):
 		p3.call("obtener_id_jugador")

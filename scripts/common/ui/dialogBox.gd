@@ -310,7 +310,7 @@ func showLine():
 	var bbName := ""
 	for i in speakers.size():
 		var nm: String = speakers[i]
-		var shown: String = GameData.playerName if nm == "Jugador" else nm
+		var shown: String = GameData.characterName if nm == "Jugador" else nm
 		if i > 0:
 			bbName += "[color=#ffffff] & [/color]"
 		bbName += "[color=#%s]%s[/color]" % [_colorForSpeaker(nm).to_html(false), shown]
@@ -321,7 +321,7 @@ func showLine():
 	var mainColor: Color = _colorForSpeaker(mainSpeaker)
 	speakerStyle.border_color = mainColor
 
-	fullText = lineData["text"].replace("{nombre}", GameData.playerName)
+	fullText = lineData["text"].replace("{nombre}", GameData.characterName)
 	continueHint.visible = false
 	dialogLabel.text = ""
 	continueHint.modulate = mainColor

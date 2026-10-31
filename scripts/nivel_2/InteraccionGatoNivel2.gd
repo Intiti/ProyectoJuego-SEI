@@ -445,7 +445,7 @@ func mostrar_linea_actual() -> void:
 	var texto: String = data.get("text", "")
 	
 	# El jugador aparece con el nombre que ingresó (como en el Nivel 1), no como "Jugador".
-	var nombre_mostrado: String = GameData.playerName if (hablante == "Jugador" or hablante == "Protagonista") else hablante
+	var nombre_mostrado: String = GameData.characterName if (hablante == "Jugador" or hablante == "Protagonista") else hablante
 	label_hablante.text = nombre_mostrado.to_upper()
 	label_texto.text = texto
 	

@@ -38,9 +38,9 @@ func _on_play_button_pressed() -> void:
 	form.cancelado.connect(func(): busy = false)
 	add_child(form)
 
-func _onAliasConfirmado(alias: String) -> void:
+func _onAliasConfirmado(alias: String, characterName: String) -> void:
 	GameData.resetRun()
-	GameData.assignAlias(alias)
+	GameData.assignAlias(alias, characterName)
 	await get_tree().create_timer(0.3).timeout
 	get_tree().change_scene_to_file("res://scenes/nivel_0/Intro.tscn")
 
