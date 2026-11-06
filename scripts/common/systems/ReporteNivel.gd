@@ -1,6 +1,8 @@
 extends Node
 
 const RUTA_REPORTE := "user://reporte_jugador.json"
+# Copia de seguridad: una por partida, nunca se sobreescribe con otra partida.
+const DIR_REPORTES := "user://reportes"
 
 var _ejercicios: Dictionary = {1: {}, 2: {}, 3: {}}
 var _preguntasExamen: Dictionary = {1: [], 2: [], 3: []}
@@ -68,6 +70,7 @@ func examenIntento(level: int, aprobado: bool, detalle: Dictionary = {}) -> void
 	d["preguntas"] = _preguntasExamen[level].duplicate(true)
 	_preguntasExamen[level].clear()
 	_intentosExamen[level].append(d)
+	_guardar()
 
 func _idJugador() -> String:
 	var p3: Node = get_node_or_null("/root/PuntajesNivel3")
@@ -134,20 +137,64 @@ func cerrarNivel(level: int) -> void:
 	}
 	_guardar()
 
+# Intentos de examen de niveles que aún no se cierran (para no perderlos si el
+# jugador sale antes de terminar el nivel).
+func _pendientes() -> Dictionary:
+	var out: Dictionary = {}
+	for level in [1, 2, 3]:
+		if _niveles.has(str(level)):
+			continue
+		if _intentosExamen[level].is_empty() and _preguntasExamen[level].is_empty():
+			continue
+		out[str(level)] = {
+			"intentos": _intentosExamen[level].duplicate(true),
+			"preguntasSinCerrar": _preguntasExamen[level].duplicate(true),
+		}
+	return out
+
+func _rutaRun() -> String:
+	var nombre: String = _partidaInicio.replace(":", "-").replace(" ", "_")
+	return "%s/reporte_%s.json" % [DIR_REPORTES, nombre]
+
+func _escribir(ruta: String, texto: String) -> bool:
+	var archivo := FileAccess.open(ruta, FileAccess.WRITE)
+	if archivo == null:
+		push_error("ReporteNivel: no se pudo escribir %s (error %d)" % [ruta, FileAccess.get_open_error()])
+		return false
+	archivo.store_string(texto)
+	archivo.close()
+	return true
+
+# Escribe a un .tmp y lo renombra, así un fallo a medias no deja el JSON roto.
+func _escribirAtomico(ruta: String, texto: String) -> bool:
+	var tmp: String = ruta + ".tmp"
+	if not _escribir(tmp, texto):
+		return _escribir(ruta, texto)
+	var err: int = DirAccess.rename_absolute(ProjectSettings.globalize_path(tmp), ProjectSettings.globalize_path(ruta))
+	if err == OK:
+		return true
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
+	return _escribir(ruta, texto)
+
 func _guardar() -> void:
 	var datos: Dictionary = {
 		"idJugador": _idJugador(),
 		"inicioPartida": _partidaInicio,
 		"actualizadoEn": _ahora(),
+		"examenesPendientes": _pendientes(),
 		"niveles": _niveles,
 	}
-	var archivo := FileAccess.open(RUTA_REPORTE, FileAccess.WRITE)
-	if archivo == null:
-		push_error("ReporteNivel: no se pudo escribir %s (error %d)" % [RUTA_REPORTE, FileAccess.get_open_error()])
-		return
-	archivo.store_string(JSON.stringify(datos, "\t"))
-	archivo.close()
-	print("ReporteNivel: reporte guardado en ", ProjectSettings.globalize_path(RUTA_REPORTE))
+	var texto: String = JSON.stringify(datos, "\t")
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(DIR_REPORTES))
+	var rutaRun: String = _rutaRun()
+	var okRun: bool = _escribir(rutaRun, texto)
+	var okMain: bool = _escribirAtomico(RUTA_REPORTE, texto)
+	if okMain:
+		print("ReporteNivel: reporte guardado en ", ProjectSettings.globalize_path(RUTA_REPORTE))
+	else:
+		push_warning("ReporteNivel: no se pudo actualizar reporte_jugador.json (¿está abierto en otro programa?)")
+	if okRun:
+		print("ReporteNivel: copia de la partida en ", ProjectSettings.globalize_path(rutaRun))
 
 func reiniciar() -> void:
 	_ejercicios = {1: {}, 2: {}, 3: {}}

@@ -4,6 +4,7 @@ const DevPanelScript := preload("res://scripts/common/ui/devPanel.gd")
 const InsigniasScreenScript := preload("res://scripts/common/ui/insigniasScreen.gd")
 const LeaderboardScreenScript := preload("res://scripts/common/ui/leaderboardScreen.gd")
 const FormularioAliasScript := preload("res://scripts/common/ui/formularioAlias.gd")
+const MenuButtonScript := preload("res://scripts/common/ui/menuButton.gd")
 
 @onready var playButton = $VBoxContainer/PlayButton
 @onready var badgesButton = $VBoxContainer/BadgesButton
@@ -20,6 +21,37 @@ func _ready():
 	#if OS.is_debug_build():
 		#add_child(DevPanelScript.new())
 	DJManager.playMusic("menu")
+	_crearBotonCarpetaJson()
+
+# Botón abajo a la derecha: abre la carpeta donde se guardan los JSON
+# (reporte_jugador.json, insignias.json, progreso/ranking del nivel 3, etc.).
+func _crearBotonCarpetaJson() -> void:
+	var btn := Button.new()
+	btn.set_script(MenuButtonScript)
+	btn.text = "CARPETA JSON"
+	btn.add_theme_font_size_override("font_size", 20)
+	btn.anchor_left = 1.0
+	btn.anchor_right = 1.0
+	btn.anchor_top = 1.0
+	btn.anchor_bottom = 1.0
+	btn.offset_left = -240.0
+	btn.offset_right = -20.0
+	btn.offset_top = -68.0
+	btn.offset_bottom = -20.0
+	btn.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	btn.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	btn.set("appearDelay", 2.45)
+	btn.pressed.connect(_on_open_json_folder_pressed)
+	add_child(btn)
+
+func _on_open_json_folder_pressed() -> void:
+	if busy:
+		return
+	var ruta: String = ProjectSettings.globalize_path("user://")
+	DirAccess.make_dir_recursive_absolute(ruta)
+	var err: int = OS.shell_open(ruta)
+	if err != OK:
+		push_error("No se pudo abrir la carpeta %s (error %d)" % [ruta, err])
 
 func _applyGlobalTheme() -> void:
 	var font = load("res://assets/fonts/MotionControl-Bold.otf")
