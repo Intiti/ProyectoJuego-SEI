@@ -50,8 +50,6 @@ func _onCinematicDialogFinished() -> void:
 	if GameData.nivel1Terminado and not GameData.nivel1ResumenMostrado:
 		GameData.nivel1ResumenMostrado = true
 		var resumen = ResumenScript.new()
-		# Al cerrar el resumen del examen: aviso de que quedan más Miaugoritmos + recordatorio del post test.
-		resumen.closed.connect(MenuPausa.mostrarAvisoPrimerExamen)
 		add_child(resumen)
 
 func _applyGlobalTheme() -> void:

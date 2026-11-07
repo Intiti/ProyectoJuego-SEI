@@ -7,6 +7,8 @@ const WorldPromptScript = preload("res://scripts/common/ui/worldPrompt.gd")
 @export var npcSprite: Texture2D
 @export var solvedFlag: String = ""
 
+const PROBLEMAS_PARA_EXAMEN: int = 5
+
 var playerNearby: bool = false
 var _prompt: Node2D = null
 
@@ -28,7 +30,22 @@ func _ready():
 	if dialogFile != "" and GameData.isSolved(dialogFile):
 		needsHelp = false
 
-	if needsHelp:
+	if needsHelp and _examenDisponible():
+		_createExclamation()
+	elif needsHelp:
+		GameData.problemsChanged.connect(_alCambiarProblemas)
+
+func _examenDisponible() -> bool:
+	if dialogFile != GameData.GUARDIA_FILE:
+		return true
+	return GameData.solvedProblemsCount() >= PROBLEMAS_PARA_EXAMEN
+
+func _alCambiarProblemas() -> void:
+	if not needsHelp or not _examenDisponible():
+		return
+	if GameData.problemsChanged.is_connected(_alCambiarProblemas):
+		GameData.problemsChanged.disconnect(_alCambiarProblemas)
+	if _prompt == null:
 		_createExclamation()
 
 func _createExclamation():
@@ -58,7 +75,7 @@ func _on_detection_body_exited(body):
 			_prompt.setNear(false)
 
 func _unhandled_input(event):
-	if not needsHelp:
+	if not needsHelp or not _examenDisponible():
 		return
 	if not playerNearby:
 		return
@@ -93,7 +110,7 @@ func onPuzzleSolved():
 		# El outro del examen se abre en onExamPuzzleFinished después de la celebración
 
 func tryStartDialog():
-	if not playerNearby or not needsHelp:
+	if not playerNearby or not needsHelp or not _examenDisponible():
 		return
 	if dialogFile == "":
 		push_error("NPC '" + name + "' no tiene dialogFile asignado.")

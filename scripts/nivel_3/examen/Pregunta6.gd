@@ -10,8 +10,10 @@ const ID_PREGUNTA: String = "EX3.P6"
 const OA_PREGUNTA: String = "OA2 / OA3: Ciclo while con bandera booleana, operador or y rama else"
 const TITULO_PREGUNTA: String = "Sincronización del puente de rescate"
 const INSTRUCCIONES_PREGUNTA: String = (
-	"Mientras el puente no esté listo y los fallos sean menores que 3, lee la frecuencia. "
-	+ "Si es \"ALFA\" o \"MIAU\", activa puente_listo = True; de lo contrario incrementa los fallos."
+	"El puente de rescate necesita sincronizarse con una frecuencia secreta. El programa usa una bandera llamada puente_listo, que parte en False, y un contador de fallos llamado fallos, que parte en 0.\n"
+	+ "El programa repite un ciclo mientras el puente NO esté listo y, al mismo tiempo, los fallos sean menores que 3.\n"
+	+ "En cada vuelta se lee por teclado la frecuencia, que es un texto. Luego se revisa: si la frecuencia es ALFA o es MIAU (basta con que sea una de las dos), el puente queda listo y su bandera pasa a True.\n"
+	+ "Si la frecuencia no es ninguna de esas dos, se usa la rama else: allí se suma 1 al contador de fallos. Cuando el ciclo termina se muestra si el puente quedó sincronizado o bloqueado."
 )
 
 const PLANTILLA_CODIGO: String = (
@@ -22,7 +24,11 @@ const PLANTILLA_CODIGO: String = (
 	+ "    [ Espacio 2 ]\n"
 	+ "        [ Espacio 3 ]\n"
 	+ "    else:\n"
-	+ "        [ Espacio 4 ]"
+	+ "        [ Espacio 4 ]\n\n"
+	+ "if puente_listo:\n"
+	+ "    print(\"Puente sincronizado\")\n"
+	+ "else:\n"
+	+ "    print(\"Puente bloqueado\")"
 )
 
 const RESPUESTA_CORRECTA: Array[String] = [

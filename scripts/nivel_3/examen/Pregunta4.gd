@@ -10,8 +10,10 @@ const ID_PREGUNTA: String = "EX3.P4"
 const OA_PREGUNTA: String = "OA2 / OA3: Ciclo while con condicional encadenado if / elif / else y contador"
 const TITULO_PREGUNTA: String = "Clasificador térmico multizona"
 const INSTRUCCIONES_PREGUNTA: String = (
-	"Recorre las 3 zonas térmicas con un ciclo while: si la temperatura supera 80 suma 1 a criticas, "
-	+ "si no pero supera 40 usa elif para sumar 1 a alertas, y en otro caso usa else para normales."
+	"El clasificador revisa 3 zonas térmicas, una por una. Usa un contador llamado zona, que parte en 0, y tres contadores de resultados: criticas, alertas y normales, todos en 0.\n"
+	+ "Un ciclo debe repetirse mientras la zona sea menor que 3. En cada vuelta se lee por teclado la temperatura de la zona y se clasifica con una cadena de condiciones, donde solo se ejecuta UNA rama.\n"
+	+ "Primera rama: si la temperatura es mayor que 80, la zona es crítica. Segunda rama: si no se cumple la primera, pero la temperatura es mayor que 40, la zona está en alerta. Tercera rama: en cualquier otro caso, la zona es normal. Cada rama suma 1 a su propio contador.\n"
+	+ "Al final de cada vuelta se avanza a la siguiente zona. Se muestra el resultado de las 3 zonas al terminar."
 )
 
 const PLANTILLA_CODIGO: String = (
@@ -27,7 +29,8 @@ const PLANTILLA_CODIGO: String = (
 	+ "        alertas = alertas + 1\n"
 	+ "    [ Espacio 4 ]\n"
 	+ "        normales = normales + 1\n"
-	+ "    zona = zona + 1"
+	+ "    zona = zona + 1\n\n"
+	+ "print(\"Críticas:\", criticas, \"Alertas:\", alertas, \"Normales:\", normales)"
 )
 
 const RESPUESTA_CORRECTA: Array[String] = [

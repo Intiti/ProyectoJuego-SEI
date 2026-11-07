@@ -24,6 +24,8 @@ extends PanelContainer
 @onready var sistema_puntos: Node = get_node_or_null("/root/PuntajesNivel3")
 @onready var dj_manager: Node = get_node_or_null("/root/DJManager")
 
+const Estilo = preload("res://scripts/common/ui/ejercicioEstilo.gd")
+const PawIconScript = preload("res://scripts/common/ui/pawIcon.gd")
 const ESCENA_SALA_10: String = "res://scenes/Nivel_3/10Cámara de Rescat.tscn"
 const TOTAL_ESPACIOS: int = 4
 
@@ -33,6 +35,10 @@ var bloques_colocados: Array[String] = []
 var intentos_pregunta: int = 0
 var validando: bool = false
 var tiempo_inicio_ms: int = 0
+var promptExamen: RichTextLabel = null
+var etiquetaPaso: Label = null
+var cajaVidas: HBoxContainer = null
+var patitas: Array = []
 
 
 # Propiedades definidas en cada script Pregunta1.gd .. Pregunta6.gd
@@ -74,32 +80,82 @@ func _ready() -> void:
 	if boton_refuerzo != null:
 		boton_refuerzo.hide()
 
+	construirPantallaEstandar()
 	_configurar_textos_y_botones()
 	_preparar_botones_bloques()
 	_iniciar_pregunta()
 
 
-func _configurar_textos_y_botones() -> void:
-	var num_actual: int = 1
-	var total_preg: int = 3
-	if sistema_puntos != null:
-		if sistema_puntos.has_method("obtener_numero_pregunta_examen_actual"):
-			num_actual = int(sistema_puntos.call("obtener_numero_pregunta_examen_actual"))
-		if sistema_puntos.has_method("obtener_total_preguntas_examen_intento"):
-			total_preg = int(sistema_puntos.call("obtener_total_preguntas_examen_intento"))
+func construirPantallaEstandar() -> void:
+	var viejo: Control = get_node_or_null("ContenidoEjercicio") as Control
+	var ui: Dictionary = Estilo.buildScreen(self, "Bloques disponibles")
 
-	if titulo != null:
-		titulo.text = "Pregunta " + str(num_actual) + "/" + str(total_preg) + " – " + _obtener_titulo_pregunta()
-	if instrucciones != null:
-		instrucciones.text = _obtener_instrucciones_pregunta()
-	if titulo_algoritmo != null:
-		titulo_algoritmo.text = "CONSTRUCCIÓN DEL ALGORITMO (Haz clic en un bloque colocado para quitarlo)"
+	titulo = ui["title_right"]
+	promptExamen = ui["prompt"]
+	titulo_algoritmo = ui["console_title"]
+	mensaje_resultado = ui["feedback"]
+	etiquetaPaso = ui["step_label"]
+	panel_pista = ui["hint_panel"]
+	panel_pista.hide()
+
+	(ui["code_box"] as Node).queue_free()
+	lista_algoritmo.reparent(ui["code_scroll"])
+	lista_algoritmo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lista_algoritmo.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	lista_algoritmo.add_theme_constant_override("separation", 4)
+
+	(ui["bank_box"] as Node).queue_free()
+	lista_bloques.reparent(ui["bank_scroll"])
+	lista_bloques.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lista_bloques.add_theme_constant_override("separation", 10)
+
+	var fila: HBoxContainer = ui["buttons"]
+	for par in [[boton_cerrar, "Volver al nivel", "danger"], [boton_limpiar, "Reiniciar", "neutral"], [boton_comprobar, "Comprobar", "primary"]]:
+		var boton: Button = par[0]
+		if boton != null:
+			boton.reparent(fila)
+			Estilo.styleActionButton(boton, par[1], par[2])
+	if boton_comprobar != null:
+		boton_comprobar.custom_minimum_size = Vector2(190, 48)
+
+	construirVidas(ui["head_row"])
+
+	if viejo != null:
+		viejo.hide()
+
+
+func construirVidas(filaEncabezado: HBoxContainer) -> void:
+	var maxErr: int = 3
+	if sistema_puntos != null and sistema_puntos.has_method("obtener_max_errores_examen"):
+		maxErr = int(sistema_puntos.call("obtener_max_errores_examen"))
+
+	cajaVidas = HBoxContainer.new()
+	cajaVidas.add_theme_constant_override("separation", 5)
+	cajaVidas.alignment = BoxContainer.ALIGNMENT_CENTER
+	cajaVidas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	filaEncabezado.add_child(cajaVidas)
+
+	var etiquetaVidas := Label.new()
+	etiquetaVidas.text = "Vidas:"
+	etiquetaVidas.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	etiquetaVidas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	etiquetaVidas.add_theme_font_size_override("font_size", 20)
+	etiquetaVidas.add_theme_color_override("font_color", Color(1.0, 0.6, 0.78))
+	cajaVidas.add_child(etiquetaVidas)
+
+	patitas = []
+	for i in range(maxErr):
+		var patita = PawIconScript.new()
+		cajaVidas.add_child(patita)
+		patitas.append(patita)
+
+
+func _configurar_textos_y_botones() -> void:
+	Estilo.setPromptText(promptExamen, _obtener_instrucciones_pregunta())
+	titulo_algoritmo.text = "Consola – completa los " + str(TOTAL_ESPACIOS) + " huecos"
+
 
 	_actualizar_encabezado_examen()
-
-	_estilizar_boton_accion(boton_limpiar, "↺ Reiniciar", Color("#334155"), Color("#64748B"))
-	_estilizar_boton_accion(boton_comprobar, "▶ Comprobar", Color("#4C1D95"), Color("#A78BFA"))
-	_estilizar_boton_accion(boton_cerrar, "⬅ Volver al nivel", Color("#7F1D1D"), Color("#F87171"))
 
 	if boton_limpiar != null and not boton_limpiar.pressed.is_connected(reiniciar_pregunta):
 		boton_limpiar.pressed.connect(reiniciar_pregunta)
@@ -125,15 +181,11 @@ func _actualizar_encabezado_examen() -> void:
 		if sistema_puntos.has_method("obtener_max_errores_examen"):
 			max_err = int(sistema_puntos.call("obtener_max_errores_examen"))
 
-	if estado_examen != null:
-		estado_examen.text = "Examen final"
-		estado_examen.add_theme_color_override("font_color", Color("#55EFC4"))
-	if progreso_examen != null:
-		progreso_examen.text = "|  Pregunta " + str(num_actual) + "/" + str(total_preg)
-		progreso_examen.add_theme_color_override("font_color", Color("#FBBF24"))
-	if contador_examen != null:
-		contador_examen.text = "|  Errores " + str(err_actuales) + "/" + str(max_err)
-		contador_examen.add_theme_color_override("font_color", Color("#F87171") if err_actuales > 0 else Color("#93C5FD"))
+	if titulo != null:
+		titulo.text = "Examen final · Pregunta " + str(num_actual) + "/" + str(total_preg) + " – " + _obtener_titulo_pregunta()
+
+	for i in range(patitas.size()):
+		patitas[i].alive = i < (max_err - err_actuales)
 
 
 func _estilizar_boton_accion(boton: Button, texto_btn: String, color_fondo: Color, color_borde: Color) -> void:
@@ -239,51 +291,17 @@ func _actualizar_estilos_botones_disponibles() -> void:
 			continue
 		var txt: String = str(bloques_texto_original.get(boton, boton.text))
 		var esta_colocado: bool = bloques_colocados.has(txt)
-
+		boton.text = txt.strip_edges()
+		Estilo.styleBankButton(boton, txt)
 		if esta_colocado:
-			boton.text = txt
-			boton.tooltip_text = "Bloque colocado. Haz clic para quitarlo del algoritmo."
-			var estilo_colocado := StyleBoxFlat.new()
-			estilo_colocado.bg_color = Color(0.09, 0.13, 0.22, 0.85)
-			estilo_colocado.border_color = Color("#38BDF8")
-			estilo_colocado.set_border_width_all(2)
-			estilo_colocado.set_corner_radius_all(8)
-			estilo_colocado.content_margin_left = 10
-			estilo_colocado.content_margin_right = 10
-			estilo_colocado.content_margin_top = 5
-			estilo_colocado.content_margin_bottom = 5
-			boton.add_theme_stylebox_override("normal", estilo_colocado)
-
-			var hover_col := estilo_colocado.duplicate()
-			hover_col.bg_color = Color(0.22, 0.12, 0.18, 0.95)
-			hover_col.border_color = Color("#F87171")
-			boton.add_theme_stylebox_override("hover", hover_col)
-			boton.add_theme_stylebox_override("pressed", hover_col)
-			boton.add_theme_color_override("font_color", Color("#93C5FD"))
+			boton.tooltip_text = "Bloque colocado en el algoritmo. Haz clic para quitarlo."
+			var usado: StyleBoxFlat = Estilo.usedStyle(txt)
+			for estado in ["normal", "hover", "pressed", "focus"]:
+				boton.add_theme_stylebox_override(estado, usado)
+			for nombre_color in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+				boton.add_theme_color_override(nombre_color, Color(0.55, 0.55, 0.55))
 		else:
-			boton.text = txt
 			boton.tooltip_text = "Haz clic para colocar este bloque en el algoritmo."
-			var paleta: Dictionary = _obtener_colores_bloque(txt)
-			var bg: Color = paleta["bg"]
-			var border: Color = paleta["border"]
-
-			var estilo_disp := StyleBoxFlat.new()
-			estilo_disp.bg_color = bg
-			estilo_disp.border_color = border
-			estilo_disp.set_border_width_all(2)
-			estilo_disp.set_corner_radius_all(8)
-			estilo_disp.content_margin_left = 10
-			estilo_disp.content_margin_right = 10
-			estilo_disp.content_margin_top = 5
-			estilo_disp.content_margin_bottom = 5
-			boton.add_theme_stylebox_override("normal", estilo_disp)
-
-			var hover_disp := estilo_disp.duplicate()
-			hover_disp.bg_color = bg.lightened(0.16)
-			hover_disp.border_color = border.lightened(0.2)
-			boton.add_theme_stylebox_override("hover", hover_disp)
-			boton.add_theme_stylebox_override("pressed", hover_disp)
-			boton.add_theme_color_override("font_color", paleta["text"])
 
 
 func presionar_bloque(boton: Button) -> void:
@@ -319,8 +337,7 @@ func quitar_bloque_colocado(posicion: int) -> void:
 	if bloques_colocados[posicion] == "":
 		return
 
-	bloques_colocados.remove_at(posicion)
-	bloques_colocados.append("")
+	bloques_colocados[posicion] = ""
 
 	if mensaje_resultado != null:
 		mensaje_resultado.text = "Bloque devuelto a las opciones disponibles."
@@ -338,17 +355,25 @@ func _actualizar_algoritmo_visual() -> void:
 		lista_algoritmo.remove_child(hijo)
 		hijo.queue_free()
 
-	lista_algoritmo.add_theme_constant_override("separation", 5)
+	lista_algoritmo.add_theme_constant_override("separation", 3)
 	var primer_libre: int = bloques_colocados.find("")
+
+	if etiquetaPaso != null:
+		var colocados: int = 0
+		for b in bloques_colocados:
+			if b != "":
+				colocados += 1
+		etiquetaPaso.text = "Colocados %d de %d" % [colocados, TOTAL_ESPACIOS]
+
 	var plantilla: String = _obtener_plantilla_codigo()
 	var lineas: PackedStringArray = plantilla.split("\n")
 
 	for linea_raw in lineas:
 		var sin_espacios: String = linea_raw.strip_edges()
 		if sin_espacios == "":
-			var esp := Control.new()
-			esp.custom_minimum_size = Vector2(0, 4)
-			lista_algoritmo.add_child(esp)
+			var espaciador := Control.new()
+			espaciador.custom_minimum_size = Vector2(0, 2)
+			lista_algoritmo.add_child(espaciador)
 			continue
 
 		var espacios_indent: int = 0
@@ -373,93 +398,30 @@ func _actualizar_algoritmo_visual() -> void:
 
 
 func _agregar_fila_codigo_examen(texto_codigo: String, espacios_indent: int) -> void:
-	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 0)
-	if espacios_indent > 0:
-		var margen := Control.new()
-		margen.custom_minimum_size = Vector2(espacios_indent * 8.0, 0)
-		fila.add_child(margen)
-
-	var lbl := Label.new()
-	lbl.text = texto_codigo
-	lbl.add_theme_font_size_override("font_size", 15)
-	if texto_codigo.begins_with("else:") or texto_codigo.begins_with("elif ") or texto_codigo.begins_with("while ") or texto_codigo.begins_with("if "):
-		lbl.add_theme_color_override("font_color", Color("#FCD34D"))
-	elif texto_codigo.contains("print("):
-		lbl.add_theme_color_override("font_color", Color("#6EE7B7"))
-	else:
-		lbl.add_theme_color_override("font_color", Color("#E2E8F0"))
-
-	fila.add_child(lbl)
-	lista_algoritmo.add_child(fila)
+	lista_algoritmo.add_child(Estilo.makeRow(int(espacios_indent / 4.0), Estilo.makeCodeBlock(texto_codigo, "locked")))
 
 
 func _agregar_fila_slot_examen(indice: int, espacios_indent: int, es_siguiente_disponible: bool) -> void:
-	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 6)
-	if espacios_indent > 0:
-		var guia := Control.new()
-		guia.custom_minimum_size = Vector2(espacios_indent * 8.0, 0)
-		fila.add_child(guia)
-
-	var btn_slot := Button.new()
-	btn_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	btn_slot.custom_minimum_size = Vector2(0, 32)
-	btn_slot.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	btn_slot.add_theme_font_size_override("font_size", 14)
-
 	var contenido_actual: String = bloques_colocados[indice] if indice < bloques_colocados.size() else ""
+	var bloque: Control
+	var con_flecha: bool = false
 	if contenido_actual != "":
-		btn_slot.text = contenido_actual
-		btn_slot.tooltip_text = "Haz clic para quitar este bloque del algoritmo."
-		btn_slot.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-
-		var paleta: Dictionary = _obtener_colores_bloque(contenido_actual)
-		var estilo_lleno := StyleBoxFlat.new()
-		estilo_lleno.bg_color = paleta["bg"]
-		estilo_lleno.border_color = paleta["border"]
-		estilo_lleno.set_border_width_all(2)
-		estilo_lleno.set_corner_radius_all(6)
-		estilo_lleno.content_margin_left = 12
-		estilo_lleno.content_margin_right = 12
-		estilo_lleno.content_margin_top = 4
-		estilo_lleno.content_margin_bottom = 4
-		btn_slot.add_theme_stylebox_override("normal", estilo_lleno)
-
-		var hover_lleno := estilo_lleno.duplicate()
-		hover_lleno.bg_color = Color("#7F1D1D")
-		hover_lleno.border_color = Color("#F87171")
-		btn_slot.add_theme_stylebox_override("hover", hover_lleno)
-		btn_slot.add_theme_stylebox_override("pressed", hover_lleno)
-		btn_slot.add_theme_color_override("font_color", paleta["text"])
-		btn_slot.pressed.connect(quitar_bloque_colocado.bind(indice))
+		bloque = Estilo.makeCodeBlock(contenido_actual, "locked")
+		bloque.tooltip_text = "Haz clic para quitar este bloque del algoritmo."
+		bloque.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		bloque.gui_input.connect(alPresionarBloqueColocado.bind(indice))
 	else:
-		btn_slot.disabled = true
-		var estilo_vacio := StyleBoxFlat.new()
-		estilo_vacio.set_corner_radius_all(6)
-		estilo_vacio.content_margin_left = 12
-		estilo_vacio.content_margin_right = 12
-		estilo_vacio.content_margin_top = 4
-		estilo_vacio.content_margin_bottom = 4
-
-		if es_siguiente_disponible:
-			btn_slot.text = "▸  Selecciona un bloque para colocar aquí..."
-			estilo_vacio.bg_color = Color(0.08, 0.16, 0.28, 0.95)
-			estilo_vacio.border_color = Color("#38BDF8")
-			estilo_vacio.set_border_width_all(2)
-			btn_slot.add_theme_color_override("font_disabled_color", Color("#7DD3FC"))
-		else:
-			btn_slot.text = "•  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─"
-			estilo_vacio.bg_color = Color(0.06, 0.09, 0.16, 0.75)
-			estilo_vacio.border_color = Color(0.28, 0.35, 0.48, 0.7)
-			estilo_vacio.set_border_width_all(1)
-			btn_slot.add_theme_color_override("font_disabled_color", Color("#64748B"))
-
-		btn_slot.add_theme_stylebox_override("disabled", estilo_vacio)
-		btn_slot.add_theme_stylebox_override("normal", estilo_vacio)
-
-	fila.add_child(btn_slot)
+		bloque = Estilo.makeEmptySlot()
+		con_flecha = es_siguiente_disponible
+	var fila: HBoxContainer = Estilo.makeRow(int(espacios_indent / 4.0), bloque, con_flecha)
 	lista_algoritmo.add_child(fila)
+	if con_flecha:
+		Estilo.ensureVisible(fila)
+
+
+func alPresionarBloqueColocado(evento: InputEvent, indice: int) -> void:
+	if evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT:
+		quitar_bloque_colocado(indice)
 
 
 func comprobar_respuesta() -> void:
@@ -520,12 +482,14 @@ func comprobar_respuesta() -> void:
 	_registrar_log_pregunta(false, duracion_seg, tipo_err, "EN_PROGRESO")
 	var err_act: int = int(sistema_puntos.call("obtener_errores_examen_actuales")) if sistema_puntos != null else 1
 	var max_err: int = int(sistema_puntos.call("obtener_max_errores_examen")) if sistema_puntos != null else 3
+	Estilo.shake(self)
 	if mensaje_resultado != null:
+		var vidas_restantes: int = max_err - err_act
 		mensaje_resultado.text = (
-			"Solución incorrecta (Errores acumulados: " + str(err_act) + "/" + str(max_err) + "). "
-			+ "Durante el examen no se muestran pistas. Revisa el orden y las condiciones de tus bloques."
+			"Incorrecto. Te quedan " + str(vidas_restantes) + " de " + str(max_err) + " vidas. "
+			+ "En el examen no hay pistas: revisa el orden y las condiciones de tus bloques."
 		)
-		mensaje_resultado.add_theme_color_override("font_color", Color("#F87171"))
+		mensaje_resultado.add_theme_color_override("font_color", Estilo.ERR)
 
 
 func validar_solucion_pregunta() -> bool:

@@ -281,7 +281,7 @@ var panel: ColorRect
 var _contentBox: VBoxContainer
 var label_titulo: Label
 var label_oa: Label
-var label_instrucciones: Label
+var label_instrucciones: RichTextLabel
 var cmdTitle: Label
 var stepLabel: Label
 var commandScroll: ScrollContainer
@@ -290,6 +290,7 @@ var feedbackLabel: Label
 var dropZone: VBoxContainer
 var consoleScroll: ScrollContainer
 var _livesBox: HBoxContainer = null
+var ventanaExamen: PanelContainer = null
 var _paws: Array = []
 
 # ----------------------------------------------------------------
@@ -342,11 +343,10 @@ func abrir_examen(altar_ref: Node2D = null) -> void:
 
 	_actualizar_vidas()
 
-	label_titulo.text       = "🏛️ EXAMEN ALTAR ANCESTRAL  ·  " + ejercicio_actual["titulo"]
+	label_titulo.text       = "Examen del Altar Ancestral · " + ejercicio_actual["titulo"]
 	label_oa.text           = "🎯 " + ejercicio_actual["oa"] + "   |   👤 NPC: " + ejercicio_actual["npc"]
-	label_instrucciones.text = ejercicio_actual["instrucciones"]
+	Estilo.setPromptText(label_instrucciones, ejercicio_actual["instrucciones"])
 	feedbackLabel.text      = ""
-	feedbackLabel.visible   = false
 
 	_construir_slots()
 	_cargar_paso_actual()
@@ -402,55 +402,44 @@ func _actualizar_vidas() -> void:
 # CONSTRUCCIÓN DE INTERFAZ
 # ----------------------------------------------------------------
 func _construir_interfaz() -> void:
-	# Fondo a pantalla completa
 	panel = ColorRect.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	panel.color = Color(0.14, 0.11, 0.06, 0.97)
+	panel.color = Estilo.BG
 	panel.visible = false
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(panel)
 
-	# Contenido principal
-	var vbox = VBoxContainer.new()
-	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	vbox.offset_left   = 32.0
-	vbox.offset_top    = 28.0
-	vbox.offset_right  = -32.0
-	vbox.offset_bottom = -28.0
-	vbox.add_theme_constant_override("separation", 12)
-	panel.add_child(vbox)
-	_contentBox = vbox
+	ventanaExamen = PanelContainer.new()
+	panel.add_child(ventanaExamen)
+	var ui: Dictionary = Estilo.buildScreen(ventanaExamen, "¿Cuál línea sigue?")
 
-	# --- Título ---
-	label_titulo = Label.new()
-	label_titulo.text = "🏛️ EXAMEN ALTAR ANCESTRAL"
-	label_titulo.add_theme_font_size_override("font_size", FONT_SIZE + 6)
-	label_titulo.add_theme_color_override("font_color", Color(0.3, 0.95, 0.85))
-	label_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vbox.add_child(label_titulo)
-
-	# --- Fila: OA | Vidas | Cerrar ---
-	var fila_meta = HBoxContainer.new()
-	fila_meta.add_theme_constant_override("separation", 16)
-	vbox.add_child(fila_meta)
+	_contentBox = ui["content"]
+	label_titulo = ui["title_right"]
+	label_instrucciones = ui["prompt"]
+	cmdTitle = ui["right_title"]
+	stepLabel = ui["step_label"]
+	feedbackLabel = ui["feedback"]
+	commandScroll = ui["bank_scroll"]
+	commandWrapper = ui["bank_box"]
+	consoleScroll = ui["code_scroll"]
+	dropZone = ui["code_box"]
 
 	label_oa = Label.new()
-	label_oa.text = "🎯 OA3  |  👤 NPC: —"
-	label_oa.add_theme_font_size_override("font_size", FONT_SIZE - 2)
-	label_oa.add_theme_color_override("font_color", Color(0.7, 0.85, 0.95))
-	label_oa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	fila_meta.add_child(label_oa)
+	label_oa.visible = false
+	add_child(label_oa)
 
-	# Vidas (patitas)
+	var filaMeta: HBoxContainer = ui["head_row"]
+	filaMeta.add_theme_constant_override("separation", 16)
+
 	_livesBox = HBoxContainer.new()
 	_livesBox.add_theme_constant_override("separation", 5)
 	_livesBox.alignment = BoxContainer.ALIGNMENT_CENTER
-	fila_meta.add_child(_livesBox)
+	filaMeta.add_child(_livesBox)
 
 	var lbl_vidas = Label.new()
 	lbl_vidas.text = "Vidas:"
 	lbl_vidas.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl_vidas.add_theme_font_size_override("font_size", FONT_SIZE)
+	lbl_vidas.add_theme_font_size_override("font_size", 20)
 	lbl_vidas.add_theme_color_override("font_color", Color(1.0, 0.6, 0.78))
 	_livesBox.add_child(lbl_vidas)
 
@@ -460,109 +449,11 @@ func _construir_interfaz() -> void:
 		_livesBox.add_child(paw)
 		_paws.append(paw)
 
+	var fila: HBoxContainer = ui["buttons"]
 	var btn_cerrar = Button.new()
-	btn_cerrar.text = "✕ Cerrar"
-	btn_cerrar.custom_minimum_size = Vector2(90, 34)
-	btn_cerrar.mouse_filter = Control.MOUSE_FILTER_STOP
+	Estilo.styleActionButton(btn_cerrar, "Cerrar", "danger")
 	btn_cerrar.pressed.connect(cerrar_examen)
-	fila_meta.add_child(btn_cerrar)
-
-	# --- Instrucciones ---
-	label_instrucciones = Label.new()
-	label_instrucciones.text = ""
-	label_instrucciones.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_instrucciones.add_theme_font_size_override("font_size", FONT_SIZE - 1)
-	label_instrucciones.add_theme_color_override("font_color", Color(0.88, 0.91, 0.96))
-	label_instrucciones.custom_minimum_size = Vector2(0, 50)
-	vbox.add_child(label_instrucciones)
-
-	# --- Columnas: consola (izq) + alternativas (der) ---
-	var hbox = HBoxContainer.new()
-	hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	hbox.add_theme_constant_override("separation", 18)
-	vbox.add_child(hbox)
-
-	# Panel consola
-	var consoleWrapper = PanelContainer.new()
-	consoleWrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	consoleWrapper.size_flags_vertical   = Control.SIZE_EXPAND_FILL
-	var consoleStyle = StyleBoxFlat.new()
-	consoleStyle.bg_color        = Color(0.07, 0.07, 0.10, 1.0)
-	consoleStyle.border_color    = Color(0.4, 0.7, 0.4, 0.8)
-	consoleStyle.set_border_width_all(2)
-	consoleStyle.set_corner_radius_all(6)
-	consoleStyle.content_margin_left   = 12
-	consoleStyle.content_margin_right  = 12
-	consoleStyle.content_margin_top    = 12
-	consoleStyle.content_margin_bottom = 12
-	consoleWrapper.add_theme_stylebox_override("panel", consoleStyle)
-	hbox.add_child(consoleWrapper)
-
-	var consoleInner = VBoxContainer.new()
-	consoleInner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	consoleInner.size_flags_vertical   = Control.SIZE_EXPAND_FILL
-	consoleWrapper.add_child(consoleInner)
-
-	var consoleTitle = Label.new()
-	consoleTitle.text = "Consola  —  Miaugoritmo en construcción"
-	consoleTitle.add_theme_font_size_override("font_size", FONT_SIZE - 2)
-	consoleTitle.add_theme_color_override("font_color", Color(0.5, 0.9, 0.5))
-	consoleInner.add_child(consoleTitle)
-
-	consoleScroll = ScrollContainer.new()
-	consoleScroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	consoleScroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	consoleInner.add_child(consoleScroll)
-
-	dropZone = VBoxContainer.new()
-	dropZone.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	dropZone.size_flags_vertical   = Control.SIZE_EXPAND_FILL
-	dropZone.add_theme_constant_override("separation", 4)
-	consoleScroll.add_child(dropZone)
-
-	# Separador
-	var sep = VSeparator.new()
-	hbox.add_child(sep)
-
-	# Panel alternativas (columna derecha con Scroll)
-	var rightColumn = VBoxContainer.new()
-	rightColumn.custom_minimum_size = Vector2(360, 0)
-	rightColumn.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	rightColumn.add_theme_constant_override("separation", 8)
-	hbox.add_child(rightColumn)
-
-	cmdTitle = Label.new()
-	cmdTitle.text = "¿Cuál línea sigue?"
-	cmdTitle.add_theme_font_size_override("font_size", FONT_SIZE + 3)
-	cmdTitle.add_theme_color_override("font_color", Color(0.5, 0.9, 0.6))
-	rightColumn.add_child(cmdTitle)
-
-	stepLabel = Label.new()
-	stepLabel.add_theme_font_size_override("font_size", FONT_SIZE + 1)
-	stepLabel.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
-	rightColumn.add_child(stepLabel)
-
-	# Feedback
-	feedbackLabel = Label.new()
-	feedbackLabel.custom_minimum_size = Vector2(0, 36)
-	feedbackLabel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	feedbackLabel.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-	feedbackLabel.visible = false
-	rightColumn.add_child(feedbackLabel)
-
-	# ScrollContainer para permitir deslizar hacia abajo la pregunta y opciones
-	commandScroll = ScrollContainer.new()
-	commandScroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	commandScroll.size_flags_vertical   = Control.SIZE_EXPAND_FILL
-	commandScroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	commandScroll.vertical_scroll_mode   = ScrollContainer.SCROLL_MODE_AUTO
-	rightColumn.add_child(commandScroll)
-
-	commandWrapper = VBoxContainer.new()
-	commandWrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	commandWrapper.size_flags_vertical   = Control.SIZE_EXPAND_FILL
-	commandWrapper.add_theme_constant_override("separation", 10)
-	commandScroll.add_child(commandWrapper)
+	fila.add_child(btn_cerrar)
 
 # ----------------------------------------------------------------
 # CONSTRUIR SLOTS (plantilla de código)
@@ -606,69 +497,13 @@ func _construir_slots() -> void:
 			row.add_child(bloque)
 
 func _crear_bloque_fijo(texto: String) -> PanelContainer:
-	var pc = PanelContainer.new()
-	pc.custom_minimum_size = Vector2(240, 42)
-	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var style = StyleBoxFlat.new()
-	style.bg_color     = Color(0.10, 0.12, 0.16, 1.0)
-	style.border_color = Color(0.3, 0.45, 0.55, 0.9)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(5)
-	style.content_margin_left   = 14
-	style.content_margin_right  = 14
-	style.content_margin_top    = 7
-	style.content_margin_bottom = 7
-	pc.add_theme_stylebox_override("panel", style)
-	var lbl = Label.new()
-	lbl.text = texto.strip_edges()
-	lbl.add_theme_font_size_override("font_size", FONT_SIZE)
-	lbl.add_theme_color_override("font_color", Color(0.75, 0.88, 1.0))
-	pc.add_child(lbl)
-	return pc
+	return Estilo.makeCodeBlock(texto, "locked")
 
 func _crear_slot_vacio() -> PanelContainer:
-	var pc = PanelContainer.new()
-	pc.custom_minimum_size = Vector2(240, 42)
-	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var style = StyleBoxFlat.new()
-	style.bg_color     = Color(0.10, 0.10, 0.14, 1.0)
-	style.border_color = Color(0.55, 0.55, 0.65, 0.7)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	style.content_margin_left   = 10
-	style.content_margin_right  = 10
-	style.content_margin_top    = 6
-	style.content_margin_bottom = 6
-	pc.add_theme_stylebox_override("panel", style)
-	var lbl = Label.new()
-	lbl.text = "_ _ _"
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
-	lbl.add_theme_color_override("font_color", Color(0.45, 0.45, 0.55))
-	lbl.add_theme_font_size_override("font_size", FONT_SIZE - 2)
-	pc.add_child(lbl)
-	return pc
+	return Estilo.makeEmptySlot()
 
 func _crear_bloque_lleno(texto: String) -> PanelContainer:
-	var pc = PanelContainer.new()
-	pc.custom_minimum_size = Vector2(240, 42)
-	pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var style = StyleBoxFlat.new()
-	style.bg_color     = Color(0.08, 0.25, 0.22, 1.0)
-	style.border_color = Color(0.3, 0.9, 0.75, 1.0)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	style.content_margin_left   = 14
-	style.content_margin_right  = 14
-	style.content_margin_top    = 7
-	style.content_margin_bottom = 7
-	pc.add_theme_stylebox_override("panel", style)
-	var lbl = Label.new()
-	lbl.text = texto.strip_edges()
-	lbl.add_theme_font_size_override("font_size", FONT_SIZE)
-	lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.85))
-	pc.add_child(lbl)
-	return pc
+	return Estilo.makeCodeBlock(texto, "locked")
 
 # ----------------------------------------------------------------
 # CARGAR PASO ACTUAL — flecha + alternativas
@@ -692,16 +527,7 @@ func _cargar_paso_actual(animate_arrow: bool = true) -> void:
 			break
 
 	if target_row:
-		_arrowOverlay = Label.new()
-		_arrowOverlay.text = "◀"
-		_arrowOverlay.add_theme_font_size_override("font_size", FONT_SIZE + 2)
-		_arrowOverlay.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-		_arrowOverlay.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.8))
-		_arrowOverlay.add_theme_constant_override("outline_size", 3)
-		_arrowOverlay.custom_minimum_size = Vector2(28, 42)
-		_arrowOverlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_arrowOverlay.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
-		_arrowOverlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_arrowOverlay = Estilo.makeArrow()
 		_arrowOverlay.modulate.a = 0.0
 		target_row.add_child(_arrowOverlay)
 
@@ -732,7 +558,6 @@ func _limpiar_alternativas() -> void:
 		commandScroll.scroll_vertical = 0
 
 func _mostrar_alternativas(alts: Array, hint: String) -> void:
-	# Subhint de contexto
 	if hint != "":
 		var hintLbl = Label.new()
 		hintLbl.text = hint
@@ -745,53 +570,16 @@ func _mostrar_alternativas(alts: Array, hint: String) -> void:
 		var texto: String = alt["text"]
 		var correcto: bool = alt["correct"]
 
-		var pc = PanelContainer.new()
-		pc.mouse_filter = Control.MOUSE_FILTER_STOP
-		var style = StyleBoxFlat.new()
-		style.bg_color     = Color(0.10, 0.18, 0.28, 0.95)
-		style.border_color = Color(0.3, 0.6, 0.8, 1.0)
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(8)
-		style.content_margin_left   = 14
-		style.content_margin_right  = 14
-		style.content_margin_top    = 10
-		style.content_margin_bottom = 10
-		pc.add_theme_stylebox_override("panel", style)
-		pc.custom_minimum_size = Vector2(280, 48)
-		pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-		var lbl = Label.new()
-		lbl.text = texto.strip_edges()
-		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		lbl.add_theme_font_size_override("font_size", FONT_SIZE)
-		lbl.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
-		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		pc.add_child(lbl)
-
-		# Hover effect
-		pc.mouse_entered.connect(func():
-			if pc.mouse_filter == Control.MOUSE_FILTER_STOP:
-				var hs = style.duplicate()
-				hs.bg_color = Color(0.15, 0.28, 0.42, 1.0)
-				pc.add_theme_stylebox_override("panel", hs)
-		)
-		pc.mouse_exited.connect(func():
-			pc.add_theme_stylebox_override("panel", style)
-		)
-
-		# Usar InputEvent para detectar clic en el PanelContainer
-		pc.gui_input.connect(func(event: InputEvent):
-			if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-				if pc.mouse_filter == Control.MOUSE_FILTER_STOP:
-					_on_alternativa_elegida(texto, correcto, pc)
-		)
-
-		commandWrapper.add_child(pc)
+		var boton := Button.new()
+		boton.text = texto.strip_edges()
+		Estilo.styleBankButton(boton, texto)
+		boton.pressed.connect(_on_alternativa_elegida.bind(texto, correcto, boton))
+		commandWrapper.add_child(boton)
 
 # ----------------------------------------------------------------
 # CUANDO EL JUGADOR ELIGE UNA ALTERNATIVA
 # ----------------------------------------------------------------
-func _on_alternativa_elegida(texto: String, correcto: bool, boton: PanelContainer) -> void:
+func _on_alternativa_elegida(texto: String, correcto: bool, boton: Button) -> void:
 	if mostrando_fallo:
 		return
 
@@ -810,30 +598,24 @@ func _on_alternativa_elegida(texto: String, correcto: bool, boton: PanelContaine
 
 		_mostrar_feedback("¡Correcto!", Color(0.4, 1.0, 0.5))
 		GameData.streakHit(1)   # cada acierto suma a la racha global, como en el Nivel 1
+		Estilo.playOk(ventanaExamen)
 		_currentStep += 1
 
 		await get_tree().create_timer(0.5).timeout
 		if not mostrando_fallo:
-			feedbackLabel.visible = false
+			feedbackLabel.text = ""
 			_cargar_paso_actual()
 	else:
-		# Bloquear este botón
-		boton.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var style_err = StyleBoxFlat.new()
-		style_err.bg_color     = Color(0.25, 0.06, 0.06, 0.9)
-		style_err.border_color = Color(0.85, 0.2, 0.2, 1.0)
-		style_err.set_border_width_all(2)
-		style_err.set_corner_radius_all(8)
-		style_err.content_margin_left   = 14
-		style_err.content_margin_right  = 14
-		style_err.content_margin_top    = 10
-		style_err.content_margin_bottom = 10
-		boton.add_theme_stylebox_override("panel", style_err)
-		boton.modulate.a = 0.5
+		boton.disabled = true
+		var estiloError: StyleBoxFlat = Estilo.wrongStyle()
+		for estado in ["normal", "hover", "pressed", "focus", "disabled"]:
+			boton.add_theme_stylebox_override(estado, estiloError)
+		boton.add_theme_color_override("font_disabled_color", Color(0.6, 0.45, 0.45, 1.0))
 
 		vidas_actuales -= 1
 		ReporteNivel.examenPregunta(2, "EX2", false, {"paso": _currentStep + 1, "respuesta": texto, "variante": ejercicio_idx})
 		GameData.streakFail()   # un error reinicia la racha global
+		Estilo.playError(ventanaExamen)
 		_actualizar_vidas()
 
 		if vidas_actuales <= 0:
@@ -848,7 +630,6 @@ func _mostrar_feedback(texto: String, color: Color) -> void:
 	feedbackLabel.text = texto
 	feedbackLabel.add_theme_color_override("font_color", color)
 	feedbackLabel.modulate.a = 1.0
-	feedbackLabel.visible = true
 
 # ----------------------------------------------------------------
 # SCROLL A FILA ACTIVA
@@ -888,7 +669,7 @@ func _on_examen_superado() -> void:
 	_limpiar_flecha()
 	_limpiar_alternativas()
 	stepLabel.text = "¡Completado!"
-	feedbackLabel.visible = false
+	feedbackLabel.text = ""
 
 	# Puntos del examen con las reglas compartidas: cada vida perdida cuenta como un error.
 	_resultadoExamen = GameData.completeExam(2, "EX2", _steps.size(), MAX_VIDAS - vidas_actuales)
@@ -1168,8 +949,7 @@ func _reiniciar_ejercicio() -> void:
 	resuelto         = false
 	_currentStep     = 0
 	_celebrating     = false
-	feedbackLabel.visible = false
-	feedbackLabel.text    = ""
+	feedbackLabel.text = ""
 
 	# ── Req. 1: elegir una variante DISTINTA a la que acaba de fallar ──
 	# Construir la lista de índices posibles excluyendo el fallado (2 restantes de 3).
@@ -1192,9 +972,9 @@ func _reiniciar_ejercicio() -> void:
 	_steps           = ejercicio_actual["steps"]
 	_plantilla       = ejercicio_actual["plantilla"]
 
-	label_titulo.text        = "🏛️ EXAMEN ALTAR ANCESTRAL  ·  " + ejercicio_actual["titulo"]
+	label_titulo.text        = "Examen del Altar Ancestral · " + ejercicio_actual["titulo"]
 	label_oa.text            = "🎯 " + ejercicio_actual["oa"] + "   |   👤 NPC: " + ejercicio_actual["npc"]
-	label_instrucciones.text = ejercicio_actual["instrucciones"]
+	Estilo.setPromptText(label_instrucciones, ejercicio_actual["instrucciones"])
 
 	_actualizar_vidas()
 	_construir_slots()

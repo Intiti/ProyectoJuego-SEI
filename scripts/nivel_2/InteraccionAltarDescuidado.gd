@@ -277,6 +277,9 @@ func iniciar_secuencia_teletransporte() -> void:
 	if resumenNivel != null:
 		await resumenNivel.closed
 	
+	if MenuPausa.mostrarAvisoExamen2():
+		await MenuPausa.avisoCerrado
+	
 	# 5. Salto al Laboratorio Subterráneo (Nivel 3)
 	print("AltarDescuidado: Teletransporte completado. Cargando Nivel 3...")
 	if ResourceLoader.exists(ESCENA_NIVEL_3):

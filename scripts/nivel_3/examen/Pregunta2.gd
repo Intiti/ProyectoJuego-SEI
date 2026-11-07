@@ -10,8 +10,10 @@ const ID_PREGUNTA: String = "EX3.P2"
 const OA_PREGUNTA: String = "OA2 / OA3: Ciclo while con bandera negada (not), operador or y contador"
 const TITULO_PREGUNTA: String = "El filtro de bioseguridad"
 const INSTRUCCIONES_PREGUNTA: String = (
-	"Mientras no exista alerta (not alerta) y las muestras sean menores que 4, lee el nivel "
-	+ "numérico y activa la bandera alerta = True si el nivel es menor que 0 o mayor que 100."
+	"El filtro de bioseguridad usa una bandera llamada alerta, que parte en False (sin alerta), y un contador llamado muestras, que parte en 0.\n"
+	+ "El programa repite un ciclo mientras la alerta NO esté activada y, al mismo tiempo, las muestras sean menores que 4.\n"
+	+ "Dentro del ciclo se pide por teclado el nivel de la muestra, como número entero, y se muestra en pantalla. Luego se revisa el nivel: si es menor que 0 o mayor que 100, el valor es peligroso y la bandera de alerta debe quedar activada (en True). Si el nivel está entre 0 y 100, no se toca nada.\n"
+	+ "Al final de cada vuelta el contador de muestras avanza de 1 en 1. Cuando el ciclo termina, se muestra si la bioseguridad quedó estable o si la alerta se activó."
 )
 
 const PLANTILLA_CODIGO: String = (
@@ -19,6 +21,7 @@ const PLANTILLA_CODIGO: String = (
 	+ "muestras = 0\n\n"
 	+ "[ Espacio 1 ]\n"
 	+ "    [ Espacio 2 ]\n"
+	+ "    print(\"Nivel leído:\", nivel)\n"
 	+ "    [ Espacio 3 ]\n"
 	+ "        [ Espacio 4 ]\n"
 	+ "    muestras = muestras + 1\n\n"

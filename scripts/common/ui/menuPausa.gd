@@ -7,11 +7,13 @@ extends CanvasLayer
 #   1. ESC en cualquier escena de juego -> "¿Quieres volver al menú principal?"
 #   2. SÍ -> ventana del post test (link + alias para copiar). Aún se puede volver al juego.
 #   3. Fin del juego (tras Panko) -> misma ventana del post test, pero OBLIGATORIA (sin volver atrás).
-#   4. Fin del examen del Nivel 1 -> aviso "Aún quedan muchos Miaugoritmos por resolver...".
+#   4. Fin del examen del Nivel 2 -> aviso "Aún quedan muchos Miaugoritmos por resolver...".
 # Mientras hay una ventana abierta el juego queda en pausa.
 # ==========================================
 
 enum Modo { NINGUNO, CONFIRMAR, POSTTEST, POSTTEST_OBLIGATORIO, AVISO }
+
+signal avisoCerrado
 
 const POST_TEST_URL := "https://docs.google.com/forms/d/e/1FAIpQLSfbvSdKIdZEcRZHRBezjqInytXtmCUnCUdTPqI3yacIFep63w/viewform?usp=sharing&ouid=101721836203715560181"
 const MENU_SCENE := "res://scenes/common/ui/MainMenu.tscn"
@@ -84,12 +86,13 @@ func mostrarPostTestObligatorio() -> void:
 	_obligatorioMostrado = true
 	_mostrar(Modo.POSTTEST_OBLIGATORIO)
 
-# Fin del examen del Nivel 1.
-func mostrarAvisoPrimerExamen() -> void:
+# Fin del examen del Nivel 2. Devuelve true si el aviso se mostró (y entonces emite avisoCerrado al cerrarse).
+func mostrarAvisoExamen2() -> bool:
 	if _avisoMostrado or _modo != Modo.NINGUNO:
-		return
+		return false
 	_avisoMostrado = true
 	_mostrar(Modo.AVISO)
+	return true
 
 # ==========================================
 # ENTRADA (ESC)
@@ -148,6 +151,7 @@ func _mostrar(modo: Modo) -> void:
 func _cerrar() -> void:
 	if _modo == Modo.NINGUNO:
 		return
+	var eraAviso: bool = _modo == Modo.AVISO
 	_modo = Modo.NINGUNO
 	if is_instance_valid(_root):
 		_root.queue_free()
@@ -155,6 +159,8 @@ func _cerrar() -> void:
 	_center = null
 	_panel = null
 	get_tree().paused = _pausadoAntes
+	if eraAviso:
+		avisoCerrado.emit()
 
 func _crearOverlay() -> void:
 	_root = Control.new()
