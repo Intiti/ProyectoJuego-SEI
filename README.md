@@ -1,10 +1,9 @@
-# Miaugoritmos (MGTS) 🐱
+# Miaugoritmos (MGTS) 
 
 **Videojuego educativo para reforzar conocimientos de programación en Python** mediante una aventura interactiva desarrollada en **Godot Engine**.
 
 **Asignatura:** OII-433 — Sistemas Educativos Inteligentes  
 **Integrantes:** Benjamín Leiva, Inti Liberona y Eliana García  
-**Proyecto:** Entrega final, segundo semestre de 2026
 
 ## Descripción
 
@@ -87,14 +86,3 @@ ProyectoJuego-SEI-main/
 - **JSON / JSONL** para diálogos y registros locales.
 - **Talo** como complemento integrado para funcionalidades de clasificación y servicios relacionados. Algunas funciones en línea pueden depender de conectividad y configuración externa.
 
-## Archivos de la entrega final
-
-Además del repositorio de código fuente, la entrega académica considera el **informe final**, la **presentación**, el **video demostrativo**, las **evidencias de pruebas con usuarios**, el **Excel de datos experimentales** y el **ejecutable**, entregados como archivos o enlaces separados.
-
-**Enlace al ejecutable:** [agregar enlace de descarga]  
-**Video demostrativo:** [agregar enlace]  
-**Datos experimentales:** [agregar enlace si corresponde]
-
----
-
-**Miaugoritmos — Proyecto académico OII-433, 2026.**
